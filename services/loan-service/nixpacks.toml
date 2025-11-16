@@ -14,5 +14,5 @@ cmds = [
 ]
 
 [start]
-cmd = "node dist/main.js"
+cmd = "node -r ./register-paths.js dist/main.js"
 
