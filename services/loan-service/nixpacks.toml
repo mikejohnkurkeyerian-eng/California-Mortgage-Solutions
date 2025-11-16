@@ -10,9 +10,10 @@ cmds = [
   "pnpm install",
   "pnpm --filter @loan-platform/shared-types build",
   "cd services/loan-service",
-  "pnpm build"
+  "pnpm build",
+  "cp dist-register-paths.js dist/register-paths.js"
 ]
 
 [start]
-cmd = "node start-production.js"
+cmd = "node -r dist/register-paths.js dist/main.js"
 
