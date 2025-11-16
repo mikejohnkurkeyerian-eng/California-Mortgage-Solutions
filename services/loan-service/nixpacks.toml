@@ -16,5 +16,5 @@ cmds = [
 ]
 
 [start]
-cmd = "cd services/loan-service && node start-simple.js"
+cmd = "node dist/main.js"
 

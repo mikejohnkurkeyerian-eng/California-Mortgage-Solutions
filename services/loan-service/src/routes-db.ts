@@ -5,7 +5,7 @@ import type {
   LoanApplication,
   ApiResponse,
   PaginatedResponse,
-} from '@shared-types';
+} from '@loan-platform/shared-types';
 
 const WORKFLOW_SERVICE_URL = process.env.WORKFLOW_SERVICE_URL || 'http://localhost:4004';
 

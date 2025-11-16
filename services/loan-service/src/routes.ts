@@ -1,6 +1,6 @@
 import { Router } from "express";
 import axios from "axios";
-import type { LoanApplication, ApiResponse, PaginatedResponse } from "@shared-types";
+import type { LoanApplication, ApiResponse, PaginatedResponse } from "@loan-platform/shared-types";
 
 const WORKFLOW_SERVICE_URL = process.env.WORKFLOW_SERVICE_URL || "http://localhost:4004";
 

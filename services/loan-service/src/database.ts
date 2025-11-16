@@ -4,7 +4,7 @@ import type {
   BorrowerProfile,
   DocumentMetadata,
   UnderwritingCondition,
-} from '@shared-types';
+} from '@loan-platform/shared-types';
 
 const prisma = new PrismaClient();
 
