@@ -11,9 +11,10 @@ cmds = [
   "pnpm --filter @loan-platform/shared-types build",
   "cd services/loan-service",
   "pnpm build",
-  "cp dist-register-paths.js dist/register-paths.js"
+  "cp dist-register-paths.js dist/register-paths.js || echo 'Copy failed, continuing...'",
+  "ls -la dist/ || echo 'dist folder check'"
 ]
 
 [start]
-cmd = "node -r dist/register-paths.js dist/main.js"
+cmd = "cd services/loan-service && node start-simple.js"
 
