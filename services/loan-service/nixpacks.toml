@@ -14,5 +14,5 @@ cmds = [
 ]
 
 [start]
-cmd = "node start.js"
+cmd = "node start-production.js"
 
