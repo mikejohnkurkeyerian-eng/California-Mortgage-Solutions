@@ -1,0 +1,31 @@
+{
+  "name": "@loan-platform/workflow-service",
+  "version": "0.0.1",
+  "private": true,
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "scripts": {
+    "start": "ts-node-dev --respawn -r ./register-paths.js src/main.ts",
+    "start:prod": "node dist/main.js",
+    "build": "pnpm --filter @loan-platform/shared-types build && tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint \"src/**/*.{ts,tsx}\""
+  },
+  "dependencies": {
+    "@loan-platform/shared-types": "workspace:^",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.4.0",
+    "eslint": "^8.0.0",
+    "rimraf": "^5.0.0"
+  }
+}
+

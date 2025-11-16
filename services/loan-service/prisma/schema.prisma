@@ -1,0 +1,128 @@
+// Prisma schema for loan service
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Borrower {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+  dateOfBirth String?
+  ssn       String? // Encrypted in production
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  loans     LoanApplication[]
+  
+  @@index([email])
+}
+
+model LoanApplication {
+  id        String   @id @default(cuid())
+  borrowerId String
+  borrower  Borrower @relation(fields: [borrowerId], references: [id])
+  
+  loanOfficerId String?
+  
+  status   String   @default("Draft")
+  stage    String   @default("Draft")
+  
+  // Property
+  propertyStreet   String
+  propertyCity     String
+  propertyState    String
+  propertyZipCode  String
+  propertyType     String
+  purchasePrice    Float
+  downPayment      Float
+  loanAmount       Float
+  
+  // Employment
+  employmentStatus String
+  employerName     String?
+  jobTitle         String?
+  monthlyIncome    Float?
+  incomeType       String
+  
+  // Loan details
+  loanType     String
+  loanPurpose  String
+  interestRate Float?
+  loanTerm     Int
+  
+  // Calculated fields
+  debtToIncomeRatio Float?
+  loanToValueRatio  Float?
+  
+  // Underwriting
+  underwritingDecision String?
+  underwritingNotes    String?
+  
+  // Dates
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  closedAt    DateTime?
+  
+  documents  Document[]
+  conditions UnderwritingCondition[]
+  
+  @@index([borrowerId])
+  @@index([status])
+  @@index([stage])
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  loanId    String
+  loan      LoanApplication @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  
+  type      String
+  fileName  String
+  fileSize  Int
+  mimeType  String
+  storagePath String
+  
+  extractedData Json? // AI-extracted data
+  
+  verificationStatus String @default("Pending")
+  verifiedBy         String?
+  verifiedAt         DateTime?
+  
+  uploadedAt DateTime @default(now())
+  uploadedBy String
+  
+  @@index([loanId])
+  @@index([type])
+}
+
+model UnderwritingCondition {
+  id        String   @id @default(cuid())
+  loanId    String
+  loan      LoanApplication @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  
+  type        String
+  description String
+  status      String @default("Pending")
+  
+  requiredDocuments String[] // Array of document types
+  
+  satisfiedAt DateTime?
+  satisfiedBy String?
+  waivedAt    DateTime?
+  waivedBy    String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([loanId])
+  @@index([status])
+}
+

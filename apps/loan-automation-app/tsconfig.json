@@ -1,0 +1,12 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "@shared-types": ["libs/shared-types/src/index"],
+      "@shared-types/*": ["libs/shared-types/src/*"]
+    }
+  },
+  "include": ["src", "index.js", "App.tsx"]
+}
+
