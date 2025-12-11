@@ -1,0 +1,43 @@
+PROFIT AND LOSS STATEMENT
+Year-to-Date (YTD)
+January 1, 2024 - October 31, 2024
+
+COMPANY NAME: Tech Solutions LLC
+ADDRESS: 123 Innovation Dr, San Francisco, CA 94105
+
+INCOME
+Revenue from Services: $150,000.00
+Product Sales: $25,000.00
+Consulting Fees: $10,000.00
+TOTAL INCOME: $185,000.00
+
+COST OF GOODS SOLD (COGS)
+Cost of Labor: $40,000.00
+Materials & Supplies: $15,000.00
+TOTAL COGS: $55,000.00
+
+GROSS PROFIT: $130,000.00
+
+EXPENSES
+Advertising & Marketing: $5,000.00
+Rent & Lease: $12,000.00
+Utilities: $2,500.00
+Insurance: $1,500.00
+Office Supplies: $800.00
+Software Subscriptions: $1,200.00
+Travel & Meals: $3,500.00
+Payroll Expenses: $60,000.00
+Taxes & Licenses: $2,000.00
+TOTAL EXPENSES: $88,500.00
+
+NET OPERATING INCOME: $41,500.00
+
+OTHER INCOME/EXPENSES
+Interest Income: $150.00
+Interest Expense: ($500.00)
+TOTAL OTHER INCOME/EXPENSES: ($350.00)
+
+NET PROFIT (YTD): $41,150.00
+
+Prepared by: John Smith, CPA
+Date: November 15, 2024

@@ -1,0 +1,21 @@
+PROFIT & LOSS STATEMENT (YTD)
+Period: Jan 1, 2024 - Oct 31, 2024
+Business: Smith Consulting LLC
+
+REVENUE
+Gross Sales: $150,000.00
+Returns: $0.00
+NET REVENUE: $150,000.00
+
+EXPENSES
+Rent: $12,000.00
+Utilities: $2,500.00
+Salaries: $45,000.00
+Software: $1,200.00
+Marketing: $5,000.00
+TOTAL EXPENSES: $65,700.00
+
+NET PROFIT: $84,300.00
+
+Signed: John Smith, Owner
+Date: 11/01/2024

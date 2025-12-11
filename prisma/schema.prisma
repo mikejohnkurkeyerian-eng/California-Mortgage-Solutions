@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User & Auth
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("borrower") // borrower, broker, underwriter
+  brokerId  String?  // For brokers (Foreign Key)
+  broker    Broker?  @relation(fields: [brokerId], references: [id])
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  loans     LoanApplication[]
+}
+
+model Broker {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+}
+
+// Loan Application
+model LoanApplication {
+  id             String      @id @default(uuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  brokerId       String?
+  status         String      @default("Draft")
+  stage          String      @default("Application Review")
+  data           String      // Storing full 1003 as JSON string (matching loan.ts)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  
+  // Relations
+  submissions    Submission[]
+  // Documents are likely stored inside 'data' JSON or separate? 
+  // loan.ts doesn't seem to handle documents relation in create/update.
+  // But we have a Document model. Let's keep it but make it optional relation.
+  documents      Document[]
+}
+
+// ... Borrower, Asset, Liability might not be needed if everything is in 'data' JSON?
+// loan.ts puts EVERYTHING in 'data'.
+// However, 'Submission' is handled separately in lender.ts.
+// Let's keep other models but relate them to LoanApplication just in case.
+
+model Document {
+  id             String   @id @default(uuid())
+  loanId         String
+  loan           LoanApplication @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  type           String   
+  status         String   
+  url            String?  
+  analyzedData   Json?    
+  createdAt      DateTime @default(now())
+}
+
+model Submission {
+  id             String   @id @default(uuid())
+  loanId         String
+  loan           LoanApplication @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  lenderId       String
+  lenderName     String
+  status         String   
+  portalUrl      String?
+  externalId     String? // externalReferenceId in code
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  submittedAt    DateTime?
+  snapshot       Json?    
+  conditions     Json?    
+}

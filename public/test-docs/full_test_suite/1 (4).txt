@@ -1,0 +1,12 @@
+Fidelity 401(k) Statement
+Plan Name: ACME Corp Retirement Plan
+Participant: John Doe
+Period: 07/01/2023 - 09/30/2023
+
+Beginning Balance: $45,000.00
+Contributions: $1,500.00
+Gain/Loss: +$850.00
+Ending Balance: $47,350.00
+
+Vested Balance: $47,350.00
+Loan Available: $23,000.00

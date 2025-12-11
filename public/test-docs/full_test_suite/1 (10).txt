@@ -1,0 +1,17 @@
+BUSINESS LICENSE
+State of New York
+License Number: BL-123456789
+
+Business Name: Smith Consulting LLC
+Owner: John Smith
+Address: 123 Business Rd, New York, NY 10001
+Type: Limited Liability Company (LLC)
+
+Issue Date: 01/15/2020
+Expiration Date: 01/15/2025
+Status: ACTIVE
+
+This certifies that the above named business is authorized to conduct business within the state.
+
+Secretary of State
+Signature: [Seal]

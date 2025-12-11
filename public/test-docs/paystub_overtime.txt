@@ -1,0 +1,11 @@
+
+ACME Corp Pay Stub
+Employee: John Doe
+Pay Period: 10/01/2023 - 10/15/2023
+Regular Pay: $2000.00
+Overtime Hours: 10
+Overtime Pay: $500.00
+Taxes: $500.00
+Net Pay: $2000.00
+Social Security: $100
+Medicare: $50

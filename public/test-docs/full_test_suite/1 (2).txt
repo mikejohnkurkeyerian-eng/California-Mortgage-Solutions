@@ -1,0 +1,12 @@
+W-2 Wage and Tax Statement 2022
+Employer: ACME Corp
+Employer EIN: 12-3456789
+Employee: John Doe
+SSN: XXX-XX-1234
+
+Box 1 (Wages, tips, other compensation): $62,000.00
+Box 2 (Federal income tax withheld): $7,500.00
+Box 3 (Social security wages): $62,000.00
+Box 4 (Social security tax withheld): $3,844.00
+Box 5 (Medicare wages and tips): $62,000.00
+Box 6 (Medicare tax withheld): $899.00
