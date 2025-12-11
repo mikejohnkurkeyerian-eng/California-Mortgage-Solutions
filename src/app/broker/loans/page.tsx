@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { getLoans } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { LoanApplication } from '@loan-platform/shared-types';
+import { LoanApplication } from '@/types/shared';
 
 export default function BrokerLoansPage() {
     const { data: loans, isLoading, error } = useQuery({
@@ -77,3 +77,4 @@ export default function BrokerLoansPage() {
         </main>
     );
 }
+

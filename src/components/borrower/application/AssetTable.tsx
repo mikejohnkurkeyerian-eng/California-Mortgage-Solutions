@@ -173,3 +173,4 @@ export const AssetTable: React.FC<AssetTableProps> = ({
         </div>
     );
 };
+

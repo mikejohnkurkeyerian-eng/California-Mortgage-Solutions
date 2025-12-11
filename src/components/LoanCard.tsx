@@ -1,6 +1,6 @@
 'use client'
 
-import { LoanApplication, LoanStage } from '@shared-types'
+import { LoanApplication, LoanStage } from '@/types/shared'
 import Link from 'next/link'
 
 interface LoanCardProps {
@@ -91,4 +91,5 @@ export function LoanCard({ loan }: LoanCardProps) {
     </Link>
   )
 }
+
 

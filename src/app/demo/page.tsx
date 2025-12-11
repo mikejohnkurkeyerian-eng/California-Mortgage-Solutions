@@ -1,7 +1,7 @@
 'use client'
 
 import { LoanReview } from '@/components/LoanReview'
-import { LoanApplication } from '@loan-platform/shared-types'
+import { LoanApplication } from '@/types/shared'
 
 const mockLoan: LoanApplication = {
     id: 'demo-loan-123',
@@ -95,3 +95,4 @@ export default function DemoPage() {
         </div>
     )
 }
+

@@ -3,7 +3,7 @@
 import { getLoanById as getLoan, updateLoan } from '@/lib/api';
 import { lenderService } from '@/lib/lender-simulation';
 import { revalidatePath } from 'next/cache';
-import { LoanApplication, LoanSubmission } from '@loan-platform/shared-types';
+import { LoanApplication, LoanSubmission } from '@/types/shared';
 
 export async function submitToLenderAction(loanId: string, lenderId: string, lenderName: string, credentials?: { clientId: string; clientSecret: string }) {
     try {
@@ -109,3 +109,4 @@ export async function downloadPackageAction(loanId: string) {
         return { success: false, error: e.message };
     }
 }
+

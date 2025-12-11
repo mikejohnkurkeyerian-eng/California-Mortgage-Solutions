@@ -317,3 +317,4 @@ export const RealEstateTable: React.FC<RealEstateTableProps> = ({ data, onChange
         </div>
     );
 };
+

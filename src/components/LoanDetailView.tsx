@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { LoanApplication } from '@shared-types'
+import { LoanApplication } from '@/types/shared'
 import Link from 'next/link'
 import { useState } from 'react'
 import { LoanOverview } from './LoanOverview'
@@ -138,4 +138,5 @@ export function LoanDetailView({ loanId }: LoanDetailViewProps) {
     </div>
   )
 }
+
 

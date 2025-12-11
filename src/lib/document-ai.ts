@@ -853,3 +853,4 @@ export async function classifyDocument(file: File): Promise<ClassificationResult
         };
     }
 }
+

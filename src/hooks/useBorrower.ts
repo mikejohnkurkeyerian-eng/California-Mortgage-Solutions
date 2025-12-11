@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createLoan, getLoans, getLoanById, updateLoan } from '@/lib/api';
 import { useSession, signOut } from 'next-auth/react';
-import type { LoanApplication } from '@loan-platform/shared-types';
+import type { LoanApplication } from '@/types/shared';
 
 export function useBorrowerLoans(borrowerId?: string) {
     return useQuery({
@@ -58,3 +58,4 @@ export function useBorrowerAuth() {
 
     return { borrowerId, isLoading, login, logout };
 }
+

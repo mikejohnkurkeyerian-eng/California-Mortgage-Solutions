@@ -139,3 +139,4 @@ export class LoanAdvisorService {
         return "I'm not sure about that specific detail yet. I'm trained to answer questions about your loan status, documents, and mortgage terms. You can also contact your Loan Officer, John Smith, for complex scenarios.";
     }
 }
+

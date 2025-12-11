@@ -1,4 +1,4 @@
-import { LoanApplication } from '@loan-platform/shared-types';
+import { LoanApplication } from '@/types/shared';
 
 export class MismoGenerator {
     static generate(loan: LoanApplication): string {
@@ -134,3 +134,4 @@ export class MismoGenerator {
         return map[purpose] || 'Purchase';
     }
 }
+

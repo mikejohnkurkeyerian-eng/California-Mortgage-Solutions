@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { LoanApplication } from '@shared-types'
+import { LoanApplication } from '@/types/shared'
 import { updateLoan, runAUS, approveLoan } from '@/lib/api'
 import { Form1003View } from './Form1003View'
 import { AIUnderwriter, AIAnalysisResult } from '@/lib/ai-underwriter'
@@ -1004,3 +1004,4 @@ function ReviewField({ label, value, editable, onChange, format = 'text' }: Revi
     </div>
   )
 }
+

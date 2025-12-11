@@ -1,4 +1,4 @@
-import { LoanStage } from '@shared-types'
+import { LoanStage } from '@/types/shared'
 
 interface PipelineStatsProps {
   loansByStage: Record<LoanStage, number>
@@ -54,4 +54,5 @@ export function PipelineStats({ loansByStage, totalLoans }: PipelineStatsProps) 
     </div>
   )
 }
+
 

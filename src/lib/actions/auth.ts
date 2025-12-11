@@ -62,3 +62,4 @@ export async function registerUser(data: z.infer<typeof RegisterSchema>) {
         return { error: `Failed: ${(error as Error).message}` };
     }
 }
+

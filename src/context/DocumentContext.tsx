@@ -10,7 +10,7 @@ import { useBrokerSettings } from './BrokerContext';
 import { AIUnderwriter, AIAnalysisResult } from '@/lib/ai-underwriter';
 import { ClassificationResult } from '@/lib/document-ai';
 import { determineRequiredDocuments } from '@/lib/document-requirements';
-import type { LoanApplication } from '@loan-platform/shared-types';
+import type { LoanApplication } from '@/types/shared';
 import { DualAUSResponse } from '@/lib/aus-engine';
 import { Full1003Data } from '@/types/form-1003';
 import { CreditService } from '@/lib/credit-service';
@@ -905,3 +905,4 @@ declare global {
         documentContext: any;
     }
 }
+

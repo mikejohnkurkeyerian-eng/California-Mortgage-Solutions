@@ -1,4 +1,4 @@
-import { LoanApplication, DocumentType } from '@loan-platform/shared-types';
+import { LoanApplication, DocumentType } from '@/types/shared';
 import { ClassificationResult } from './document-ai';
 import { Full1003Data } from '@/types/form-1003';
 
@@ -236,3 +236,4 @@ export class AIUnderwriter {
         }
     }
 }
+

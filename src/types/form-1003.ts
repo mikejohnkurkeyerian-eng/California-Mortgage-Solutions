@@ -262,3 +262,4 @@ export const initial1003Data: Full1003Data = {
         sex: 'Refuse'
     }
 };
+

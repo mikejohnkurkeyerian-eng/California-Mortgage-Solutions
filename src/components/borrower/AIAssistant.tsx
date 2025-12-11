@@ -180,3 +180,4 @@ export function AIAssistant({ context }: AIAssistantProps) {
         </div>
     );
 }
+

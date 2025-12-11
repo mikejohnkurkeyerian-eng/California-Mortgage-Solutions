@@ -6,7 +6,7 @@ import { LoanCard } from '@/components/LoanCard';
 import { getLoans } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { LoanApplication } from '@loan-platform/shared-types';
+import { LoanApplication } from '@/types/shared';
 import { InvitationLink } from '@/components/broker/InvitationLink';
 
 export default function BrokerDashboardPage() {
@@ -177,3 +177,4 @@ function ChartIcon() {
         </svg>
     );
 }
+

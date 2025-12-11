@@ -87,3 +87,4 @@ export async function sendLoanPackageEmail(loanId: string, emailDetails: { recip
         return { success: false, error: error.message };
     }
 }
+

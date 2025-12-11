@@ -88,3 +88,4 @@ export function DiscrepancyModal({ isOpen, onClose, discrepancies, onFix, onIgno
         </div>
     );
 }
+

@@ -112,3 +112,4 @@ export const RedFlagModal: React.FC<RedFlagModalProps> = ({ isOpen, onClose, iss
         </div>
     );
 };
+

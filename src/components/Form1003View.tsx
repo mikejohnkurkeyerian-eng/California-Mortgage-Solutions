@@ -1,6 +1,6 @@
 'use client';
 
-import { LoanApplication } from '@loan-platform/shared-types';
+import { LoanApplication } from '@/types/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 
 interface Form1003ViewProps {
@@ -312,3 +312,4 @@ export function Form1003View({ loan }: Form1003ViewProps) {
         </div>
     );
 }
+

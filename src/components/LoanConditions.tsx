@@ -1,4 +1,4 @@
-import { LoanApplication } from '@shared-types'
+import { LoanApplication } from '@/types/shared'
 
 interface LoanConditionsProps {
   loan: LoanApplication
@@ -127,4 +127,5 @@ export function LoanConditions({ loan }: LoanConditionsProps) {
     </div>
   )
 }
+
 

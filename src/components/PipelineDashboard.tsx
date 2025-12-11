@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { LoanApplication, LoanStage } from '@shared-types'
+import { LoanApplication, LoanStage } from '@/types/shared'
 import { LoanCard } from './LoanCard'
 import { getLoans } from '@/lib/api'
 import { useState } from 'react'
@@ -14,3 +14,4 @@ export function PipelineDashboard() {
     </div>
   )
 }
+

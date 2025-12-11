@@ -59,3 +59,4 @@ export const sendEmail = async (payload: EmailPayload) => {
         return { success: false, error: error.message };
     }
 };
+

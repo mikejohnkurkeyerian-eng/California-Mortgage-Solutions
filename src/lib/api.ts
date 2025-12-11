@@ -1,5 +1,5 @@
 import { createLoan as createLoanAction, updateLoan as updateLoanAction, getLoans as getLoansAction } from '@/lib/actions/loan';
-import { LoanApplication } from '@loan-platform/shared-types';
+import { LoanApplication } from '@/types/shared';
 
 // Re-export types
 export type { LoanApplication };
@@ -68,3 +68,4 @@ export const runAUS = async (loanId: string) => {
     ]
   };
 };
+

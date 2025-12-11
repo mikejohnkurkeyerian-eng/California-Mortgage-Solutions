@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getLoans, getLoanById, updateLoan, submitLoanApplication, approveLoan } from '@/lib/api';
-import type { LoanApplication } from '@loan-platform/shared-types';
+import type { LoanApplication } from '@/types/shared';
 
 export function useBrokerPipeline() {
     return useQuery({
@@ -41,3 +41,4 @@ export function useLoan(id: string) {
         enabled: !!id,
     });
 }
+

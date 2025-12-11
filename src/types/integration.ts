@@ -12,3 +12,4 @@ export interface IntegrationContextType {
     getCredential: (lenderId: string) => BrokerCredential | undefined;
     deleteCredential: (lenderId: string) => void;
 }
+

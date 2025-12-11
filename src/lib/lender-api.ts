@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { LoanApplication } from '@loan-platform/shared-types'
+import type { LoanApplication } from '@/types/shared'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4002'
 
@@ -101,4 +101,5 @@ export async function testLenderConnection(): Promise<{ success: boolean; messag
   const response = await apiClient.post('/api/lender-config/test-connection')
   return response.data.data
 }
+
 

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { compareLenders, getRecommendedLender, type LenderComparison } from '@/lib/lender-api'
-import type { LoanApplication } from '@shared-types'
+import type { LoanApplication } from '@/types/shared'
 
 interface LenderComparisonProps {
   loan: LoanApplication
@@ -233,4 +233,5 @@ export function LenderComparison({ loan }: LenderComparisonProps) {
     </div>
   )
 }
+
 

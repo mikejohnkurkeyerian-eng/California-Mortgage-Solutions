@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { LoanApplication } from '@loan-platform/shared-types';
+import { LoanApplication } from '@/types/shared';
 import { MismoGenerator } from './mismo-generator';
 
 export class SubmissionPackager {
@@ -29,3 +29,4 @@ export class SubmissionPackager {
         return content;
     }
 }
+

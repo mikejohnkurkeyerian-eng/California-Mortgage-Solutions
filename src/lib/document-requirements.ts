@@ -316,3 +316,4 @@ export function determineRequiredDocuments(loan: LoanApplication): DocumentRequi
 
     return requirements;
 }
+

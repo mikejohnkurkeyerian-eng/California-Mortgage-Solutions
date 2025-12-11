@@ -195,3 +195,4 @@ export class Form1003Parser {
         // We don't have a direct field for LO Name in LoanApplication (just ID), but we could store it in metadata if needed.
     }
 }
+
