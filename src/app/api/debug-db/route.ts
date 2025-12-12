@@ -1,79 +1,23 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        // 1. Check Env Vars
-        const directUrl = process.env.DIRECT_URL;
-        const dbUrl = process.env.DATABASE_URL;
+        const { searchParams } = new URL(request.url);
+        const email = searchParams.get('email');
 
-        const envStatus = {
-            hasDatabaseUrl: !!dbUrl,
-            hasDirectUrl: !!directUrl,
-            // Check if they look correct (simple heuristic)
-            isDirectUnpooled: directUrl?.includes('pooler') === false,
-        };
+        if (!email) {
+            return NextResponse.json({ error: "Email param required" }, { status: 400 });
+        }
 
-        // Create User table if not exists (Old logic)
-        await prisma.$executeRawUnsafe(`
-            CREATE TABLE IF NOT EXISTS "User" (
-                "id" TEXT NOT NULL,
-                "email" TEXT NOT NULL,
-                "name" TEXT,
-                "password" TEXT,
-                "role" TEXT NOT NULL DEFAULT 'borrower',
-                "brokerId" TEXT,
-                "image" TEXT,
-                "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                "updatedAt" TIMESTAMP(3) NOT NULL,
-                "emailVerified" TIMESTAMP(3),
-                "twoFactorSecret" TEXT,
-                "twoFactorEnabled" BOOLEAN NOT NULL DEFAULT false,
-                "firstName" TEXT NOT NULL DEFAULT '',
-                "lastName" TEXT NOT NULL DEFAULT '',
-                "middleName" TEXT,
-
-                CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-            );
-        `);
-
-        // PATCH: Add columns if table exists but columns don't
-        await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "firstName" TEXT NOT NULL DEFAULT '';`);
-        await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "lastName" TEXT NOT NULL DEFAULT '';`);
-        await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "middleName" TEXT;`);
-
-        // Fix "name" column being optional now
-        await prisma.$executeRawUnsafe(`ALTER TABLE "User" ALTER COLUMN "name" DROP NOT NULL;`);
-
-        // Create unique index on email
-        await prisma.$executeRawUnsafe(`
-            CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");
-        `);
-
-        // Create Account table (for Google Auth)
-        await prisma.$executeRawUnsafe(`
-             CREATE TABLE IF NOT EXISTS "Account" (
-                "id" TEXT NOT NULL,
-                "userId" TEXT NOT NULL,
-                "type" TEXT NOT NULL,
-                "provider" TEXT NOT NULL,
-                "providerAccountId" TEXT NOT NULL,
-                "refresh_token" TEXT,
-                "access_token" TEXT,
-                "expires_at" INTEGER,
-                "token_type" TEXT,
-                "scope" TEXT,
-                "id_token" TEXT,
-                "session_state" TEXT,
-
-                CONSTRAINT "Account_pkey" PRIMARY KEY ("id")
-            );
-        `);
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
 
         return NextResponse.json({
             status: 'Success',
-            message: 'Attempted to create tables via Raw SQL.',
-            env: envStatus
+            searchedEmail: email,
+            user: user || "NOT FOUND"
         });
 
     } catch (error) {
