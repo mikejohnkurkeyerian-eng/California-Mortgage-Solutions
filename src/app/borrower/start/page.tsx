@@ -1,15 +1,25 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
+import { useBorrowerAuth } from '@/hooks/useBorrower';
+import { useEffect } from 'react';
 
 function BorrowerStartContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
+    const { borrowerId, isLoading } = useBorrowerAuth();
     const callbackUrl = searchParams.get('callbackUrl');
+
+    useEffect(() => {
+        if (!isLoading && borrowerId) {
+            router.replace('/borrower/dashboard');
+        }
+    }, [borrowerId, isLoading, router]);
 
     const registerLink = callbackUrl
         ? `/borrower/signup?role=BORROWER&callbackUrl=${encodeURIComponent(callbackUrl)}`

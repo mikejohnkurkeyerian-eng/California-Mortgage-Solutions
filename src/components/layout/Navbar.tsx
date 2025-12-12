@@ -77,11 +77,11 @@ export function Navbar() {
                             )}
                         </button>
 
-                        <Link href="/broker/login">
-                            <span className="text-sm text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white transition-colors mr-2 font-semibold">Broker Portal</span>
+                        <Link href="/broker/login" target="_blank" rel="noopener noreferrer">
+                            <span className="text-sm text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white transition-colors mr-6 font-semibold">Broker Portal</span>
                         </Link>
-                        <Link href="/borrower/apply">
-                            <Button variant="primary" size="sm" className="bg-secondary-600 hover:bg-secondary-500">
+                        <Link href="/borrower/start">
+                            <Button variant="primary" size="sm" className="bg-secondary-600 hover:bg-secondary-500 mr-2">
                                 Get Started
                             </Button>
                         </Link>
