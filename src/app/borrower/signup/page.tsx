@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { registerUser } from '@/lib/actions/auth';
 
@@ -61,6 +62,14 @@ export default function BorrowerSignupPage() {
                         <CardTitle className="text-center">Create Borrower Account</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        <GoogleSignInButton />
+
+                        <div className="relative flex py-5 items-center">
+                            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                            <span className="flex-shrink-0 mx-4 text-slate-400 text-xs uppercase">Or with email</span>
+                            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                        </div>
+
                         <form onSubmit={handleSignup} className="space-y-4">
                             {error && (
                                 <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">

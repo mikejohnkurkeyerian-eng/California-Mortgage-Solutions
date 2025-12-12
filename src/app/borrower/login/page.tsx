@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { signIn } from 'next-auth/react';
 
@@ -14,26 +15,57 @@ export default function BorrowerLoginPage() {
     const router = useRouter();
     // const { login } = useBorrowerAuth(); // Not needed anymore
 
+    const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+    const [twoFactorCode, setTwoFactorCode] = useState('');
+    const [error, setError] = useState('');
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError('');
 
         try {
-            const result = await signIn('credentials', {
+            const formData = {
                 email,
                 password,
                 redirect: false,
-            });
+                twoFactorCode: twoFactorRequired ? twoFactorCode : undefined
+            };
+
+            const result = await signIn('credentials', formData as any);
 
             if (result?.error) {
-                console.error('Login failed:', result.error);
+                if (result.error === '2FA_REQUIRED' || result.error.includes('2FA_REQUIRED')) { // NextAuth sometimes wraps errors
+                    setTwoFactorRequired(true);
+                    setIsLoading(false);
+                    return;
+                }
+
+                if (twoFactorRequired && (result.error === 'INVALID_2FA_CODE' || result.error.includes('INVALID'))) {
+                    setError("Invalid Code. Please try again.");
+                } else {
+                    setError('Invalid email or password');
+                }
                 setIsLoading(false);
-                // In a real app, show error message
             } else {
-                router.push('/borrower/dashboard');
+                // Success
+                if (window.location.search.includes('callbackUrl')) {
+                    const params = new URLSearchParams(window.location.search);
+                    router.push(params.get('callbackUrl') || '/borrower/dashboard');
+                } else {
+                    router.push('/borrower/dashboard');
+                }
             }
-        } catch (error) {
-            console.error('Login error:', error);
+        } catch (err) {
+            // NextAuth/Auth.js v5 throws on redirect, but we set redirect:false..
+            // However, errors might bubble as Exceptions
+            if ((err as Error).message.includes('2FA_REQUIRED')) {
+                setTwoFactorRequired(true);
+                setIsLoading(false);
+                return;
+            }
+            console.error('Login error:', err);
+            setError('Something went wrong');
             setIsLoading(false);
         }
     };
@@ -48,7 +80,15 @@ export default function BorrowerLoginPage() {
                         <CardTitle className="text-center">Borrower Login</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleLogin} className="space-y-4">
+                        <GoogleSignInButton />
+
+                        <div className="relative flex py-5 items-center">
+                            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                            <span className="flex-shrink-0 mx-4 text-slate-400 text-xs uppercase">Or with email</span>
+                            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                        </div>
+
+                        <form onSubmit={handleLogin} className="space-y-6">
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1">
                                     Email Address

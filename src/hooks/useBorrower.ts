@@ -56,6 +56,13 @@ export function useBorrowerAuth() {
         window.location.href = '/login';
     };
 
-    return { borrowerId, isLoading, login, logout };
+    return {
+        borrowerId,
+        user: session?.user,
+        mutate: session?.update,
+        isLoading,
+        login,
+        logout
+    };
 }
 
