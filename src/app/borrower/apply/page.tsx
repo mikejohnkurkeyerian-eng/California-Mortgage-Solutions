@@ -474,11 +474,16 @@ function LoanApplicationContent() {
                                 highlighted={highlightedFields.has('borrower.dob')}
                                 onFocus={() => handleFieldFocus('borrower.dob')}
                             />
+                            {/* Hidden dummy input to prevent password managers from filling the SSN field */}
+                            <input type="text" style={{ display: 'none' }} autoComplete="username" />
+                            <input type="password" style={{ display: 'none' }} autoComplete="new-password" />
+
                             <Input
                                 label="Social Security Number"
                                 type="password"
-                                id="borrower-ssn"
-                                autoComplete="new-password" // Prevents browser from filling password
+                                id="borrower-ssn-safe"
+                                name="ssn-field-random-123" // Random name to confuse simple trackers
+                                autoComplete="off"
                                 value={formData.borrower.ssn}
                                 onChange={(e) => setFormData({ ...formData, borrower: { ...formData.borrower, ssn: e.target.value } })}
                                 onBlur={handleBlur}
