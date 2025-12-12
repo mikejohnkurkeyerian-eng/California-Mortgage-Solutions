@@ -10,7 +10,9 @@ import { registerUser } from '@/lib/actions/auth';
 
 export default function BorrowerSignupPage() {
     const [formData, setFormData] = useState({
-        name: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
         email: '',
         password: '',
         confirmPassword: ''
@@ -32,7 +34,9 @@ export default function BorrowerSignupPage() {
 
         try {
             const result = await registerUser({
-                name: formData.name,
+                firstName: formData.firstName,
+                middleName: formData.middleName,
+                lastName: formData.lastName,
                 email: formData.email,
                 password: formData.password,
                 role: 'BORROWER'
@@ -77,16 +81,44 @@ export default function BorrowerSignupPage() {
                                 </div>
                             )}
 
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-1">
+                                        First Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.firstName}
+                                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                        className="w-full px-4 py-2 bg-surface/50 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
+                                        placeholder="John"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-1">
+                                        Middle Name <span className="text-slate-500 text-xs font-normal">(Optional)</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.middleName}
+                                        onChange={(e) => setFormData({ ...formData, middleName: e.target.value })}
+                                        className="w-full px-4 py-2 bg-surface/50 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
+                                        placeholder=""
+                                    />
+                                </div>
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-1">
-                                    Full Name
+                                    Last Name
                                 </label>
                                 <input
                                     type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    value={formData.lastName}
+                                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                                     className="w-full px-4 py-2 bg-surface/50 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
-                                    placeholder="John Doe"
+                                    placeholder="Doe"
                                     required
                                 />
                             </div>

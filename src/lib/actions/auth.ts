@@ -5,7 +5,9 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 const RegisterSchema = z.object({
-    name: z.string().min(1),
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    middleName: z.string().optional(),
     email: z.string().email(),
     password: z.string().min(6),
     role: z.enum(['BORROWER', 'BROKER']),
@@ -19,7 +21,8 @@ export async function registerUser(data: z.infer<typeof RegisterSchema>) {
         return { error: "Invalid fields" };
     }
 
-    const { name, email, password, role, brokerName } = validatedFields.data;
+    const { firstName, lastName, middleName, email, password, role, brokerName } = validatedFields.data;
+    const fullName = `${firstName} ${middleName ? middleName + ' ' : ''}${lastName}`;
 
     try {
         // Check if user exists
@@ -48,7 +51,10 @@ export async function registerUser(data: z.infer<typeof RegisterSchema>) {
         // Create User
         await prisma.user.create({
             data: {
-                name,
+                firstName,
+                lastName,
+                middleName,
+                name: fullName,
                 email,
                 password: hashedPassword,
                 role,
