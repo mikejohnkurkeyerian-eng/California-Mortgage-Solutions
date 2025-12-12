@@ -256,28 +256,37 @@ function LoanApplicationContent() {
             console.log("Not edit mode, initializing new application");
             resetApplication();
 
-            // Pre-fill from Session
-            if (user) {
-                console.log("DEBUG: Pre-filling form. Session User:", user);
-                // Explicitly check if fields exist on user object
-                const firstName = (user as any).firstName;
-                const lastName = (user as any).lastName;
-                console.log("DEBUG: Found Names?", { firstName, lastName });
+            // Pre-fill from Backend (Guaranteed Fresh Data)
+            if (borrowerId) {
+                // We define an async function inside effect to call server action
+                const fetchProfile = async () => {
+                    try {
+                        const { getBorrowerProfile } = await import('@/lib/actions/user');
+                        const profile = await getBorrowerProfile();
+                        console.log("Fetched Profile from DB:", profile);
 
-                setFormData(prev => ({
-                    ...prev,
-                    borrower: {
-                        ...prev.borrower,
-                        firstName: firstName || prev.borrower.firstName,
-                        lastName: lastName || prev.borrower.lastName,
-                        email: user.email || prev.borrower.email,
+                        if (profile) {
+                            setFormData(prev => ({
+                                ...prev,
+                                borrower: {
+                                    ...prev.borrower,
+                                    firstName: profile.firstName || prev.borrower.firstName,
+                                    lastName: profile.lastName || prev.borrower.lastName,
+                                    email: profile.email || prev.borrower.email,
+                                    phone: profile.phone || prev.borrower.phone,
+                                }
+                            }));
+                        }
+                    } catch (err) {
+                        console.error("Failed to fetch profile pre-fill:", err);
                     }
-                }));
+                };
+                fetchProfile();
             }
         } else {
             console.log("Edit mode but missing data:", { currentLoan });
         }
-    }, [isEditMode, currentLoan, resetApplication, borrowerId, router, user]);
+    }, [isEditMode, currentLoan, resetApplication, borrowerId, router]); // user removed from dep array as we fetch fresh
 
     const handleInsightAction = (action: { type: string; payload: any }) => {
         console.log("Handling insight action:", action);
