@@ -1113,6 +1113,19 @@ function LoanApplicationContent() {
 
             <div className="pt-32 pb-20 px-4">
                 <div className="max-w-4xl mx-auto">
+                    {/* DEBUGGER: REMOVE BEFORE PRODUCTION */}
+                    {user && (
+                        <div className="bg-gray-100 p-4 mb-4 rounded border border-gray-300 text-xs font-mono overflow-auto max-h-40">
+                            <strong>DEBUG SESSION USER:</strong>
+                            <pre>{JSON.stringify(user, null, 2)}</pre>
+                            <strong>FORM PRE-FILL STATUS:</strong>
+                            <pre>{JSON.stringify({
+                                firstName: formData.borrower.firstName,
+                                lastName: formData.borrower.lastName,
+                                email: formData.borrower.email
+                            }, null, 2)}</pre>
+                        </div>
+                    )}
                     <div className="mb-8">
                         <Button
                             variant="ghost"
