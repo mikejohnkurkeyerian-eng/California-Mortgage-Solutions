@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth';
 
 export async function getBorrowerProfile() {
     const session = await auth();
+    console.log("getBorrowerProfile Session check:", session?.user?.email ? "Email Found" : "No Email");
 
     if (!session?.user?.email) {
         return null;
@@ -22,7 +23,7 @@ export async function getBorrowerProfile() {
                 // Add any other profile fields here
             }
         });
-
+        console.log("getBorrowerProfile DB Result:", user ? "User Found" : "User Not Found");
         return user;
     } catch (error) {
         console.error("Failed to fetch borrower profile:", error);
