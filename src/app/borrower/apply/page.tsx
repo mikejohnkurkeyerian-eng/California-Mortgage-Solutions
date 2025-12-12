@@ -258,20 +258,18 @@ function LoanApplicationContent() {
 
             // Pre-fill from Session
             if (user) {
-                console.log("Pre-filling from session:", user);
+                console.log("DEBUG: Pre-filling form. Session User:", user);
+                // Explicitly check if fields exist on user object
+                const firstName = (user as any).firstName;
+                const lastName = (user as any).lastName;
+                console.log("DEBUG: Found Names?", { firstName, lastName });
+
                 setFormData(prev => ({
                     ...prev,
                     borrower: {
                         ...prev.borrower,
-                        firstName: (user as any).firstName || prev.borrower.firstName,
-                        lastName: (user as any).lastName || prev.borrower.lastName,
-                        // Middle name might not be in initial1003Data type yet, so we handle gracefully if needed, 
-                        // but 1003 form usually has it. 
-                        // Checking Full1003Data type definition would be good, but assuming standard field exist.
-                        // We will map it to 'middleName' if it exists in the borrower object structure, 
-                        // otherwise we might need to concat or ignore.
-                        // Looking at lines 156-168 of the original file, we didn't see middleName explicity mapped there either.
-                        // Let's assume the form state has it.
+                        firstName: firstName || prev.borrower.firstName,
+                        lastName: lastName || prev.borrower.lastName,
                         email: user.email || prev.borrower.email,
                     }
                 }));
@@ -479,6 +477,8 @@ function LoanApplicationContent() {
                             <Input
                                 label="Social Security Number"
                                 type="password"
+                                id="borrower-ssn"
+                                autoComplete="new-password" // Prevents browser from filling password
                                 value={formData.borrower.ssn}
                                 onChange={(e) => setFormData({ ...formData, borrower: { ...formData.borrower, ssn: e.target.value } })}
                                 onBlur={handleBlur}
