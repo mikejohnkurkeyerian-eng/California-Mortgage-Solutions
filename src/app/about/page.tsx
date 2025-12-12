@@ -79,9 +79,9 @@ export default function AboutPage() {
                     <p className="text-xl text-slate-400 mb-10">
                         Join thousands of satisfied borrowers who found their perfect loan with us.
                     </p>
-                    <Link href="/borrower/apply">
-                        <Button size="lg" className="px-12 py-6 text-xl shadow-xl shadow-primary-500/20 hover:shadow-primary-500/40 transition-shadow">
-                            Start Your Application
+                    <Link href="/borrower/start">
+                        <Button className="bg-white text-primary-600 hover:bg-slate-100 shadow-xl shadow-white/10" size="lg">
+                            Apply for a Loan Now
                         </Button>
                     </Link>
                 </div>

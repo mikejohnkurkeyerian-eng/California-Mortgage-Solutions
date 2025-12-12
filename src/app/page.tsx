@@ -33,7 +33,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
               <Link href="/borrower/start">
                 <Button size="lg" className="w-full sm:w-auto px-8 py-4 text-lg shadow-lg shadow-primary-500/20">
-                  Get Started Now (v2)
+                  Get Started Now
                 </Button>
               </Link>
               <Link href="/about">

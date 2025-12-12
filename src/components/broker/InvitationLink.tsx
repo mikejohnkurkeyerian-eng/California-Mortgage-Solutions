@@ -20,7 +20,7 @@ export function InvitationLink() {
     // Construct Link (Assuming running on localhost:3000 or production domain)
     // We use window.location.origin if available, else placeholder
     const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-    const inviteLink = `${origin}/borrower/apply?ref=${brokerId}`;
+    const inviteLink = `${origin}/borrower/start?ref=${brokerId}`;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(inviteLink);
