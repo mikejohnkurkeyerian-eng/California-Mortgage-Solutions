@@ -14,13 +14,12 @@ export async function GET() {
             isDirectUnpooled: directUrl?.includes('pooler') === false,
         };
 
-        // 2. Attempt to force-create the User table (simplified version of schema)
-        // This is a desperate fallback since CLI isn't working
+        // Create User table if not exists (Old logic)
         await prisma.$executeRawUnsafe(`
             CREATE TABLE IF NOT EXISTS "User" (
                 "id" TEXT NOT NULL,
                 "email" TEXT NOT NULL,
-                "name" TEXT NOT NULL,
+                "name" TEXT,
                 "password" TEXT,
                 "role" TEXT NOT NULL DEFAULT 'borrower',
                 "brokerId" TEXT,
@@ -30,10 +29,21 @@ export async function GET() {
                 "emailVerified" TIMESTAMP(3),
                 "twoFactorSecret" TEXT,
                 "twoFactorEnabled" BOOLEAN NOT NULL DEFAULT false,
+                "firstName" TEXT NOT NULL DEFAULT '',
+                "lastName" TEXT NOT NULL DEFAULT '',
+                "middleName" TEXT,
 
                 CONSTRAINT "User_pkey" PRIMARY KEY ("id")
             );
         `);
+
+        // PATCH: Add columns if table exists but columns don't
+        await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "firstName" TEXT NOT NULL DEFAULT '';`);
+        await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "lastName" TEXT NOT NULL DEFAULT '';`);
+        await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "middleName" TEXT;`);
+
+        // Fix "name" column being optional now
+        await prisma.$executeRawUnsafe(`ALTER TABLE "User" ALTER COLUMN "name" DROP NOT NULL;`);
 
         // Create unique index on email
         await prisma.$executeRawUnsafe(`
