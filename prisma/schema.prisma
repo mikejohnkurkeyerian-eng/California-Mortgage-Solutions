@@ -12,7 +12,11 @@ datasource db {
 model User {
   id               String    @id @default(uuid())
   email            String    @unique
-  name             String
+  email            String    @unique
+  name             String?   // Computed Full Name (Optional now)
+  firstName        String    @default("")
+  lastName         String    @default("")
+  middleName       String?
   password         String?   // Optional for OAuth users
   role             String    @default("borrower")
   brokerId         String?
