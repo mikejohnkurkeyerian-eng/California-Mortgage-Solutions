@@ -1,17 +1,14 @@
-// import { auth } from "@/lib/auth"
+import NextAuth from "next-auth"
+import { auth } from "@/lib/auth"
 
-// export default auth((req) => {
-//    // TEMPORARY DEBUG: BYPASS ALL MIDDLEWARE
-//    return null;
-// })
+export default auth((req) => {
+    const isLoggedIn = !!req.auth
+    const path = req.nextUrl.pathname
 
-// Minimal middleware to keep Next.js happy without importing Auth
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-
-export function middleware(request: NextRequest) {
-    return NextResponse.next();
-}
+    // Define paths
+    const isStartPage = path === '/borrower/start' || path === '/broker/start'
+    const isAuthPage = path.includes('/login') || path.includes('/signup') || path.includes('/register')
+})
 
 export const config = {
     matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
