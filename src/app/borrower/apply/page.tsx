@@ -262,10 +262,14 @@ function LoanApplicationContent() {
                 const fetchProfile = async () => {
                     try {
                         const { getBorrowerProfile } = await import('@/lib/actions/user');
-                        const profile = await getBorrowerProfile();
-                        console.log("Fetched Profile from DB:", profile);
+                        const result = await getBorrowerProfile();
+                        console.log("Fetched Profile result:", result);
 
-                        if (profile) {
+                        // Expose to debug box
+                        (window as any).debugDetails = result;
+
+                        if (result && result.status === 'success' && result.data) {
+                            const profile = result.data;
                             setFormData(prev => ({
                                 ...prev,
                                 borrower: {
@@ -279,6 +283,7 @@ function LoanApplicationContent() {
                         }
                     } catch (err) {
                         console.error("Failed to fetch profile pre-fill:", err);
+                        (window as any).debugDetails = { error: String(err) };
                     }
                 };
                 fetchProfile();
