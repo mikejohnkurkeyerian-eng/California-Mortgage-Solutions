@@ -14,6 +14,14 @@ export async function GET(request: Request) {
             where: { email },
         });
 
+        // PATCH: Add phone column if missing (Safety Net)
+        try {
+            await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;`);
+        } catch (e) {
+            // Ignore if fails, likely exists or permissions
+            console.error("Auto-patch failed", e);
+        }
+
         return NextResponse.json({
             status: 'Success',
             searchedEmail: email,

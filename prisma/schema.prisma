@@ -16,6 +16,7 @@ model User {
   firstName        String    @default("")
   lastName         String    @default("")
   middleName       String?
+  phone            String?
   password         String?   // Optional for OAuth users
   role             String    @default("borrower")
   brokerId         String?
