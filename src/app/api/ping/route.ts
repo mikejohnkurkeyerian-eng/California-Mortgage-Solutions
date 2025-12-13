@@ -4,6 +4,6 @@ export async function GET() {
     return NextResponse.json({
         message: "pong",
         timestamp: new Date().toISOString(),
-        version: "v3-DEPLOY-CHECK-FIXED-AUTH"
+        version: "v4-NO-MIDDLEWARE-DEBUG-MODE"
     });
 }

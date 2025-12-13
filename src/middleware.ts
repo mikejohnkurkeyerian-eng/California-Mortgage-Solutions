@@ -1,10 +1,10 @@
-import NextAuth from "next-auth"
-import { authConfig } from "@/lib/auth.config"
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export default NextAuth(authConfig).auth
-// Logic moved to auth.config.ts callbacks.authorized
-// This ensures middleware is Edge Safe (no Prisma imports)
+export function middleware(request: NextRequest) {
+    return NextResponse.next();
+}
 
 export const config = {
     matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-}
+};
