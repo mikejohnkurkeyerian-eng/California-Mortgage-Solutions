@@ -10,17 +10,17 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Email param required" }, { status: 400 });
         }
 
-        const user = await prisma.user.findUnique({
-            where: { email },
-        });
-
         // PATCH: Add phone column if missing (Safety Net)
+        // MUST RUN BEFORE QUERY because Prisma Client now expects 'phone' to exist
         try {
             await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;`);
         } catch (e) {
-            // Ignore if fails, likely exists or permissions
             console.error("Auto-patch failed", e);
         }
+
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
 
         return NextResponse.json({
             status: 'Success',
