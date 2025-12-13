@@ -295,7 +295,7 @@ function LoanApplicationContent() {
                                     firstName: profile.firstName || prev.borrower.firstName,
                                     lastName: profile.lastName || prev.borrower.lastName,
                                     email: profile.email || prev.borrower.email,
-                                    phone: profile.phone || prev.borrower.phone,
+                                    phone: (profile as any).phone || prev.borrower.phone,
                                 }
                             }));
                         }
