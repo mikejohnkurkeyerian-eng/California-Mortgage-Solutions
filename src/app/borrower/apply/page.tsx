@@ -6,6 +6,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
+import { SSNInput } from '@/components/ui/SSNInput';
 import { useCreateLoan, useUpdateLoan, useBorrowerAuth } from '@/hooks/useBorrower';
 import { useDocuments } from '@/context/DocumentContext';
 import { Full1003Data, initial1003Data } from '@/types/form-1003';
@@ -511,14 +512,10 @@ function LoanApplicationContent() {
                             <input type="text" style={{ display: 'none' }} autoComplete="username" />
                             <input type="password" style={{ display: 'none' }} autoComplete="new-password" />
 
-                            <Input
+                            <SSNInput
                                 label="Social Security Number"
-                                type="password"
-                                id="borrower-ssn-safe"
-                                name="ssn-field-random-123" // Random name to confuse simple trackers
-                                autoComplete="off"
                                 value={formData.borrower.ssn}
-                                onChange={(e) => setFormData({ ...formData, borrower: { ...formData.borrower, ssn: e.target.value } })}
+                                onChange={(value) => setFormData({ ...formData, borrower: { ...formData.borrower, ssn: value } })}
                                 onBlur={handleBlur}
                                 highlighted={highlightedFields.has('borrower.ssn')}
                                 onFocus={() => handleFieldFocus('borrower.ssn')}
