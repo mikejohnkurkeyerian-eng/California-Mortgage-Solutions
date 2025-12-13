@@ -24,6 +24,7 @@ export function useCreateLoan() {
 
     return useMutation({
         mutationFn: (data: Partial<LoanApplication>) => createLoan(data),
+        retry: 0, // Fail immediately, don't retry
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['loans'] });
         },

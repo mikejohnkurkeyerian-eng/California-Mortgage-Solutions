@@ -8,7 +8,7 @@ const BUILD_TIMESTAMP = new Date().toISOString();
 export async function GET() {
     return NextResponse.json({
         status: 'Online',
-        buildTime: BUILD_TIMESTAMP,
-        version: 'vDebug-Refreshed'
+        buildTime: new Date().toISOString(),
+        version: 'vDebug-AuthBypass'
     });
 }
