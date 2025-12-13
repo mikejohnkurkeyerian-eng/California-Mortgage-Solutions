@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-    message: "pong",
+    return NextResponse.json({
+        message: "pong",
         timestamp: new Date().toISOString(),
-            version: "v5-SECURITY-RESTORED"
-});
+        version: "v5-SECURITY-RESTORED"
+    });
 }
