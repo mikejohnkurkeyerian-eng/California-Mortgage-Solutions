@@ -499,6 +499,8 @@ function LoanApplicationContent() {
                             <Input
                                 label="Date of Birth"
                                 type="date"
+                                max="9999-12-31"
+                                min="1900-01-01"
                                 value={formData.borrower.dob}
                                 onChange={(e) => setFormData({ ...formData, borrower: { ...formData.borrower, dob: e.target.value } })}
                                 onBlur={handleBlur}
