@@ -1,13 +1,9 @@
 import NextAuth from "next-auth"
-import { auth } from "@/lib/auth"
+import { authConfig } from "@/lib/auth.config"
 
-export default auth((req) => {
-    const isLoggedIn = !!req.auth
-    const path = req.nextUrl.pathname
-
-    // Define paths
-    const isStartPage = path === '/borrower/start' || path === '/broker/start'
-    const isAuthPage = path.includes('/login') || path.includes('/signup') || path.includes('/register')
+export default NextAuth(authConfig).auth
+// Logic moved to auth.config.ts callbacks.authorized
+// This ensures middleware is Edge Safe (no Prisma imports)
 })
 
 export const config = {
