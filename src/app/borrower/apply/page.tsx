@@ -429,7 +429,17 @@ function LoanApplicationContent() {
                 setToast({ message: 'Application updated successfully!', type: 'success' });
             } else {
                 console.log("Calling createLoanMutation...");
-                const result = await createLoanMutation.mutateAsync(loanData as any);
+
+                // Safety Timeout: If backend takes > 15s, reject.
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Request timed out (Backend unresponsive)")), 15000)
+                );
+
+                const result = await Promise.race([
+                    createLoanMutation.mutateAsync(loanData as any),
+                    timeoutPromise
+                ]);
+
                 console.log("Create mutation finished. Result:", result);
             }
 
@@ -1301,11 +1311,15 @@ function LoanApplicationContent() {
                                         <Button
                                             variant="primary"
                                             className="bg-secondary-600 hover:bg-secondary-500"
-                                            onClick={() => handleSubmit(true)}
+                                            onClick={() => {
+                                                alert("DEBUG: Submit Clicked (vDebug)"); // Nuclear Proof of Life
+                                                setToast({ message: "Starting Submission (vDebug)...", type: "info" });
+                                                handleSubmit(true);
+                                            }}
                                             isLoading={createLoanMutation.isPending || updateLoanMutation.isPending}
                                             disabled={!isEditMode && !formData.acknowledgments.agreedToElectronicSignatures}
                                         >
-                                            {isEditMode ? 'Save & Exit' : 'Submit Application'}
+                                            {isEditMode ? 'Save & Exit' : 'Submit Application (vDebug)'}
                                         </Button>
                                     )}
                                 </div>

@@ -11,6 +11,8 @@ export async function createLoan(data: any) {
     }
 
     try {
+        console.log('[CREATE_LOAN] 1. Auth Verified. User:', session.user.id);
+
         const createData = {
             userId: session.user.id,
             // Use provided brokerId (from invite) OR fallback to session (if user is broker)
@@ -19,11 +21,13 @@ export async function createLoan(data: any) {
             stage: 'Application Review',
             data: JSON.stringify(data),
         };
-        console.log('DEBUG: Creating loan with data:', createData);
+        console.log('[CREATE_LOAN] 2. Payload Prepared. Inserting into DB...');
 
         const loan = await prisma.loanApplication.create({
             data: createData
         });
+
+        console.log('[CREATE_LOAN] 3. Success! Loan ID:', loan.id);
 
         revalidatePath('/borrower/dashboard');
         return { success: true, loan };

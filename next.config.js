@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-// Force Rebuild: v4-Check
+// Force Rebuild: vDebug-Refreshed-FINAL
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@loan-platform/shared-types'],
