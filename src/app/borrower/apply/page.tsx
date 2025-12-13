@@ -258,6 +258,23 @@ function LoanApplicationContent() {
 
             // Pre-fill from Backend (Guaranteed Fresh Data)
             if (borrowerId) {
+                // 1. FAST PATH: Use Session Data (if available)
+                if (user) {
+                    console.log("Pre-filling from Session:", user);
+                    setFormData(prev => ({
+                        ...prev,
+                        borrower: {
+                            ...prev.borrower,
+                            // Use session data, fallback to existing form data
+                            firstName: (user as any).firstName || prev.borrower.firstName,
+                            lastName: (user as any).lastName || prev.borrower.lastName,
+                            middleName: (user as any).middleName || prev.borrower.middleName,
+                            email: user.email || prev.borrower.email,
+                        }
+                    }));
+                }
+
+                // 2. SLOW PATH: Fetch DB Profile (Get latest phone, etc)
                 // We define an async function inside effect to call server action
                 const fetchProfile = async () => {
                     try {
