@@ -10,37 +10,78 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Email param required" }, { status: 400 });
         }
 
-        let patchResult = "Not Attempted";
-        let patchError = null;
+        // Schema Diagnostic Mode
 
-        // PATCH: Add phone column if missing (Safety Net)
-        // MUST RUN BEFORE QUERY because Prisma Client now expects 'phone' to exist
+        let logs: string[] = [];
+        const log = (msg: string) => logs.push(msg);
+
         try {
-            await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;`);
-            patchResult = "Success";
-        } catch (e: any) {
-            console.error("Auto-patch failed", e);
-            patchResult = "Failed";
-            patchError = e.message || String(e);
+            // 1. Check Existing Columns
+            log("Step 1: Checking Schema...");
+            const columns: any[] = await prisma.$queryRaw`
+                SELECT column_name, data_type 
+                FROM information_schema.columns 
+                WHERE table_name = 'User';
+            `;
+            const columnNames = columns.map((c: any) => c.column_name);
+            log(`Found columns: ${columnNames.join(', ')}`);
 
-            // If patch fails, return immediately because query WILL fail
+            const hasPhone = columnNames.includes('phone');
+
+            // 2. Patch if needed
+            if (!hasPhone) {
+                log("Step 2: 'phone' missing. Attempting ALTER TABLE...");
+                try {
+                    // Try Quoted "User" (Prisma default)
+                    await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;`);
+                    log("Executed ALTER TABLE \"User\"");
+                } catch (e: any) {
+                    log(`Error patching "User": ${e.message}`);
+
+                    // Fallback: Try unquoted User (Postgres default lowercase)
+                    try {
+                        await prisma.$executeRawUnsafe(`ALTER TABLE User ADD COLUMN IF NOT EXISTS phone TEXT;`);
+                        log("Executed ALTER TABLE User (Fallback)");
+                    } catch (e2: any) {
+                        log(`Error patching User (Fallback): ${e2.message}`);
+                    }
+                }
+            } else {
+                log("Step 2: 'phone' already exists. No patch needed.");
+            }
+
+            // 3. Verify Result
+            log("Step 3: Re-checking Schema...");
+            const finalColumns = await prisma.$queryRaw`
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'User';
+            `;
+            const finalNames = (finalColumns as any[]).map(c => c.column_name);
+            log(`Final columns: ${finalNames.join(', ')}`);
+
+            // 4. Try Query (Only if patch looked successful)
+            let userData = null;
+            if (finalNames.includes('phone')) {
+                log("Step 4: Querying User Data...");
+                userData = await prisma.user.findUnique({ where: { email } });
+            } else {
+                log("Step 4: Skipping Query (Schema still mismatch)");
+            }
+
+            return NextResponse.json({
+                status: 'Diagnostic Complete',
+                logs,
+                user: userData
+            });
+
+        } catch (error: any) {
             return NextResponse.json({
                 status: 'Error',
-                error: 'Schema Patch Failed',
-                details: patchError
+                logs,
+                fatalError: error.message
             }, { status: 500 });
         }
-
-        const user = await prisma.user.findUnique({
-            where: { email },
-        });
-
-        return NextResponse.json({
-            status: 'Success',
-            patchResult, // Inform user if patch ran
-            searchedEmail: email,
-            user: user || "NOT FOUND"
-        });
 
     } catch (error) {
         return NextResponse.json({
