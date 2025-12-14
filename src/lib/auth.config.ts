@@ -60,4 +60,5 @@ export const authConfig = {
         }
     },
     providers: [], // Providers added in auth.ts (Node only)
+    secret: 'temp-secret-key-for-dev', // Ensure Middleware can decode the token
 } satisfies NextAuthConfig;
