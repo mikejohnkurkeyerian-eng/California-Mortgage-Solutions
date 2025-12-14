@@ -14,10 +14,11 @@ export const authConfig = {
             // Allow start pages and auth pages
             if (isStartPage || isAuthPage) {
                 if (isLoggedIn) {
-                    // Optional: Redirect logged in users away from login page?
-                    // For now, allow it or let page logic handle it.
-                    // Returning true allows access.
-                    return true;
+                    // Redirect logged-in users to their respective dashboards
+                    if (nextUrl.pathname.startsWith('/broker')) {
+                        return Response.redirect(new URL('/broker/dashboard', nextUrl));
+                    }
+                    return Response.redirect(new URL('/borrower/dashboard', nextUrl));
                 }
                 return true;
             }
