@@ -32,10 +32,21 @@ export default function BorrowerLoginPage() {
                 twoFactorCode: twoFactorRequired ? twoFactorCode : undefined
             };
 
-            const result = await signIn('credentials', formData as any);
+            // Safety Timeout (10s)
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Login timed out (Server unresponsive)")), 10000)
+            );
+
+            console.log("Attempting Borrower Login...");
+            const result = await Promise.race([
+                signIn('credentials', formData as any),
+                timeoutPromise
+            ]) as any;
+
+            console.log("Login Result:", result);
 
             if (result?.error) {
-                if (result.error === '2FA_REQUIRED' || result.error.includes('2FA_REQUIRED')) { // NextAuth sometimes wraps errors
+                if (result.error === '2FA_REQUIRED' || result.error.includes('2FA_REQUIRED')) {
                     setTwoFactorRequired(true);
                     setIsLoading(false);
                     return;
@@ -49,23 +60,28 @@ export default function BorrowerLoginPage() {
                 setIsLoading(false);
             } else {
                 // Success
+                console.log("Login Success. Hard Redirecting...");
+                let dest = '/borrower/dashboard';
                 if (window.location.search.includes('callbackUrl')) {
                     const params = new URLSearchParams(window.location.search);
-                    router.push(params.get('callbackUrl') || '/borrower/dashboard');
-                } else {
-                    router.push('/borrower/dashboard');
+                    dest = params.get('callbackUrl') || '/borrower/dashboard';
                 }
+
+                // Force hard reload
+                window.location.href = dest;
             }
         } catch (err) {
-            // NextAuth/Auth.js v5 throws on redirect, but we set redirect:false..
-            // However, errors might bubble as Exceptions
+            console.error('Login error:', err);
             if ((err as Error).message.includes('2FA_REQUIRED')) {
                 setTwoFactorRequired(true);
                 setIsLoading(false);
                 return;
             }
-            console.error('Login error:', err);
-            setError('Something went wrong');
+            if ((err as Error).message.includes('timed out')) {
+                setError('Server timed out. Please try again.');
+            } else {
+                setError('Something went wrong');
+            }
             setIsLoading(false);
         }
     };
