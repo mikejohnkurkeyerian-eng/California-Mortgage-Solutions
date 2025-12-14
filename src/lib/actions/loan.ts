@@ -22,9 +22,11 @@ export async function createLoan(data: any) {
             brokerId: data.brokerId || (session.user as any).brokerId || undefined,
             status: 'Draft',
             stage: 'Application Review',
-            data: JSON.stringify(data),
+            // DEBUG: Minimal payload to test size limits
+            data: JSON.stringify({ debug: "Minimal payload test", originalSize: JSON.stringify(data).length }),
         };
-        console.log('[CREATE_LOAN] 2. Payload Prepared. Inserting into DB...');
+        console.log('[CREATE_LOAN] 2. Payload Prepared. Size:', createData.data.length);
+        console.log('[CREATE_LOAN] 3. Inserting into DB...');
 
         const loan = await prisma.loanApplication.create({
             data: createData

@@ -9,6 +9,6 @@ export async function GET() {
     return NextResponse.json({
         status: 'Online',
         buildTime: new Date().toISOString(),
-        version: 'vDebug-AuthBypass'
+        version: 'vDebug-MinimalPayload'
     });
 }
