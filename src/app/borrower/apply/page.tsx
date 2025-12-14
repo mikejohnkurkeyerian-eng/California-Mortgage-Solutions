@@ -1318,15 +1318,11 @@ function LoanApplicationContent() {
                                         <Button
                                             variant="primary"
                                             className="bg-secondary-600 hover:bg-secondary-500"
-                                            onClick={() => {
-                                                alert("DEBUG: Submit Clicked (vDebug)"); // Nuclear Proof of Life
-                                                setToast({ message: "Starting Submission (vDebug)...", type: "info" });
-                                                handleSubmit(true);
-                                            }}
+                                            onClick={() => handleSubmit(true)}
                                             isLoading={createLoanMutation.isPending || updateLoanMutation.isPending}
                                             disabled={!isEditMode && !formData.acknowledgments.agreedToElectronicSignatures}
                                         >
-                                            {isEditMode ? 'Save & Exit' : 'Submit Application (vDebug)'}
+                                            {isEditMode ? 'Save & Exit' : 'Submit Application'}
                                         </Button>
                                     )}
                                 </div>
