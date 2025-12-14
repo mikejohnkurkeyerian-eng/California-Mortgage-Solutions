@@ -6,15 +6,27 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 
 export default function BorrowerLoginPage() {
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (status === 'authenticated') {
+            const params = new URLSearchParams(window.location.search);
+            const callbackUrl = params.get('callbackUrl') || '/borrower/dashboard';
+            window.location.href = callbackUrl; // Hard redirect to be safe
+        }
+    }, [status, router]);
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
-    // const { login } = useBorrowerAuth(); // Not needed anymore
 
+    // const { login } = useBorrowerAuth(); // Not needed anymore
     const [twoFactorRequired, setTwoFactorRequired] = useState(false);
     const [twoFactorCode, setTwoFactorCode] = useState('');
     const [error, setError] = useState('');
