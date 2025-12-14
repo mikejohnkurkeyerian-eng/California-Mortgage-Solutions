@@ -25,21 +25,36 @@ export default function BrokerLoginPage() {
         setError('');
 
         try {
-            const result = await signIn('credentials', {
-                email,
-                password,
-                redirect: false,
-            });
+            console.log("Attempting Broker Login...");
+
+            // Timeout race
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Login timed out")), 10000)
+            );
+
+            const result = await Promise.race([
+                signIn('credentials', {
+                    email,
+                    password,
+                    redirect: false,
+                }),
+                timeoutPromise
+            ]) as any;
+
+            console.log("Login Result:", result);
 
             if (result?.error) {
+                console.error("Login Failed:", result.error);
                 setError('Invalid email or password');
                 setIsLoading(false);
             } else {
+                console.log("Login Success. Redirecting...");
                 router.push('/broker/dashboard');
+                // Don't stop loading, page transition happening
             }
-        } catch (err) {
-            console.error('Login error:', err);
-            setError('Something went wrong');
+        } catch (err: any) {
+            console.error('Login Exception:', err);
+            setError(err.message || 'Something went wrong');
             setIsLoading(false);
         }
     };
