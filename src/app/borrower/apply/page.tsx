@@ -420,12 +420,28 @@ function LoanApplicationContent() {
                     setToast({ message: 'Error: Could not find loan to update. Please try again.', type: 'error' });
                     return;
                 }
-                console.log("Calling updateLoanMutation...");
-                await updateLoanMutation.mutateAsync({
-                    id: currentLoan.id,
-                    data: loanData as any
+                // The original `isEditMode` check is equivalent to `isUpdate` here.
+                // We need to ensure `existingLoanId` is available, which `currentLoan.id` provides.
+                const existingLoanId = currentLoan.id;
+
+                console.log("Updating via API Route...");
+
+                // Standard API Fetch for Update
+                const response = await fetch('/api/submit-loan', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...loanData, id: existingLoanId }) // Ensure ID is present
                 });
-                console.log("Update mutation finished.");
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API Update Error ${response.status}: ${errorText}`);
+                }
+
+                const result = await response.json();
+                if (!result.success) throw new Error(result.error);
+
+                console.log("API Update finished.");
                 setToast({ message: 'Application updated successfully!', type: 'success' });
             } else {
                 console.log("Submitting via API Route...");
