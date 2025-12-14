@@ -48,9 +48,9 @@ export default function BrokerLoginPage() {
                 setError('Invalid email or password');
                 setIsLoading(false);
             } else {
-                console.log("Login Success. Redirecting...");
-                router.push('/broker/dashboard');
-                // Don't stop loading, page transition happening
+                console.log("Login Success. Hard Redirecting...");
+                // Force hard reload to ensure session cookies are picked up by Middleware
+                window.location.href = '/broker/dashboard';
             }
         } catch (err: any) {
             console.error('Login Exception:', err);
