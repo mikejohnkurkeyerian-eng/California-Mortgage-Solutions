@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { signIn } from 'next-auth/react';
+
 export default function BrokerLoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');
@@ -15,19 +17,31 @@ export default function BrokerLoginPage() {
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    const [error, setError] = useState('');
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError('');
 
-        // Simulate login delay
-        setTimeout(() => {
-            setIsLoading(false);
-            // In a real app, we would handle "Remember Me" persistence here
-            if (rememberMe) {
-                localStorage.setItem('broker_email', email);
+        try {
+            const result = await signIn('credentials', {
+                email,
+                password,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                setError('Invalid email or password');
+                setIsLoading(false);
+            } else {
+                router.push('/broker/dashboard');
             }
-            router.push('/broker/loans');
-        }, 1000);
+        } catch (err) {
+            console.error('Login error:', err);
+            setError('Something went wrong');
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -47,6 +61,11 @@ export default function BrokerLoginPage() {
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleLogin} className="space-y-6">
+                                {error && (
+                                    <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                        {error}
+                                    </div>
+                                )}
                                 <Input
                                     label="Email Address"
                                     type="email"
