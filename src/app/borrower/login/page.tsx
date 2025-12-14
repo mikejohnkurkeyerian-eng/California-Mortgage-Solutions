@@ -6,21 +6,15 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { signIn, useSession } from 'next-auth/react';
+import { signIn, useSession, signOut } from 'next-auth/react';
 import { useEffect } from 'react';
 
 export default function BorrowerLoginPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
 
-    // Redirect if already logged in
-    useEffect(() => {
-        if (status === 'authenticated') {
-            const params = new URLSearchParams(window.location.search);
-            const callbackUrl = params.get('callbackUrl') || '/borrower/dashboard';
-            window.location.href = callbackUrl; // Hard redirect to be safe
-        }
-    }, [status, router]);
+    // REMOVED: Auto-redirect caused loop.
+    // Instead, we will render a "Continue" button if session exists.
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -108,13 +102,35 @@ export default function BorrowerLoginPage() {
                         <CardTitle className="text-center">Borrower Login</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <GoogleSignInButton />
+                        {status === 'authenticated' && session?.user ? (
+                            <div className="mb-6 p-4 bg-primary-500/10 border border-primary-500/30 rounded-lg text-center">
+                                <p className="text-white mb-2">You are logged in as <span className="font-bold">{session.user.email}</span></p>
+                                <div className="flex flex-col gap-2">
+                                    <Button
+                                        onClick={() => window.location.href = '/borrower/dashboard'}
+                                        className="w-full"
+                                    >
+                                        Go to Dashboard
+                                    </Button>
+                                    <button
+                                        onClick={() => signOut({ callbackUrl: '/borrower/login' })}
+                                        className="text-xs text-slate-400 hover:text-white underline"
+                                    >
+                                        Sign Out & Switch Account
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <GoogleSignInButton />
 
-                        <div className="relative flex py-5 items-center">
-                            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
-                            <span className="flex-shrink-0 mx-4 text-slate-400 text-xs uppercase">Or with email</span>
-                            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
-                        </div>
+                                <div className="relative flex py-5 items-center">
+                                    <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                                    <span className="flex-shrink-0 mx-4 text-slate-400 text-xs uppercase">Or with email</span>
+                                    <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                                </div>
+                            </>
+                        )}
 
                         <form onSubmit={handleLogin} className="space-y-6">
                             <div>
