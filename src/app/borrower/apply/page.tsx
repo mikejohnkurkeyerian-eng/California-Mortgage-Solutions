@@ -428,19 +428,26 @@ function LoanApplicationContent() {
                 console.log("Update mutation finished.");
                 setToast({ message: 'Application updated successfully!', type: 'success' });
             } else {
-                console.log("Calling createLoanMutation...");
+                console.log("Submitting via API Route...");
 
-                // Safety Timeout: If backend takes > 15s, reject.
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Request timed out (Backend unresponsive)")), 15000)
-                );
+                // Use Standard API Fetch instead of Server Action
+                const response = await fetch('/api/submit-loan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loanData)
+                });
 
-                const result = await Promise.race([
-                    createLoanMutation.mutateAsync(loanData as any),
-                    timeoutPromise
-                ]);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API Error ${response.status}: ${errorText}`);
+                }
 
-                console.log("Create mutation finished. Result:", result);
+                const result = await response.json();
+                console.log("API Submission Result:", result);
+
+                if (!result.success) {
+                    throw new Error(result.error || "Unknown API Failure");
+                }
             }
 
             console.log("Mutation successful. Triggering background sync...");
