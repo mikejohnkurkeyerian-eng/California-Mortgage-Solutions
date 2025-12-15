@@ -442,7 +442,8 @@ function LoanApplicationContent() {
                 if (!result.success) throw new Error(result.error);
 
                 console.log("API Update finished.");
-                setToast({ message: 'Application updated successfully!', type: 'success' });
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                setToast({ message: `Saved successfully at ${time}`, type: 'success' });
             } else {
                 console.log("Submitting via API Route...");
 
