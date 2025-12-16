@@ -322,7 +322,7 @@ function EmailConfiguration() {
                                 <div className="bg-blue-500/10 p-3 rounded text-sm text-blue-300 border border-blue-500/20">
                                     <strong>How to use Gmail:</strong>
                                     <ol className="list-decimal ml-4 mt-1 space-y-1">
-                                        <li>Go to your Google Account Security settings.</li>
+                                        <li>Go to your <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">Google Account Security settings</a>.</li>
                                         <li>Enable 2-Step Verification if not already on.</li>
                                         <li>Search for "App Passwords".</li>
                                         <li>Create a new App Password named "Mortgage Bot".</li>
