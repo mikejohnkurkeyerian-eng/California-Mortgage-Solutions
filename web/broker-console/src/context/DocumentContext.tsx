@@ -173,7 +173,7 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                     );
                     const latestLoan = sortedLoans[0];
                     setCurrentLoanId(latestLoan.id);
-                    setCurrentLoan(latestLoan as any); // Set current loan
+                    // setCurrentLoan moved to after parsing
 
                     // Map backend status to frontend ApplicationStatus
                     let newStatus: ApplicationStatus = 'draft';
@@ -208,6 +208,8 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                             citizenship: parsedData?.borrower?.citizenship || full1003Data?.borrower?.citizenship
                         }
                     };
+
+                    setCurrentLoan(loanWithFull1003 as any); // Update state with enriched object
 
                     console.log('🔍 DYNAMIC DOCS DEBUG INPUT:', {
                         incomeType: (loanWithFull1003 as any).employment?.incomeType,
