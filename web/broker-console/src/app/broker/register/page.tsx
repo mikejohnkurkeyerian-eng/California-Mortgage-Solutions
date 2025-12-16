@@ -73,14 +73,51 @@ export default function BrokerRegisterPage() {
 
         setIsLoading(true);
 
-        // Simulate Registration API call
-        setTimeout(() => {
+        try {
+            const response = await fetch('/api/broker/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...formData,
+                    nmlsId,
+                    licenseStates: licenseState
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.error || 'Registration failed');
+                setIsLoading(false);
+                return;
+            }
+
+            // Success
+            // Optional: Auto-login here using signIn, or redirect to login
+            // For cleanliness, let's redirect to login for now, or dashboard if we had auto-login (requires credentials auth flow locally)
+            // Ideally we auto-login, but `signIn` needs clean creds. 
+            // Let's redirect to login with a query param? or just push to dashboard?
+            // Actually, we can just signIn immediately with the password we have.
+
+            const { signIn } = await import('next-auth/react');
+            const result = await signIn('credentials', {
+                email: formData.email,
+                password: formData.password,
+                redirect: false
+            });
+
+            if (result?.error) {
+                // If auto-login fails, send to login page
+                console.error("Auto-login failed:", result.error);
+                router.push('/broker/login');
+            } else {
+                router.push('/broker/dashboard');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            alert('Something went wrong. Please try again.');
             setIsLoading(false);
-            // Save "Remember Me" preference implicitly for new accounts if desired, 
-            // or just redirect to dashboard
-            // or just redirect to dashboard
-            router.push('/broker/dashboard');
-        }, 1500);
+        }
     };
 
     return (
