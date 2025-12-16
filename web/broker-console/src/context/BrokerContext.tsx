@@ -87,8 +87,8 @@ const defaultSettings: BrokerSettings = {
         smtpPass: 'wbwg mbul ngel zslq'
     },
     creditIntegration: {
-        provider: 'none',
-        enabled: false
+        provider: 'mock',
+        enabled: true
     },
     theme: 'dark' // Default to dark for premium feel
 };
@@ -113,7 +113,17 @@ export const BrokerProvider = ({ children }: { children: ReactNode }) => {
             try {
                 const parsed = JSON.parse(saved);
                 // Ensure theme exists in parsed settings (migration)
+                // Ensure theme exists in parsed settings (migration)
                 if (!parsed.theme) parsed.theme = 'dark';
+
+                // [DEMO MODE MIGRATION] Force enable mock provider if it was disabled/none
+                if (!parsed.creditIntegration || parsed.creditIntegration.provider === 'none') {
+                    parsed.creditIntegration = {
+                        provider: 'mock',
+                        enabled: true
+                    };
+                }
+
                 setSettings(parsed);
             } catch (e) {
                 console.error('Failed to parse broker settings', e);
