@@ -36,9 +36,15 @@ export function Navbar() {
                     </div>
 
                     <div className="hidden md:flex items-center space-x-8">
-                        <Link href="/borrower/start" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
-                            Apply Now
-                        </Link>
+                        {borrowerId ? (
+                            <Link href="/borrower/dashboard" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <Link href="/borrower/start" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                                Apply Now
+                            </Link>
+                        )}
                         <Link href="/about" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
                             How it Works
                         </Link>
@@ -80,9 +86,9 @@ export function Navbar() {
                         <Link href="/broker/login" target="_blank" rel="noopener noreferrer">
                             <span className="text-sm text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white transition-colors mr-6 font-semibold">Broker Portal</span>
                         </Link>
-                        <Link href="/borrower/start">
+                        <Link href={borrowerId ? "/borrower/dashboard" : "/borrower/start"}>
                             <Button variant="primary" size="sm" className="bg-secondary-600 hover:bg-secondary-500 mr-2">
-                                Get Started
+                                {borrowerId ? "Dashboard" : "Get Started"}
                             </Button>
                         </Link>
                     </div>
