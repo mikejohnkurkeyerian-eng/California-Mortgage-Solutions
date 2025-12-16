@@ -1246,6 +1246,24 @@ function LoanApplicationContent() {
                                 const isSkipped = isEditMode && stepNum === 8;
                                 const isDisabled = (!isEditMode && stepNum > step) || isSkipped;
 
+                                // Check for errors in this step
+                                const stepFields = {
+                                    1: ['borrower', 'currentAddress'],
+                                    2: ['employment'],
+                                    3: ['assets'],
+                                    4: ['liabilities'],
+                                    5: ['realEstate'],
+                                    6: ['loanAndProperty'],
+                                    7: ['declarations'],
+                                    8: ['acknowledgments'],
+                                    9: ['military', 'demographics']
+                                }[stepNum] || [];
+
+                                const hasErrors = isEditMode && formInsights.some(insight =>
+                                    insight.severity === 'ERROR' &&
+                                    stepFields.some(prefix => insight.field.startsWith(prefix) || insight.field === prefix)
+                                );
+
                                 return (
                                     <button
                                         key={i}
@@ -1260,13 +1278,19 @@ function LoanApplicationContent() {
                                             flex items-center justify-center h-8 w-8 md:h-10 md:w-10 rounded-full text-xs md:text-sm font-bold shadow-sm transition-all duration-300 z-10
                                             ${isCurrent
                                                 ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 scale-110 shadow-lg ring-4 ring-white dark:ring-slate-900'
-                                                : isCompleted
-                                                    ? 'bg-primary-500 text-white shadow-md'
-                                                    : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700'
+                                                : hasErrors
+                                                    ? 'bg-red-100 text-red-600 border-2 border-red-500 dark:bg-red-900/20 dark:text-red-400 dark:border-red-500' // Error State
+                                                    : isCompleted
+                                                        ? 'bg-primary-500 text-white shadow-md'
+                                                        : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700'
                                             }
-                                            ${!isDisabled && !isCurrent && !isCompleted ? 'group-hover:border-primary-300 group-hover:text-primary-500 group-hover:bg-primary-50 dark:group-hover:bg-primary-900/20' : ''}
+                                            ${!isDisabled && !isCurrent && !isCompleted && !hasErrors ? 'group-hover:border-primary-300 group-hover:text-primary-500 group-hover:bg-primary-50 dark:group-hover:bg-primary-900/20' : ''}
                                         `}>
-                                            {isCompleted ? (
+                                            {hasErrors ? (
+                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                            ) : isCompleted ? (
                                                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                 </svg>
@@ -1277,7 +1301,9 @@ function LoanApplicationContent() {
                                             text-[10px] md:text-xs font-medium uppercase tracking-wider transition-all duration-300 whitespace-nowrap
                                             ${isCurrent
                                                 ? 'text-slate-900 dark:text-white font-bold translate-y-0'
-                                                : 'text-slate-400 dark:text-slate-500 translate-y-1 opacity-0 group-hover:opacity-100 group-hover:translate-y-0'
+                                                : hasErrors
+                                                    ? 'text-red-600 dark:text-red-400 font-bold translate-y-0' // Keep error label visible/bold maybe?
+                                                    : 'text-slate-400 dark:text-slate-500 translate-y-1 opacity-0 group-hover:opacity-100 group-hover:translate-y-0'
                                             }
                                         `}>
                                             {label}
