@@ -46,7 +46,8 @@ export function useUpdateLoan() {
 export function useBorrowerAuth() {
     const { data: session, status } = useSession();
     const isLoading = status === 'loading';
-    const borrowerId = session?.user?.id || null;
+    const isBorrower = session?.user?.role === 'BORROWER'; // Strict check
+    const borrowerId = isBorrower ? session?.user?.id : null;
 
     const login = (id: string) => {
         // Handled by NextAuth login page

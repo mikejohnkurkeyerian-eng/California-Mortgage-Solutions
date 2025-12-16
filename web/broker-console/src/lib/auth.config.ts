@@ -7,34 +7,51 @@ export const authConfig = {
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            const isOnDashboard = nextUrl.pathname.startsWith('/borrower') || nextUrl.pathname.startsWith('/broker');
+            const isOnBrokerLine = nextUrl.pathname.startsWith('/broker');
+            const isOnBorrowerLine = nextUrl.pathname.startsWith('/borrower');
+
             const isAuthPage = nextUrl.pathname.includes('/login') || nextUrl.pathname.includes('/signup') || nextUrl.pathname.includes('/register');
             const isStartPage = nextUrl.pathname === '/borrower/start' || nextUrl.pathname === '/broker/start';
+            const isPublicPage = nextUrl.pathname === '/' || nextUrl.pathname === '/about';
 
-            // Allow start pages and auth pages
-            if (isStartPage || isAuthPage) {
-                if (isLoggedIn) {
-                    const userRole = (auth?.user as any)?.role;
-                    // Strict Role-Based Redirection
-                    if (userRole === 'BROKER') {
-                        return Response.redirect(new URL('/broker/dashboard', nextUrl));
-                    } else if (userRole === 'BORROWER') {
-                        return Response.redirect(new URL('/borrower/dashboard', nextUrl));
-                    }
-
-                    // Fallback for unknown roles (e.g. initial setup)
-                    if (nextUrl.pathname.startsWith('/broker')) {
-                        return Response.redirect(new URL('/broker/dashboard', nextUrl));
-                    }
-                    return Response.redirect(new URL('/borrower/dashboard', nextUrl));
+            // 1. Handle Unauthenticated Users
+            if (!isLoggedIn) {
+                // Protect private routes
+                if ((isOnBrokerLine || isOnBorrowerLine) && !isAuthPage && !isStartPage) {
+                    // Redirect to appropriate login based on attempted path
+                    if (isOnBrokerLine) return false; // Triggers redirects to broker login via pages config? No, default is borrower login. 
+                    // We need strict redirect for broker login if hitting broker protected route
+                    if (isOnBrokerLine) return Response.redirect(new URL('/broker/login', nextUrl));
+                    return false; // Redirects to default signIn page (/borrower/login)
                 }
                 return true;
             }
 
-            // Protect Dashboard
-            if (isOnDashboard) {
-                if (isLoggedIn) return true;
-                return false; // Redirect to login
+            // 2. Handle Authenticated Users
+            if (isLoggedIn) {
+                const userRole = (auth?.user as any)?.role;
+
+                // Prevent Access to Auth Pages if already logged in
+                if (isAuthPage || isStartPage) {
+                    if (userRole === 'BROKER') {
+                        return Response.redirect(new URL('/broker/dashboard', nextUrl));
+                    } else {
+                        return Response.redirect(new URL('/borrower/dashboard', nextUrl));
+                    }
+                }
+
+                // Enforce Role Separation
+                if (isOnBrokerLine) {
+                    if (userRole !== 'BROKER') {
+                        // Borrower trying to access Broker pages -> Bounce to Borrower Dashboard
+                        return Response.redirect(new URL('/borrower/dashboard', nextUrl));
+                    }
+                } else if (isOnBorrowerLine) {
+                    if (userRole === 'BROKER') {
+                        // Broker trying to access Borrower pages -> Bounce to Broker Dashboard
+                        return Response.redirect(new URL('/broker/dashboard', nextUrl));
+                    }
+                }
             }
 
             return true;
