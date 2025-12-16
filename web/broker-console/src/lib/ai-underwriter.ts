@@ -125,11 +125,16 @@ export class AIUnderwriter {
 
     private static analyzeLiabilities(data: Full1003Data, issues: UnderwritingIssue[]) {
         // Simple DTI Check based on declared income and liabilities
-        const totalMonthlyLiabilities = data.liabilities.reduce((sum, l) => sum + (l.monthlyPayment || 0), 0) +
-            data.realEstate.reduce((sum, re) => sum + (re.mortgageLoans?.reduce((mSum, m) => mSum + m.monthlyPayment, 0) || 0), 0);
+        const liabilities = data.liabilities || [];
+        const realEstate = data.realEstate || [];
+        const employment = data.employment || [];
+        const otherIncome = data.otherIncome || [];
 
-        const totalMonthlyIncome = data.employment.reduce((sum, emp) => sum + emp.monthlyIncome.total, 0) +
-            (data.otherIncome?.reduce((sum, inc) => sum + inc.monthlyAmount, 0) || 0);
+        const totalMonthlyLiabilities = liabilities.reduce((sum, l) => sum + (l.monthlyPayment || 0), 0) +
+            realEstate.reduce((sum, re) => sum + (re.mortgageLoans?.reduce((mSum, m) => mSum + m.monthlyPayment, 0) || 0), 0);
+
+        const totalMonthlyIncome = employment.reduce((sum, emp) => sum + (emp.monthlyIncome?.total || 0), 0) +
+            otherIncome.reduce((sum, inc) => sum + inc.monthlyAmount, 0);
 
         if (totalMonthlyIncome > 0) {
             const dti = (totalMonthlyLiabilities / totalMonthlyIncome) * 100;
