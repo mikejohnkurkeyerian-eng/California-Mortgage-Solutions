@@ -8,7 +8,7 @@ export const authConfig = {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
             const isOnDashboard = nextUrl.pathname.startsWith('/borrower') || nextUrl.pathname.startsWith('/broker');
-            const isAuthPage = nextUrl.pathname.includes('/login') || nextUrl.pathname.includes('/signup');
+            const isAuthPage = nextUrl.pathname.includes('/login') || nextUrl.pathname.includes('/signup') || nextUrl.pathname.includes('/register');
             const isStartPage = nextUrl.pathname === '/borrower/start' || nextUrl.pathname === '/broker/start';
 
             // Allow start pages and auth pages
