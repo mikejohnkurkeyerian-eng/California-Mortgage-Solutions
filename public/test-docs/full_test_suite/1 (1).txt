@@ -1,0 +1,19 @@
+US Individual Income Tax Return 2023
+Form 1040
+Filing Status: Single
+Name: John Doe
+SSN: XXX-XX-1234
+Address: 123 Main St, Anytown, USA
+
+Income:
+Line 1z (Wages, salaries, tips): $65,000.00
+Line 2b (Taxable interest): $120.00
+Line 3b (Ordinary dividends): $50.00
+Line 8 (Other income from Schedule 1): $0.00
+Line 9 (Total income): $65,170.00
+
+Tax and Credits:
+Line 15 (Taxable income): $51,320.00
+Line 24 (Total tax): $7,200.00
+Line 33 (Total payments): $8,000.00
+Line 34 (Overpaid): $800.00

@@ -1,0 +1,16 @@
+Chase Bank Statement
+Account Number: XXXXX1234
+Period: Oct 01, 2023 - Oct 31, 2023
+Account Holder: John Doe
+
+Beginning Balance: $12,500.00
+Total Deposits: $15,000.00
+Total Withdrawals: $4,000.00
+Ending Balance: $23,500.00
+
+Transactions:
+10/01 Direct Deposit ACME Corp  +$2,428.00
+10/05 Transfer from Savings     +$10,000.00
+10/10 ATM Withdrawal            -$200.00
+10/15 Direct Deposit ACME Corp  +$2,428.00
+10/20 Check #101 Rent           -$2,000.00

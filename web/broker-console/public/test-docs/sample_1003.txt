@@ -1,0 +1,63 @@
+Uniform Residential Loan Application
+Freddie Mac Form 65   Fannie Mae Form 1003
+
+Section 1: Borrower Information. This section asks about your personal information and your income from employment and other sources.
+
+1a. Personal Information
+Name (First, Middle, Last, Suffix): John Quincy Borrower
+Social Security Number: 123-45-6789
+Date of Birth (mm/dd/yyyy): 01/15/1980
+Citizenship: [x] U.S. Citizen
+Marital Status: Married
+Dependents: 2
+Contact Information
+Home Phone: (555) 123-4567    Cell Phone: (555) 987-6543    Work Phone:
+Email: john.borrower@example.com
+Current Address: Street: 123 Maple Street   Unit #:
+City: Springfield   State: IL   Zip: 62704   Country: USA
+How long at current address? 5 Years
+
+1b. Current Employment/Self-Employment and Income
+Employer or Business Name: Acme Corp
+Phone: 555-555-5555
+Street: 456 Business Rd   City: Springfield   State: IL   Zip: 62704
+Position: Manager   Start Date: 01/01/2015
+Gross Monthly Income
+Base: $ 5,000.00
+Overtime: $ 0.00
+Bonus: $ 1,000.00
+Commissions: $ 0.00
+Other: $ 0.00
+Total: $ 6,000.00
+
+Section 2: Financial Information - Assets and Liabilities.
+2a. Assets - Bank Accounts, Retirement, and Other Accounts You Have
+Account Type: Checking   Financial Institution: Chase Bank   Account Number: 1234   Cash or Market Value: $ 10,000.00
+Account Type: Savings    Financial Institution: Chase Bank   Account Number: 5678   Cash or Market Value: $ 25,000.00
+
+2b. Other Assets You Have
+...
+
+2c. Liabilities - Credit Cards, Other Debts, and Leases that You Owe
+Account Type: Credit Card   Company Name: Visa   Account Number: 1111   Unpaid Balance: $ 500.00   Monthly Payment: $ 50.00
+Account Type: Auto Loan     Company Name: Ford Credit   Account Number: 2222   Unpaid Balance: $ 15,000.00   Monthly Payment: $ 350.00
+
+Section 3: Financial Information - Real Estate.
+...
+
+Section 4: Loan and Property Information.
+4a. Loan and Property Information
+Loan Amount: $ 300,000.00
+Loan Purpose: Purchase
+Property Address: Street: 789 Oak Avenue   Unit #:
+City: Springfield   State: IL   Zip: 62704   Country: USA
+Occupancy: Primary Residence
+
+Section 5: Declarations.
+...
+
+Section 9: Loan Originator Information.
+Loan Originator Name: Jane Broker
+Loan Originator Identifier: 98765
+Loan Originator Company Name: Best Mortgage Co
+Loan Originator Company Identifier: 54321

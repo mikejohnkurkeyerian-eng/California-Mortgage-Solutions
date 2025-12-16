@@ -1,0 +1,27 @@
+ADP EARNINGS STATEMENT
+Company: Tech Solutions Inc.
+Employee: John Doe
+Employee ID: 98765
+Pay Period: 10/01/2024 - 10/15/2024
+Pay Date: 10/20/2024
+
+EARNINGS
+Rate      Hours     This Period     YTD Amount
+Regular       50.00     80.00     4,000.00        80,000.00
+Bonus                             1,000.00        5,000.00
+Gross Pay                         5,000.00        85,000.00
+
+TAXES
+Fed Income Tax                    800.00          16,000.00
+Social Security                   310.00          5,270.00
+Medicare                          72.50           1,232.50
+State Income Tax                  200.00          4,000.00
+
+DEDUCTIONS
+401(k)                            250.00          5,000.00
+Health Ins                        150.00          3,000.00
+
+NET PAY                           $3,217.50
+
+Direct Deposit Distribution:
+Bank of America ...1234           $3,217.50

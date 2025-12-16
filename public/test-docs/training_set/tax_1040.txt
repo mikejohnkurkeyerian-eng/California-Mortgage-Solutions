@@ -1,0 +1,33 @@
+Form 1040        Department of the Treasury - Internal Revenue Service
+U.S. Individual Income Tax Return        2023
+OMB No. 1545-0074
+
+Filing Status: Single
+Your First Name: John    Last Name: Doe
+Your Social Security Number: 123-45-6789
+
+Income
+1a. Total amount from Form(s) W-2, box 1:    $85,000.00
+2b. Taxable interest:                        $150.00
+3b. Ordinary dividends:                      $500.00
+...
+9. Total Income:                             $85,650.00
+
+Adjusted Gross Income
+11. Adjusted Gross Income:                   $85,650.00
+
+Standard Deduction or Itemized Deductions
+12. Standard Deduction:                      $13,850.00
+
+Tax and Credits
+16. Tax:                                     $14,500.00
+24. Total Tax:                               $14,500.00
+
+Payments
+25a. Federal income tax withheld:            $16,000.00
+
+Refund
+34. Amount you overpaid:                     $1,500.00
+
+Sign Here
+Your signature: [John Doe]    Date: 04/10/2024

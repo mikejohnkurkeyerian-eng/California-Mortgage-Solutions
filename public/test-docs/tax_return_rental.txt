@@ -1,0 +1,14 @@
+
+FORM 1040
+U.S. Individual Income Tax Return
+Filing Status: Single
+Name: John Doe
+
+...
+SCHEDULE E
+(Form 1040)
+Supplemental Income and Loss
+(From rental real estate, royalties, partnerships, S corporations, estates, trusts, REMICs, etc.)
+
+Part I Income or Loss From Rental Real Estate and Royalties
+...

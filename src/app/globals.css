@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 15 23 42;
+    --surface: 255 255 255;
+    --surface-highlight: 255 255 255;
+  }
+
+  .dark {
+    --background: 15 23 42;
+    --foreground: 226 232 240;
+    --surface: 30 41 59;
+    --surface-highlight: 51 65 85;
+  }
+
+  body {
+    @apply bg-background text-slate-900 dark:text-white transition-colors duration-200;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading font-bold tracking-tight text-slate-900 dark:text-white;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/50 dark:bg-surface/50 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-xl;
+  }
+
+  .glass-card {
+    @apply bg-white/40 dark:bg-surface/40 backdrop-blur-lg border border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-500 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-lg shadow-primary-900/20;
+  }
+
+  .input-field {
+    @apply bg-white dark:bg-surface-highlight/30 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-2 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide number input spinners */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+}

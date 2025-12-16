@@ -1,0 +1,29 @@
+MEMBER ACCOUNT STATEMENT
+Local Community Credit Union
+123 Main St, Hometown, USA
+
+Member Name: Jane Smith
+Member Number: 123456
+Statement Date: 11/30/2024
+
+SHARE SAVINGS - ID 00
+Previous Balance: $10,000.00
+Dividends Earned: $15.50
+Deposits: $500.00
+Withdrawals: $0.00
+New Balance: $10,515.50
+
+CHECKING - ID 10
+Previous Balance: $2,500.00
+Deposits: $4,000.00
+Withdrawals: $3,800.00
+New Balance: $2,700.00
+
+Activity:
+11/05   Payroll Deposit          $2,000.00
+11/15   Mortgage Payment        -$1,800.00
+11/20   Payroll Deposit          $2,000.00
+11/25   Auto Loan Payment       -$400.00
+
+YTD Dividends: $145.67
+YTD Interest Paid: $0.00

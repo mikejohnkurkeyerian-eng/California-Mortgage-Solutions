@@ -1,0 +1,25 @@
+CHASE TOTAL CHECKING
+JPMorgan Chase Bank, N.A.
+P.O. Box 659754
+San Antonio, TX 78265-9754
+
+Statement Period: October 12, 2024 through November 10, 2024
+Account Number: 000000123456789
+
+CHECKING SUMMARY
+Beginning Balance      $5,432.10
+Deposits and Additions $3,200.00
+ATM & Debit Card Withdrawals - $1,500.00
+Electronic Withdrawals - $800.00
+Ending Balance         $6,332.10
+
+TRANSACTION DETAIL
+DATE        DESCRIPTION                     AMOUNT
+10/15       Deposit - Payroll              3,200.00
+10/18       Debit Card Purchase - Target     -54.32
+10/20       ATM Withdrawal                  -100.00
+11/01       Payment to Chase Credit Card    -500.00
+
+CUSTOMER SERVICE INFORMATION
+Web site: www.chase.com
+Service Center: 1-800-935-9935
