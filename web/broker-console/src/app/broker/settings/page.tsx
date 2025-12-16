@@ -184,7 +184,7 @@ function IntegrationSettings() {
                     {emailConfig.provider === 'gmail' && (
                         <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-4 animate-fade-in">
                             <div className="bg-amber-500/10 text-amber-300 text-sm p-3 rounded border border-amber-500/20">
-                                <strong>Setup required:</strong> Enable 2FA on your Google Account, then generate an App Password.
+                                <strong>Setup required:</strong> <a href="https://myaccount.google.com/signinoptions/two-step-verification" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline border-b border-amber-400/30 pb-0.5 transition-colors hover:border-amber-400">Enable 2FA on your Google Account</a>, then generate an App Password.
                                 <div className="mt-2">
                                     <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline font-medium">Click here to create App Password →</a>
                                 </div>
@@ -305,8 +305,8 @@ export default function BrokerSettingsPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200 ${activeTab === tab.id
-                                        ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/20'
-                                        : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/20'
+                                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
                                     }`}
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
