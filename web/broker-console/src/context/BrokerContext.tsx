@@ -70,21 +70,14 @@ const defaultSettings: BrokerSettings = {
     useFannieMae: true,
     useFreddieMac: false,
     defaultUnderwritingMode: 'EMAIL',
-    underwriters: [
-        {
-            id: 'default-mike',
-            name: 'mike',
-            email: 'mikejohnkurkeyerian@gmail.com',
-            type: 'internal'
-        }
-    ],
+    underwriters: [],
     lenders: [],
     emailSettings: {
         provider: 'gmail',
-        fromEmail: 'Mikekurkeyerian09@gmail.com',
-        fromName: 'mikes bot',
-        smtpUser: 'Mikekurkeyerian09@gmail.com',
-        smtpPass: 'wbwg mbul ngel zslq'
+        fromEmail: '',
+        fromName: '',
+        smtpUser: '',
+        smtpPass: ''
     },
     creditIntegration: {
         provider: 'mock',

@@ -1,55 +1,70 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { useBrokerSettings, EmailSettings } from '@/context/BrokerContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LenderSettings } from '@/components/LenderSettings';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'; // We need to check if this exists or build simple tabs
+// Assuming we don't have a Tabs component yet, I will build a simple one inline or use basic state.
 
-function LenderManagement() {
+/* -------------------------------------------------------------------------- */
+/*                                SUB-COMPONENTS                              */
+/* -------------------------------------------------------------------------- */
+
+// --- General Appearance ---
+function AppearanceSettings() {
+    const { settings, updateSettings } = useBrokerSettings();
     return (
-        <Card variant="glass" className="mt-8">
-            <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Lender Management</CardTitle>
-                <Link href="/broker/settings/integrations">
-                    <Button size="sm">Manage Integrations</Button>
-                </Link>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-6">
-                    <p className="text-slate-600 dark:text-slate-400">
-                        Connect to institutional lenders (Rocket, UWM, PennyMac) to access their loan products and automated underwriting systems.
-                    </p>
-                    <div className="flex items-center justify-between p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-500 text-white rounded-lg">
-                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+        <div className="space-y-6 animate-fade-in-up">
+            <div>
+                <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-4">Theme Preferences</h3>
+                <div className="grid grid-cols-2 gap-4 max-w-xl">
+                    <button
+                        onClick={() => updateSettings({ theme: 'light' })}
+                        className={`p-4 rounded-xl border-2 transition-all duration-200 ${settings.theme === 'light' ? 'border-primary-500 bg-primary-500/10 shadow-lg shadow-primary-500/10' : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'}`}
+                    >
+                        <div className="flex flex-col items-center space-y-3">
+                            <div className="w-full h-24 bg-slate-50 rounded-lg border border-slate-200 relative overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-full h-4 bg-white border-b border-slate-200"></div>
+                                <div className="absolute top-8 left-4 w-16 h-2 bg-slate-200 rounded group-hover:w-20 transition-all"></div>
+                                <div className="absolute top-12 left-4 w-24 h-2 bg-slate-200 rounded group-hover:w-28 transition-all delay-75"></div>
                             </div>
-                            <div>
-                                <h4 className="font-bold text-slate-900 dark:text-white">API Integrations</h4>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Manage your Client IDs and Secrets for real-time submission.</p>
-                            </div>
+                            <span className={`font-semibold ${settings.theme === 'light' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500'}`}>Light Mode</span>
                         </div>
-                        <Link href="/broker/settings/integrations">
-                            <Button variant="outline">Configure</Button>
-                        </Link>
-                    </div>
+                    </button>
+                    <button
+                        onClick={() => updateSettings({ theme: 'dark' })}
+                        className={`p-4 rounded-xl border-2 transition-all duration-200 ${settings.theme === 'dark' ? 'border-primary-500 bg-primary-500/10 shadow-lg shadow-primary-500/10' : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'}`}
+                    >
+                        <div className="flex flex-col items-center space-y-3">
+                            <div className="w-full h-24 bg-slate-900 rounded-lg border border-slate-800 relative overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-full h-4 bg-slate-800 border-b border-slate-700"></div>
+                                <div className="absolute top-8 left-4 w-16 h-2 bg-slate-700 rounded group-hover:w-20 transition-all"></div>
+                                <div className="absolute top-12 left-4 w-24 h-2 bg-slate-700 rounded group-hover:w-28 transition-all delay-75"></div>
+                            </div>
+                            <span className={`font-semibold ${settings.theme === 'dark' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500'}`}>Dark Mode</span>
+                        </div>
+                    </button>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }
 
-function CreditIntegration() {
-    const { settings, updateSettings } = useBrokerSettings();
+// --- Integrations (Credit & Email) ---
+function IntegrationSettings() {
+    const { settings, updateSettings, updateEmailSettings } = useBrokerSettings();
     const config = settings.creditIntegration || { provider: 'none', enabled: false };
+    const emailConfig = settings.emailSettings || { provider: 'gmail', fromEmail: '', fromName: '', smtpUser: '', smtpPass: '', apiKey: '' };
 
-    const handleUpdate = (field: string, value: any) => {
+    const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+    const [testMessage, setTestMessage] = useState('');
+
+    const handleUpdateCredit = (field: string, value: any) => {
         updateSettings({
             creditIntegration: {
                 ...config,
@@ -59,543 +74,286 @@ function CreditIntegration() {
         });
     };
 
-    return (
-        <Card variant="glass" className="mt-8">
-            <CardHeader>
-                <CardTitle>Credit Integration</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-6">
-                    <p className="text-slate-600 dark:text-slate-400">
-                        Connect your Credit Reporting Agency (CRA) account to automatically pull Tri-Merge credit reports during underwriting.
-                    </p>
-
-                    <div className="bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10 space-y-4">
-                        <div>
-                            <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">Credit Provider</label>
-                            <select
-                                className="w-full bg-slate-800 border-slate-700 rounded-md text-white p-2 focus:ring-primary-500 focus:border-primary-500"
-                                value={config.provider}
-                                onChange={(e) => handleUpdate('provider', e.target.value)}
-                            >
-                                <option value="none">Select a Provider...</option>
-                                <option value="cic">Universal Credit (CIC)</option>
-                                <option value="advantage">Advantage Credit</option>
-                                <option value="credco">CoreLogic Credco</option>
-                                <option value="mock">Mock Provider (Testing)</option>
-                            </select>
-                        </div>
-
-                        {config.provider !== 'none' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
-                                <Input
-                                    label="Account ID / Subscriber Code"
-                                    value={config.accountId || ''}
-                                    onChange={(e) => handleUpdate('accountId', e.target.value)}
-                                    placeholder="e.g. 12345678"
-                                />
-                                <Input
-                                    label="Username"
-                                    value={config.username || ''}
-                                    onChange={(e) => handleUpdate('username', e.target.value)}
-                                    placeholder="Username"
-                                />
-                                <Input
-                                    label="Password"
-                                    type="password"
-                                    value={config.password || ''}
-                                    onChange={(e) => handleUpdate('password', e.target.value)}
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                        )}
-
-                        {config.provider === 'mock' && (
-                            <div className="mt-4 p-3 bg-blue-500/10 text-blue-300 text-sm rounded border border-blue-500/20">
-                                <strong>Testing Mode:</strong> This mock provider simulates credit pulls based on the SSN entered.
-                                Use SSN ending in 9000 for Excellent credit.
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
-
-function UnderwriterManagement() {
-    const { settings, addUnderwriter, removeUnderwriter } = useBrokerSettings();
-    const [isAdding, setIsAdding] = useState(false);
-    const [newUnderwriter, setNewUnderwriter] = useState({ name: '', email: '', company: '' });
-
-    const handleAdd = () => {
-        if (!newUnderwriter.name || !newUnderwriter.email) return;
-        addUnderwriter({
-            name: newUnderwriter.name,
-            email: newUnderwriter.email,
-            company: newUnderwriter.company,
-            type: 'external'
-        });
-        setNewUnderwriter({ name: '', email: '', company: '' });
-        setIsAdding(false);
+    const handleUpdateEmail = (field: keyof EmailSettings, value: any) => {
+        updateEmailSettings({ ...emailConfig, [field]: value });
     };
 
-    return (
-        <Card variant="glass" className="mt-8">
-            <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Underwriter Management</CardTitle>
-                <Button size="sm" onClick={() => setIsAdding(!isAdding)}>
-                    {isAdding ? 'Cancel' : 'Add Underwriter'}
-                </Button>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-6">
-                    <p className="text-slate-600 dark:text-slate-400">
-                        Manage manual underwriter contacts. These are individuals you can route applications to for manual review.
-                    </p>
-
-                    {isAdding && (
-                        <div className="bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10 space-y-4">
-                            <h3 className="text-slate-900 dark:text-white font-medium">Add New Underwriter</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Input
-                                    label="Name"
-                                    value={newUnderwriter.name}
-                                    onChange={(e) => setNewUnderwriter({ ...newUnderwriter, name: e.target.value })}
-                                    placeholder="e.g. John Smith"
-                                />
-                                <Input
-                                    label="Email"
-                                    value={newUnderwriter.email}
-                                    onChange={(e) => setNewUnderwriter({ ...newUnderwriter, email: e.target.value })}
-                                    placeholder="underwriter@example.com"
-                                />
-                                <Input
-                                    label="Company (Optional)"
-                                    value={newUnderwriter.company}
-                                    onChange={(e) => setNewUnderwriter({ ...newUnderwriter, company: e.target.value })}
-                                    placeholder="e.g. The Mortgage Shop"
-                                />
-                            </div>
-                            <div className="flex justify-end">
-                                <Button onClick={handleAdd}>Save Underwriter</Button>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="space-y-3">
-                        {settings.underwriters.length === 0 ? (
-                            <div className="text-center py-8 text-slate-500 dark:text-slate-500 bg-white/5 rounded-lg border border-dashed border-slate-300 dark:border-white/10">
-                                No manual underwriters configured.
-                            </div>
-                        ) : (
-                            settings.underwriters.map((uw) => (
-                                <div key={uw.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="h-10 w-10 rounded-full flex items-center justify-center bg-purple-500/20 text-purple-400">
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <div className="text-slate-900 dark:text-white font-medium">{uw.name}</div>
-                                            <div className="text-sm text-slate-500 dark:text-slate-400">
-                                                {uw.company ? `${uw.company} • ` : ''}{uw.email}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                        onClick={() => removeUnderwriter(uw.id)}
-                                    >
-                                        Remove
-                                    </Button>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
-
-function EmailConfiguration() {
-    const { settings, updateEmailSettings } = useBrokerSettings();
-    const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
-    const [testMessage, setTestMessage] = useState('');
-
-    // Use local state for inputs to prevent cursor jumping, but sync with context
-    // Actually, for real-time, we should just use the context value directly if performance allows.
-    // Given the small scale, direct context update is fine, but we need to handle the object merge carefully.
-
-    const config = settings.emailSettings || {
-        provider: 'gmail',
-        fromEmail: '',
-        fromName: '',
-        smtpUser: '',
-        smtpPass: '',
-        apiKey: ''
-    };
-
-    const updateField = (field: keyof EmailSettings, value: any) => {
-        updateEmailSettings({
-            ...config,
-            [field]: value
-        });
-    };
-
-    const handleTestConnection = async () => {
+    const handleTestEmail = async () => {
         setTestStatus('testing');
-        setTestMessage('');
         try {
             const response = await fetch('/api/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    to: config.fromEmail, // Send to self
+                    to: emailConfig.fromEmail,
                     subject: 'Test Email from Broker Console',
                     html: '<p>This is a test email to verify your configuration. If you are reading this, it works!</p>',
-                    settings: config
+                    settings: emailConfig
                 })
             });
-
             const result = await response.json();
             if (response.ok) {
                 setTestStatus('success');
-                setTestMessage('Connection successful! Check your inbox.');
+                setTestMessage('Sent successfully!');
             } else {
                 setTestStatus('error');
-                setTestMessage(result.error || 'Failed to send test email');
+                setTestMessage(result.error || 'Failed');
             }
         } catch (error: any) {
             setTestStatus('error');
-            setTestMessage(error.message || 'Network error');
+            setTestMessage(error.message);
         }
     };
 
     return (
-        <Card variant="glass" className="mt-8">
-            <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Email Service Configuration</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-6">
-                    <p className="text-slate-600 dark:text-slate-400">
-                        Configure how the bot sends emails on your behalf. You can use your own Gmail account or an email API service.
-                    </p>
-
-                    <div className="space-y-4 bg-white/5 p-4 rounded-lg border border-slate-200 dark:border-white/10">
-                        <div>
-                            <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">Email Provider</label>
-                            <select
-                                className="w-full bg-slate-800 border-slate-700 rounded-md text-white p-2 focus:ring-primary-500 focus:border-primary-500"
-                                value={config.provider}
-                                onChange={(e) => updateField('provider', e.target.value)}
-                            >
-                                <option value="gmail">Gmail (Recommended for Individuals)</option>
-                                <option value="sendgrid">SendGrid API</option>
-                                <option value="resend">Resend API</option>
-                                <option value="custom_smtp">Custom SMTP</option>
-                            </select>
+        <div className="space-y-8 animate-fade-in-up">
+            {/* Credit Section */}
+            <Card variant="glass">
+                <CardHeader>
+                    <div className="flex items-center gap-2">
+                        <div className="p-2 bg-blue-500/20 text-blue-400 rounded-lg">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input
-                                label="From Name"
-                                value={config.fromName}
-                                onChange={(e) => updateField('fromName', e.target.value)}
-                                placeholder="e.g. Mike's Mortgage Bot"
-                            />
-                            <Input
-                                label="From Email"
-                                value={config.fromEmail}
-                                onChange={(e) => updateField('fromEmail', e.target.value)}
-                                placeholder="e.g. mike@example.com"
-                            />
-                        </div>
-
-                        {config.provider === 'gmail' && (
-                            <div className="space-y-4 pt-2 border-t border-white/10">
-                                <div className="bg-blue-500/10 p-3 rounded text-sm text-blue-300 border border-blue-500/20">
-                                    <strong>How to use Gmail:</strong>
-                                    <ol className="list-decimal ml-4 mt-1 space-y-1">
-                                        <li>Go to your <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">Google Account Security settings</a>.</li>
-                                        <li>Enable 2-Step Verification if not already on.</li>
-                                        <li>Search for "App Passwords".</li>
-                                        <li>Create a new App Password named "Mortgage Bot".</li>
-                                        <li>Paste that 16-character password below.</li>
-                                    </ol>
-                                </div>
-                                <Input
-                                    label="Gmail Address"
-                                    value={config.smtpUser}
-                                    onChange={(e) => updateField('smtpUser', e.target.value)}
-                                    placeholder="your.email@gmail.com"
-                                />
-                                <Input
-                                    label="App Password"
-                                    type="password"
-                                    value={config.smtpPass}
-                                    onChange={(e) => updateField('smtpPass', e.target.value)}
-                                    placeholder="xxxx xxxx xxxx xxxx"
-                                />
-                            </div>
-                        )}
-
-                        {(config.provider === 'sendgrid' || config.provider === 'resend') && (
-                            <Input
-                                label="API Key"
-                                type="password"
-                                value={config.apiKey}
-                                onChange={(e) => updateField('apiKey', e.target.value)}
-                                placeholder={`Enter your ${config.provider === 'sendgrid' ? 'SendGrid' : 'Resend'} API Key`}
-                            />
-                        )}
-
-                        <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                            <div className="text-sm">
-                                {testStatus === 'testing' && <span className="text-blue-400">Testing connection...</span>}
-                                {testStatus === 'success' && <span className="text-green-400">✅ {testMessage}</span>}
-                                {testStatus === 'error' && <span className="text-red-400">❌ {testMessage}</span>}
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleTestConnection}
-                                disabled={testStatus === 'testing'}
-                            >
-                                Test Connection
-                            </Button>
-                        </div>
+                        <CardTitle>Credit Reporting</CardTitle>
                     </div>
-                </div>
-            </CardContent>
-        </Card>
+                    <CardDescription>Connect a Credit Reporting Agency (CRA) to pull reports.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div>
+                        <label className="block text-sm text-slate-400 mb-1">Provider</label>
+                        <select
+                            className="w-full bg-slate-800/50 border border-white/10 rounded-md text-white p-2.5 focus:ring-2 focus:ring-primary-500 transition-all"
+                            value={config.provider}
+                            onChange={(e) => handleUpdateCredit('provider', e.target.value)}
+                        >
+                            <option value="none">None (Disabled)</option>
+                            <option value="mock">✨ Mock Provider (Testing)</option>
+                            <option value="cic">Universal Credit (CIC)</option>
+                            <option value="advantage">Advantage Credit</option>
+                            <option value="credco">CoreLogic Credco</option>
+                        </select>
+                    </div>
+                    {config.provider !== 'none' && config.provider !== 'mock' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+                            <Input label="Account ID" value={config.accountId || ''} onChange={(e) => handleUpdateCredit('accountId', e.target.value)} placeholder="12345" />
+                            <Input label="Username" value={config.username || ''} onChange={(e) => handleUpdateCredit('username', e.target.value)} placeholder="user" />
+                            <div className="md:col-span-2">
+                                <Input label="Password" type="password" value={config.password || ''} onChange={(e) => handleUpdateCredit('password', e.target.value)} placeholder="••••" />
+                            </div>
+                        </div>
+                    )}
+                    {config.provider === 'mock' && (
+                        <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm text-blue-300">
+                            <strong>Sandbox Mode Active:</strong> Credit pulls will be simulated. Use SSN ending in 9000 for 750+ scores.
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Email Section */}
+            <Card variant="glass">
+                <CardHeader>
+                    <div className="flex items-center gap-2">
+                        <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        </div>
+                        <CardTitle>Email Service</CardTitle>
+                    </div>
+                    <CardDescription>Configure outbound email for notifications and packages.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input label="Sender Name" value={emailConfig.fromName} onChange={(e) => handleUpdateEmail('fromName', e.target.value)} placeholder="e.g. Loans Bot" />
+                        <Input label="Sender Email" value={emailConfig.fromEmail} onChange={(e) => handleUpdateEmail('fromEmail', e.target.value)} placeholder="e.g. bot@company.com" />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm text-slate-400 mb-1">Service Provider</label>
+                        <select
+                            className="w-full bg-slate-800/50 border border-white/10 rounded-md text-white p-2.5 focus:ring-2 focus:ring-primary-500"
+                            value={emailConfig.provider}
+                            onChange={(e) => handleUpdateEmail('provider', e.target.value)}
+                        >
+                            <option value="gmail">Gmail (Easiest)</option>
+                            <option value="sendgrid">SendGrid API</option>
+                            <option value="resend">Resend API</option>
+                            <option value="custom_smtp">Custom SMTP</option>
+                        </select>
+                    </div>
+
+                    {emailConfig.provider === 'gmail' && (
+                        <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-4 animate-fade-in">
+                            <div className="bg-amber-500/10 text-amber-300 text-sm p-3 rounded border border-amber-500/20">
+                                <strong>Setup required:</strong> Enable 2FA on your Google Account, then generate an App Password.
+                                <div className="mt-2">
+                                    <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline font-medium">Click here to create App Password →</a>
+                                </div>
+                            </div>
+                            <Input label="Gmail Address" value={emailConfig.smtpUser} onChange={(e) => handleUpdateEmail('smtpUser', e.target.value)} placeholder="you@gmail.com" />
+                            <Input label="App Password (16 chars)" type="password" value={emailConfig.smtpPass} onChange={(e) => handleUpdateEmail('smtpPass', e.target.value)} placeholder="xxxx xxxx xxxx xxxx" />
+                        </div>
+                    )}
+
+                    {(emailConfig.provider === 'sendgrid' || emailConfig.provider === 'resend') && (
+                        <Input label="API Key" type="password" value={emailConfig.apiKey} onChange={(e) => handleUpdateEmail('apiKey', e.target.value)} placeholder="sk_..." />
+                    )}
+
+                    <div className="pt-2 flex items-center justify-between">
+                        <span className={`text-sm ${testStatus === 'success' ? 'text-emerald-400' : testStatus === 'error' ? 'text-red-400' : 'text-slate-500'}`}>
+                            {testStatus === 'testing' && 'Testing...'}
+                            {testStatus === 'success' && `✓ ${testMessage}`}
+                            {testStatus === 'error' && `✗ ${testMessage}`}
+                        </span>
+                        <Button size="sm" variant="outline" onClick={handleTestEmail} isLoading={testStatus === 'testing'}>
+                            Send Test Email
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     );
 }
 
-export default function BrokerSettingsPage() {
-    const { settings, updateSettings, resetSettings } = useBrokerSettings();
+// --- Team Management ---
+function TeamSettings() {
+    const { settings, addUnderwriter, removeUnderwriter } = useBrokerSettings();
+    const [newUw, setNewUw] = useState({ name: '', email: '' });
 
-
-
-    const handleReset = () => {
-        if (confirm('Are you sure you want to reset all settings to system defaults? This will clear your custom configurations.')) {
-            resetSettings();
-            window.location.reload();
-        }
+    const handleAdd = () => {
+        if (!newUw.name || !newUw.email) return;
+        addUnderwriter({ name: newUw.name, email: newUw.email, type: 'external' });
+        setNewUw({ name: '', email: '' });
     };
 
     return (
-        <main className="min-h-screen bg-background">
+        <div className="space-y-6 animate-fade-in-up">
+            <Card variant="glass">
+                <CardHeader>
+                    <CardTitle>Underwriting Team</CardTitle>
+                    <CardDescription>Colleagues or external underwriters who can review loans.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex gap-4 mb-6">
+                        <Input value={newUw.name} onChange={e => setNewUw({ ...newUw, name: e.target.value })} placeholder="Name" className="flex-1" />
+                        <Input value={newUw.email} onChange={e => setNewUw({ ...newUw, email: e.target.value })} placeholder="Email" className="flex-1" />
+                        <Button onClick={handleAdd}>Add</Button>
+                    </div>
+
+                    <div className="space-y-2">
+                        {settings.underwriters.length === 0 && <p className="text-slate-500 text-center py-4">No underwriters added.</p>}
+                        {settings.underwriters.map(u => (
+                            <div key={u.id} className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-8 w-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">
+                                        {u.name[0].toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-slate-200">{u.name}</div>
+                                        <div className="text-xs text-slate-500">{u.email}</div>
+                                    </div>
+                                </div>
+                                <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300" onClick={() => removeUnderwriter(u.id)}>Remove</Button>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                MAIN PAGE                                   */
+/* -------------------------------------------------------------------------- */
+
+const TABS = [
+    { id: 'general', label: 'General', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4' },
+    { id: 'integrations', label: 'Integrations', icon: 'M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z' },
+    { id: 'lenders', label: 'Lenders', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+    { id: 'team', label: 'Team', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+];
+
+export default function BrokerSettingsPage() {
+    const { resetSettings } = useBrokerSettings();
+    const [activeTab, setActiveTab] = useState('general');
+
+    return (
+        <main className="min-h-screen bg-background text-slate-100">
             <Navbar />
-            <div className="pt-32 pb-20 px-4">
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex justify-between items-center mb-8">
-                        <h1 className="text-3xl font-heading font-bold text-slate-900 dark:text-white">Broker Settings</h1>
-                        <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            Changes save automatically
+            <div className="pt-28 pb-12 px-4 max-w-6xl mx-auto">
+
+                {/* Header */}
+                <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-heading font-bold gradient-text">Broker Configuration</h1>
+                        <p className="text-slate-400">Manage your originations pipeline, integrations, and preferences.</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        Auto-Save Active
+                    </div>
+                </div>
+
+                <div className="flex flex-col lg:flex-row gap-8">
+                    {/* SIDEBAR NAVIGATION */}
+                    <div className="w-full lg:w-64 flex-shrink-0 space-y-2">
+                        {TABS.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200 ${activeTab === tab.id
+                                        ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/20'
+                                        : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                                    }`}
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
+                                </svg>
+                                <span className="font-medium">{tab.label}</span>
+                            </button>
+                        ))}
+
+                        <div className="pt-8 mt-8 border-t border-white/10">
+                            <button
+                                onClick={() => {
+                                    if (confirm('Reset all settings to default?')) {
+                                        resetSettings();
+                                        window.location.reload();
+                                    }
+                                }}
+                                className="w-full flex items-center gap-3 p-3 rounded-lg text-left text-red-400 hover:bg-red-500/10 transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                <span className="font-medium">Reset Defaults</span>
+                            </button>
                         </div>
                     </div>
 
-                    <Card variant="glass">
-                        <CardHeader>
-                            <CardTitle>Automated Underwriting Configuration</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-6">
-                                <p className="text-slate-600 dark:text-slate-400">
-                                    Select the underwriting engines you want to use for automated analysis.
-                                    Enabling both will run parallel checks.
-                                </p>
-
-                                <div className="space-y-4">
-                                    <label className="flex items-center space-x-3 p-4 bg-white/5 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
-                                        <input
-                                            type="checkbox"
-                                            checked={settings.useFannieMae}
-                                            onChange={(e) => updateSettings({ useFannieMae: e.target.checked })}
-                                            className="h-5 w-5 rounded border-slate-600 bg-slate-700 text-primary-500 focus:ring-primary-500"
-                                        />
-                                        <div>
-                                            <div className="text-slate-900 dark:text-white font-medium">Fannie Mae Desktop Underwriter (DU)</div>
-                                            <div className="text-sm text-slate-500 dark:text-slate-400">Analyzes loans against Fannie Mae selling guide guidelines.</div>
-                                        </div>
-                                    </label>
-
-                                    <label className="flex items-center space-x-3 p-4 bg-white/5 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
-                                        <input
-                                            type="checkbox"
-                                            checked={settings.useFreddieMac}
-                                            onChange={(e) => updateSettings({ useFreddieMac: e.target.checked })}
-                                            className="h-5 w-5 rounded border-slate-600 bg-slate-700 text-primary-500 focus:ring-primary-500"
-                                        />
-                                        <div>
-                                            <div className="text-slate-900 dark:text-white font-medium">Freddie Mac Loan Product Advisor (LPA)</div>
-                                            <div className="text-sm text-slate-500 dark:text-slate-400">Analyzes loans against Freddie Mac selling guide guidelines.</div>
-                                        </div>
-                                    </label>
+                    {/* CONTENT AREA */}
+                    <div className="flex-1">
+                        {activeTab === 'general' && <AppearanceSettings />}
+                        {activeTab === 'integrations' && <IntegrationSettings />}
+                        {activeTab === 'lenders' && (
+                            <div className="space-y-8 animate-fade-in-up">
+                                <div className="p-4 bg-primary-500/10 border border-primary-500/20 rounded-lg text-primary-200">
+                                    <h4 className="font-bold flex items-center gap-2">
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        Lender Management
+                                    </h4>
+                                    <p className="text-sm mt-1 opacity-90">Manage institutional lender connections and API credentials here.</p>
                                 </div>
-
-                                <div className="pt-4 border-t border-white/10">
-                                    <div className="flex items-center text-sm text-amber-400 bg-amber-500/10 p-3 rounded">
-                                        <span className="mr-2">ℹ️</span>
-                                        Changes are saved automatically and will apply to the next loan submission.
-                                    </div>
-                                </div>
+                                <LenderSettings />
                             </div>
-                        </CardContent>
-                    </Card>
-                    <Card variant="glass" className="mt-8">
-                        <CardHeader>
-                            <CardTitle>Default Underwriting Workflow</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-6">
-                                <p className="text-slate-600 dark:text-slate-400">
-                                    Choose the default method for submitting loan packages. This selection will be pre-filled when you click "Submit to Underwriting", but you can always change it for individual loans.
-                                </p>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <button
-                                        onClick={() => updateSettings({ defaultUnderwritingMode: 'EMAIL' })}
-                                        className={`p-4 rounded-lg border-2 text-left transition-all ${settings.defaultUnderwritingMode === 'EMAIL'
-                                            ? 'border-primary-500 bg-primary-500/10'
-                                            : 'border-white/10 hover:border-white/20 bg-white/5'}`}
-                                    >
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="p-2 rounded-full bg-blue-500/20 text-blue-400">
-                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                            <span className="font-bold text-slate-900 dark:text-white">Email Package</span>
-                                        </div>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                                            Send PDF packages via email to external underwriters or investors.
-                                        </p>
-                                    </button>
-
-                                    <button
-                                        onClick={() => updateSettings({ defaultUnderwritingMode: 'IN_HOUSE' })}
-                                        className={`p-4 rounded-lg border-2 text-left transition-all ${settings.defaultUnderwritingMode === 'IN_HOUSE'
-                                            ? 'border-primary-500 bg-primary-500/10'
-                                            : 'border-white/10 hover:border-white/20 bg-white/5'}`}
-                                    >
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="p-2 rounded-full bg-indigo-500/20 text-indigo-400">
-                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                                </svg>
-                                            </div>
-                                            <span className="font-bold text-slate-900 dark:text-white">In-House Team</span>
-                                        </div>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                                            Route to internal underwriting queue for processing.
-                                        </p>
-                                    </button>
-
-                                    <button
-                                        onClick={() => updateSettings({ defaultUnderwritingMode: 'LENDER' })}
-                                        className={`p-4 rounded-lg border-2 text-left transition-all ${settings.defaultUnderwritingMode === 'LENDER'
-                                            ? 'border-primary-500 bg-primary-500/10'
-                                            : 'border-white/10 hover:border-white/20 bg-white/5'}`}
-                                    >
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="p-2 rounded-full bg-emerald-500/20 text-emerald-400">
-                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                                </svg>
-                                            </div>
-                                            <span className="font-bold text-slate-900 dark:text-white">External Lender</span>
-                                        </div>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                                            Submit directly to lender portal integrations (UWM, Rocket, etc).
-                                        </p>
-                                    </button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-
-
-                    <Card variant="glass" className="mt-8">
-                        <CardHeader>
-                            <CardTitle>Appearance</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-6">
-                                <p className="text-slate-600 dark:text-slate-400">
-                                    Customize the look and feel of the application.
-                                </p>
-                                <div className="flex space-x-4">
-                                    <button
-                                        onClick={() => updateSettings({ theme: 'light' })}
-                                        className={`flex-1 p-4 rounded-lg border-2 transition-all ${settings.theme === 'light' ? 'border-primary-500 bg-primary-500/10' : 'border-white/10 hover:border-white/20 bg-white/5'}`}
-                                    >
-                                        <div className="flex flex-col items-center space-y-2">
-                                            <div className="w-full h-24 bg-slate-100 rounded border border-slate-200 relative overflow-hidden">
-                                                <div className="absolute top-0 left-0 w-full h-4 bg-white border-b border-slate-200"></div>
-                                                <div className="absolute top-8 left-4 w-16 h-2 bg-slate-200 rounded"></div>
-                                                <div className="absolute top-12 left-4 w-24 h-2 bg-slate-200 rounded"></div>
-                                            </div>
-                                            <span className={`font-medium ${settings.theme === 'light' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'}`}>Light Mode</span>
-                                        </div>
-                                    </button>
-                                    <button
-                                        onClick={() => updateSettings({ theme: 'dark' })}
-                                        className={`flex-1 p-4 rounded-lg border-2 transition-all ${settings.theme === 'dark' ? 'border-primary-500 bg-primary-500/10' : 'border-white/10 hover:border-white/20 bg-white/5'}`}
-                                    >
-                                        <div className="flex flex-col items-center space-y-2">
-                                            <div className="w-full h-24 bg-slate-100 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 relative overflow-hidden">
-                                                <div className="absolute top-0 left-0 w-full h-4 bg-slate-800 border-b border-slate-700"></div>
-                                                <div className="absolute top-8 left-4 w-16 h-2 bg-slate-700 rounded"></div>
-                                                <div className="absolute top-12 left-4 w-24 h-2 bg-slate-700 rounded"></div>
-                                            </div>
-                                            <span className={`font-medium ${settings.theme === 'dark' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'}`}>Dark Mode</span>
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <EmailConfiguration />
-                    <CreditIntegration />
-                    <LenderSettings />
-                    <LenderManagement />
-                    <UnderwriterManagement />
-
-                    {/* Danger Zone */}
-                    <div className="mt-12 pt-8 border-t border-white/10">
-                        <h3 className="text-xl font-bold text-red-400 mb-4">Danger Zone</h3>
-                        <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-6 flex items-center justify-between">
-                            <div>
-                                <h4 className="text-slate-900 dark:text-white font-medium">Reset All Settings</h4>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                                    This will restore default configurations and remove all custom lenders and underwriters.
-                                </p>
-                            </div>
-                            <Button
-                                variant="outline"
-                                onClick={handleReset}
-                                className="text-red-400 hover:text-red-300 border-red-500/30 hover:bg-red-500/10"
-                            >
-                                Reset to Defaults
-                            </Button>
-                        </div>
+                        )}
+                        {activeTab === 'team' && <TeamSettings />}
                     </div>
                 </div>
             </div>
         </main>
     );
 }
-
