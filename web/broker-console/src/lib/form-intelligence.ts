@@ -23,7 +23,7 @@ export class FormIntelligenceService {
         insights.push(...this.analyzeBorrowerInfo(data));
 
         // 1. Employment History Analysis
-        insights.push(...this.analyzeEmployment(data.employment));
+        insights.push(...this.analyzeEmployment(data.employment || []));
 
         // 3. Asset Analysis
         insights.push(...this.analyzeAssets(data));
