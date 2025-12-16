@@ -8,11 +8,12 @@ export interface CreditReport {
 
 export class CreditService {
     /**
-     * Simulates a credit pull based on SSN.
-     * Deterministic: Same SSN always yields same score.
+     * @demo TEMPORARY / DEMO MODE
+     * This entire method is a simulation for development purposes.
+     * TODO: When ready for production, delete this method body and replace with real API calls (Experian/Equifax/TransUnion).
      */
     static async pullCredit(ssn: string): Promise<CreditReport> {
-        // Simulate network delay
+        // [DEMO MODE] Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         // Clean SSN
