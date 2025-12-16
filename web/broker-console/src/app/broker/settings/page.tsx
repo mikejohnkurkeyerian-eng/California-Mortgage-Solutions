@@ -8,7 +8,6 @@ import { useBrokerSettings, EmailSettings } from '@/context/BrokerContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LenderSettings } from '@/components/LenderSettings';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'; // We need to check if this exists or build simple tabs
 // Assuming we don't have a Tabs component yet, I will build a simple one inline or use basic state.
 
 /* -------------------------------------------------------------------------- */
