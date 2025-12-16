@@ -74,6 +74,7 @@ model LoanApplication {
   
   documents  Document[]
   conditions UnderwritingCondition[]
+  submissions LoanSubmission[]
   
   @@index([borrowerId])
   @@index([status])
@@ -123,6 +124,26 @@ model UnderwritingCondition {
   createdAt DateTime @default(now())
   
   @@index([loanId])
+  @@index([status])
+}
+
+model LoanSubmission {
+  id        String   @id @default(cuid())
+  loanId    String
+  loan      LoanApplication @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  
+  lenderId    String
+  lenderName  String
+  status      String   @default("Submitted") // Submitted, Received, Underwriting, Approved, Rejected, Counteroffer
+  
+  notes       String?
+  externalReferenceId String?
+  
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([loanId])
+  @@index([lenderId])
   @@index([status])
 }
 

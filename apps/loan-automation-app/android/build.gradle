@@ -1,7 +1,7 @@
 buildscript {
     ext {
         buildToolsVersion = "34.0.0"
-        minSdkVersion = 21
+        minSdkVersion = 23
         compileSdkVersion = 35
         targetSdkVersion = 34
         ndkVersion = "25.1.8937393"
@@ -19,6 +19,41 @@ buildscript {
     }
 }
 
+// Configure Kotlin compiler globally for all projects including composite builds
+// This must run early to catch the gradle-plugin composite build
+gradle.projectsLoaded {
+    allprojects {
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = "17"
+                freeCompilerArgs += ["-Xskip-metadata-version-check"]
+            }
+        }
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon).configureEach {
+            kotlinOptions {
+                freeCompilerArgs += ["-Xskip-metadata-version-check"]
+            }
+        }
+    }
+}
+
+// Also configure after projects are evaluated as a fallback
+gradle.projectsEvaluated {
+    allprojects {
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = "17"
+                freeCompilerArgs += ["-Xskip-metadata-version-check"]
+            }
+        }
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon).configureEach {
+            kotlinOptions {
+                freeCompilerArgs += ["-Xskip-metadata-version-check"]
+            }
+        }
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -30,15 +65,84 @@ allprojects {
     configurations.all {
         resolutionStrategy.eachDependency { details ->
             if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native') {
-                details.useTarget("com.facebook.react:react-android:0.73.0")
+                details.useTarget("com.facebook.react:react-android:0.74.7")
                 details.because("react-native has been replaced with react-android in React Native 0.73+")
+            }
+            // Force Kotlin version to 1.9.22 to match Gradle 8.3
+            if (details.requested.group == 'org.jetbrains.kotlin') {
+                if (details.requested.name.startsWith('kotlin-')) {
+                    details.useVersion("1.9.22")
+                    details.because("Gradle 8.3 requires Kotlin 1.9.22")
+                }
             }
         }
     }
 }
 
 subprojects {
+    // Apply resolution strategy to all subprojects
+    configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native') {
+                details.useTarget("com.facebook.react:react-android:0.74.7")
+                details.because("react-native has been replaced with react-android in React Native 0.73+")
+            }
+            // Force Kotlin version to 1.9.22 to match Gradle 8.3
+            if (details.requested.group == 'org.jetbrains.kotlin') {
+                if (details.requested.name.startsWith('kotlin-')) {
+                    details.useVersion("1.9.22")
+                    details.because("Gradle 8.3 requires Kotlin 1.9.22")
+                }
+            }
+        }
+    }
+    
+    // Note: react-android will be added in afterEvaluate when we know the Android plugin is applied
+    
+    // Apply Kotlin compiler flags BEFORE afterEvaluate to catch gradle-plugin
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = "17"
+            freeCompilerArgs += ["-Xskip-metadata-version-check"]
+        }
+    }
+    
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon).configureEach {
+        kotlinOptions {
+            freeCompilerArgs += ["-Xskip-metadata-version-check"]
+        }
+    }
+    
     afterEvaluate { project ->
+        // Check if this is a React Native library by project name
+        def isReactNativeLib = project.name.contains("react-native") || 
+                              project.name.contains("reactnative")
+        
+        // Ensure react-android is available for ALL React Native libraries at compile time
+        if (isReactNativeLib && project.hasProperty("android") && project.name != "react-native") {
+            // Add react-android to all relevant configurations to ensure it's on compile classpath
+            project.configurations.all { config ->
+                // Resolve react-native to react-android
+                config.resolutionStrategy.eachDependency { details ->
+                    if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native') {
+                        details.useTarget("com.facebook.react:react-android:0.74.7")
+                        details.because("react-native has been replaced with react-android in React Native 0.73+")
+                    }
+                }
+            }
+            
+            project.dependencies {
+                // Add react-android as both api and implementation to ensure it's on compile classpath
+                // This ensures BaseReactPackage and other React Native classes are available
+                api("com.facebook.react:react-android:0.74.7")
+                implementation("com.facebook.react:react-android:0.74.7")
+                // Also add to compileOnly to ensure it's available during compilation
+                if (project.configurations.findByName("compileOnly") != null) {
+                    compileOnly("com.facebook.react:react-android:0.74.7")
+                }
+            }
+            
+        }
         if (project.hasProperty("android")) {
             project.android {
                 if (namespace == null) {
@@ -53,7 +157,7 @@ subprojects {
                 }
             }
         }
-        // Force Kotlin JVM target to 17 for all Kotlin projects
+        // Force Kotlin JVM target to 17 for all Kotlin projects (redundant but safe)
         project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
             kotlinOptions {
                 jvmTarget = "17"
@@ -69,28 +173,13 @@ subprojects {
             }
         }
         
-        // Add React Native dependencies to React Native libraries
-        if (project.name.startsWith("react-native-") && project.name != "react-native") {
-            // Apply resolution strategy to all configurations in this project
+        // Apply resolution strategy to all React Native library configurations
+        if (isReactNativeLib && project.name != "react-native" && project.hasProperty("android")) {
             project.configurations.all { config ->
                 config.resolutionStrategy.eachDependency { details ->
                     if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native') {
-                        details.useTarget("com.facebook.react:react-android:0.73.0")
+                        details.useTarget("com.facebook.react:react-android:0.74.7")
                         details.because("react-native has been replaced with react-android in React Native 0.73+")
-                    }
-                }
-            }
-            
-            project.afterEvaluate {
-                // Add React Native dependencies after project evaluation
-                project.dependencies {
-                    // Ensure react-android is available for compilation
-                    // Check if already added (might have been resolved from react-native:+)
-                    def hasReactAndroid = project.configurations.getByName("implementation").dependencies.any { 
-                        it.group == "com.facebook.react" && (it.name == "react-android" || it.name == "react-native")
-                    }
-                    if (!hasReactAndroid) {
-                        implementation("com.facebook.react:react-android:0.73.0")
                     }
                 }
             }

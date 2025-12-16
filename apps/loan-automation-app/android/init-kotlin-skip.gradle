@@ -1,0 +1,32 @@
+// Global init script to force skip Kotlin metadata version check
+// This runs before all builds, including composite builds
+
+gradle.projectsLoaded {
+    rootProject.allprojects {
+        afterEvaluate { project ->
+            try {
+                def kotlinCompileClass = project.tasks.matching { task ->
+                    task.class.name.contains('KotlinCompile')
+                }
+                project.tasks.matching { task ->
+                    task.class.name.contains('KotlinCompile')
+                }.configureEach { task ->
+                    try {
+                        if (task.hasProperty('kotlinOptions')) {
+                            task.kotlinOptions {
+                                if (task.kotlinOptions.hasProperty('freeCompilerArgs')) {
+                                    task.kotlinOptions.freeCompilerArgs += ["-Xskip-metadata-version-check"]
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Ignore if we can't configure this task
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore if Kotlin plugin is not available
+            }
+        }
+    }
+}
+

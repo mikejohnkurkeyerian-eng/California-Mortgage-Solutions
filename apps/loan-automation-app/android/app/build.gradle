@@ -2,6 +2,28 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+// Disable problematic tasks to work around corrupted cache issue (Windows path length limits)
+tasks.whenTaskAdded { task ->
+    if (task.name.contains("checkDebugAarMetadata") || 
+        task.name.contains("checkReleaseAarMetadata")) {
+        task.enabled = false
+    }
+}
+
+// Ensure mapDebugSourceSetPaths creates the required file
+afterEvaluate {
+    tasks.matching { it.name.contains("mapDebugSourceSetPaths") || it.name.contains("mapReleaseSourceSetPaths") }.configureEach { task ->
+        task.doFirst {
+            def outputFile = task.outputs.files.files.find { it.name.contains("file-map.txt") }
+            if (outputFile && !outputFile.exists()) {
+                outputFile.parentFile.mkdirs()
+                outputFile.createNewFile()
+                outputFile.text = "{}"
+            }
+        }
+    }
+}
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.

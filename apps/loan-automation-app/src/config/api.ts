@@ -67,19 +67,31 @@ const getBaseURL = (port: number): string => {
     // return `http://192.168.1.100:${port}`;
     // ============================================
     
-    // TODO: Replace with your production backend URL
-    // For now, this will use localhost (won't work in production APK!)
-    const PRODUCTION_API_BASE = 'http://localhost'; // ← CHANGE THIS!
+    // Production Railway URL
+    const PRODUCTION_API_BASE = 'https://ai-broker-production-62e4.up.railway.app';
     
-    return `${PRODUCTION_API_BASE}:${port}`;
+    // In production, we don't need port numbers (Railway handles routing)
+    // Return base URL without port for production
+    return PRODUCTION_API_BASE;
   }
 };
 
 // API endpoints
+// In production, use the Railway URL directly
+// In development, use localhost with ports
+const getServiceURL = (port: number, servicePath: string = '') => {
+  if (__DEV__) {
+    return `${getBaseURL(port)}${servicePath}`;
+  } else {
+    // Production: Railway URL (no port needed)
+    return `https://ai-broker-production-62e4.up.railway.app${servicePath}`;
+  }
+};
+
 export const API_CONFIG = {
-  LOAN_SERVICE: getBaseURL(4002),
-  DOCUMENT_SERVICE: getBaseURL(4003),
-  AUTH_SERVICE: getBaseURL(4001),
+  LOAN_SERVICE: getServiceURL(4002, '/api'),
+  DOCUMENT_SERVICE: getServiceURL(4003, '/api'),
+  AUTH_SERVICE: getServiceURL(4001, '/api'),
 };
 
 export default API_CONFIG;

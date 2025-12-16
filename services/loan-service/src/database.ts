@@ -1,4 +1,4 @@
-import {PrismaClient} from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import type {
   LoanApplication,
   BorrowerProfile,
@@ -36,7 +36,7 @@ export class LoanDatabase {
 
   async getBorrower(id: string): Promise<BorrowerProfile | null> {
     const borrower = await prisma.borrower.findUnique({
-      where: {id},
+      where: { id },
     });
 
     if (!borrower) return null;
@@ -57,7 +57,7 @@ export class LoanDatabase {
   async createLoan(loan: LoanApplication): Promise<LoanApplication> {
     // Create borrower if doesn't exist
     await prisma.borrower.upsert({
-      where: {id: loan.borrower.id},
+      where: { id: loan.borrower.id },
       create: {
         id: loan.borrower.id,
         firstName: loan.borrower.firstName,
@@ -89,7 +89,7 @@ export class LoanDatabase {
         propertyType: loan.property.propertyType,
         purchasePrice: loan.property.purchasePrice,
         downPayment: loan.property.downPayment,
-        loanAmount: loan.loanAmount,
+        loanAmount: loan.property.loanAmount,
         employmentStatus: loan.employment.status,
         employerName: loan.employment.employerName,
         jobTitle: loan.employment.jobTitle,
@@ -111,6 +111,7 @@ export class LoanDatabase {
         borrower: true,
         documents: true,
         conditions: true,
+        submissions: true,
       },
     });
 
@@ -119,11 +120,12 @@ export class LoanDatabase {
 
   async getLoan(id: string): Promise<LoanApplication | null> {
     const loan = await prisma.loanApplication.findUnique({
-      where: {id},
+      where: { id },
       include: {
         borrower: true,
         documents: true,
         conditions: true,
+        submissions: true,
       },
     });
 
@@ -137,7 +139,7 @@ export class LoanDatabase {
     updates: Partial<LoanApplication>,
   ): Promise<LoanApplication> {
     const updated = await prisma.loanApplication.update({
-      where: {id},
+      where: { id },
       data: {
         status: updates.status,
         stage: updates.stage,
@@ -155,6 +157,7 @@ export class LoanDatabase {
         borrower: true,
         documents: true,
         conditions: true,
+        submissions: true,
       },
     });
 
@@ -191,14 +194,15 @@ export class LoanDatabase {
           borrower: true,
           documents: true,
           conditions: true,
+          submissions: true,
         },
-        orderBy: {createdAt: 'desc'},
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.loanApplication.count({where}),
+      prisma.loanApplication.count({ where }),
     ]);
 
     return {
-      items: loans.map(loan => this.mapToLoanApplication(loan)),
+      items: loans.map((loan: any) => this.mapToLoanApplication(loan)),
       total,
       page,
       pageSize,
@@ -208,15 +212,16 @@ export class LoanDatabase {
 
   async getLoansReadyForSignOff(): Promise<LoanApplication[]> {
     const loans = await prisma.loanApplication.findMany({
-      where: {stage: 'ClearToClose'},
+      where: { stage: 'ClearToClose' },
       include: {
         borrower: true,
         documents: true,
         conditions: true,
+        submissions: true,
       },
     });
 
-    return loans.map(loan => this.mapToLoanApplication(loan));
+    return loans.map((loan: any) => this.mapToLoanApplication(loan));
   }
 
   private mapToLoanApplication(loan: any): LoanApplication {
@@ -291,6 +296,17 @@ export class LoanDatabase {
         waivedBy: cond.waivedBy || undefined,
         createdAt: cond.createdAt.toISOString(),
       })),
+      submissions: loan.submissions ? loan.submissions.map((sub: any) => ({
+        id: sub.id,
+        loanId: sub.loanId,
+        lenderId: sub.lenderId,
+        lenderName: sub.lenderName,
+        status: sub.status as any,
+        submittedAt: sub.submittedAt.toISOString(),
+        updatedAt: sub.updatedAt.toISOString(),
+        notes: sub.notes || undefined,
+        externalReferenceId: sub.externalReferenceId || undefined,
+      })) : [],
       underwritingNotes: loan.underwritingNotes || undefined,
       createdAt: loan.createdAt.toISOString(),
       updatedAt: loan.updatedAt.toISOString(),

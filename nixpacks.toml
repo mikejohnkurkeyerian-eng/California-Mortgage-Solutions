@@ -1,0 +1,25 @@
+# Root-level nixpacks.toml for Railway deployment
+# This builds the loan-service from the monorepo root
+
+[phases.setup]
+nixPkgs = ["nodejs-18_x"]
+
+[phases.install]
+cmds = [
+  "export SHELL=/bin/bash && curl -fsSL https://get.pnpm.io/install.sh | sh -",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && echo '=== CHECKING /app CONTENTS ===' && pwd && ls -la",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && echo '=== LOOKING FOR package.json ===' && find . -name 'package.json' -type f 2>/dev/null | head -10",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && if [ -f package.json ]; then echo 'package.json EXISTS' && head -5 package.json; else echo 'package.json NOT FOUND in root'; fi",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && echo '=== CHECKING FOR LIBS ===' && ls -la libs/ 2>/dev/null || echo 'libs/ NOT FOUND'",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && echo '=== CHECKING FOR SERVICES ===' && ls -la services/ 2>/dev/null || echo 'services/ NOT FOUND'",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && pnpm install",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && pnpm --filter @loan-platform/shared-types build",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && cd services/loan-service && pnpm build",
+  "cd services/loan-service && cp dist-register-paths.js dist/register-paths.js || echo 'Copy failed, continuing...'",
+  "cd services/loan-service && ls -la dist/ || echo 'dist folder check'"
+]
+
+[start]
+# Start command uses full path from repo root
+cmd = "node services/loan-service/dist/main.js"
+

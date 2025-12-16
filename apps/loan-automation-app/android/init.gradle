@@ -1,0 +1,15 @@
+// Global init script to apply Kotlin compiler flags to all projects including composite builds
+allprojects {
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            freeCompilerArgs += ["-Xskip-metadata-version-check"]
+        }
+    }
+    
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon).configureEach {
+        kotlinOptions {
+            freeCompilerArgs += ["-Xskip-metadata-version-check"]
+        }
+    }
+}
+

@@ -1,20 +1,32 @@
 [phases.setup]
 nixPkgs = ["nodejs-18_x"]
-
-[phases.install]
+# Install pnpm in setup phase to ensure it's available before Nixpacks checks for lock files
 cmds = [
-  "export SHELL=/bin/bash",
-  "curl -fsSL https://get.pnpm.io/install.sh | sh -",
+  "export SHELL=/bin/bash && curl -fsSL https://get.pnpm.io/install.sh | sh -",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && pnpm --version || echo 'pnpm install failed'"
+]
+
+# Tell Nixpacks to use pnpm by providing pnpm-lock.yaml detection
+# This prevents the "No package-lock.json" error
+[phases.install]
+# Custom install commands override Nixpacks' automatic detection
+# Ensure pnpm-lock.yaml exists in the repo root for Nixpacks to detect pnpm
+cmds = [
   "export PATH=\"$HOME/.local/share/pnpm:$PATH\"",
-  "cd ../..",
-  "pnpm install",
-  "pnpm --filter @loan-platform/shared-types build",
-  "cd services/loan-service",
-  "pnpm build",
-  "cp dist-register-paths.js dist/register-paths.js || echo 'Copy failed, continuing...'",
-  "ls -la dist/ || echo 'dist folder check'"
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && pwd && echo '=== ROOT DIRECTORY ===' && ls -la",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && echo '=== CHECKING FOR LIBS ===' && find . -name 'shared-types' -type d 2>/dev/null | head -5",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && echo '=== CHECKING GIT ===' && git ls-files libs/ 2>/dev/null | head -5 || echo 'Not a git repo or libs not in git'",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && if [ -d libs ]; then echo 'libs exists' && ls -la libs/; else echo 'libs does NOT exist'; fi",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && if [ -f pnpm-workspace.yaml ]; then cat pnpm-workspace.yaml; else echo 'pnpm-workspace.yaml NOT FOUND'; fi",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && pnpm install",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && pnpm --filter @loan-platform/shared-types build",
+  "export PATH=\"$HOME/.local/share/pnpm:$PATH\" && cd services/loan-service && pnpm build",
+  "cd services/loan-service && cp dist-register-paths.js dist/register-paths.js || echo 'Copy failed, continuing...'",
+  "cd services/loan-service && ls -la dist/ || echo 'dist folder check'"
 ]
 
 [start]
+# Root Directory should be EMPTY (repo root)
+# Start command uses full path from repo root
 cmd = "node services/loan-service/dist/main.js"
 

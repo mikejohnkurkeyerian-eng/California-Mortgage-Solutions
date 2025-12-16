@@ -3,6 +3,22 @@ node_modules/
 dist/
 coverage/
 .turbo/
+.pnpm-store/
+
+# Generated artifacts likely from react-native/pnpm
+**/__node_modules_*
+
+# React Native Build Artifacts
+apps/*/android/app/build/
+apps/*/android/.gradle/
+apps/*/android/build/
+apps/*/ios/build/
+apps/*/ios/Pods/
+apps/*/ios/*.xcworkspace/xcuserdata/
+apps/*/ios/*.xcodeproj/xcuserdata/
+apps/*/ios/DerivedData/
+apps/*/.expo/
+apps/*/.expo-shared/
 
 # Logs & Build
 *.log
@@ -32,4 +48,9 @@ terraform.tfstate.*
 Thumbs.db
 Desktop.ini
 
-
+# Archives - don't push ZIP files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+AI PROCCESS TEST.zip
