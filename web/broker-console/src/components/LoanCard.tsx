@@ -19,8 +19,17 @@ const stageColors: Record<LoanStage, string> = {
 }
 
 export function LoanCard({ loan }: LoanCardProps) {
+  // Defensive checks
+  if (!loan) return null;
+
   const borrowerName = loan.borrower ? `${loan.borrower.firstName} ${loan.borrower.lastName}` : 'Unknown Borrower'
   const propertyAddress = loan.property?.address ? `${loan.property.address.city}, ${loan.property.address.state}` : 'Address Not Available'
+
+  // Safe access for required fields
+  const loanId = loan.id ? loan.id.slice(0, 8) : '????'
+  const stageRaw = loan.stage || 'Draft'
+  const stageDisplay = typeof stageRaw === 'string' ? stageRaw.replace(/([A-Z])/g, ' $1').trim() : String(stageRaw)
+  const stageColorClass = stageColors[stageRaw as LoanStage] || 'bg-gray-100 text-gray-800'
 
   return (
     <Link href={`/broker/loans/${loan.id}`}>
@@ -36,13 +45,13 @@ export function LoanCard({ loan }: LoanCardProps) {
               {borrowerName}
             </h3>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 font-mono mt-1">
-              #{loan.id.slice(0, 8)}
+              #{loanId}
             </p>
           </div>
           <span
-            className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${stageColors[loan.stage]}`}
+            className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${stageColorClass}`}
           >
-            {loan.stage.replace(/([A-Z])/g, ' $1').trim()}
+            {stageDisplay}
           </span>
         </div>
 
@@ -91,5 +100,3 @@ export function LoanCard({ loan }: LoanCardProps) {
     </Link>
   )
 }
-
-
