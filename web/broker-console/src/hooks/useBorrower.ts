@@ -61,7 +61,7 @@ export function useBorrowerAuth() {
     return {
         borrowerId,
         user: session?.user,
-        mutate: session?.update,
+        mutate: (session as any)?.update,
         isLoading,
         login,
         logout

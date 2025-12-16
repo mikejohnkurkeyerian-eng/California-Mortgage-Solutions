@@ -319,7 +319,7 @@ export class FormIntelligenceService {
         });
 
         const totalAssets = assets.reduce((sum, a) => sum + (a.cashOrMarketValue || 0), 0);
-        const loanAndProperty = data.loanAndProperty || {};
+        const loanAndProperty = data.loanAndProperty || { loanAmount: 0, propertyValue: 0, loanPurpose: 'Purchase' } as any;
         const loanAmount = loanAndProperty.loanAmount || 0;
         const purchasePrice = loanAndProperty.propertyValue || 0;
 
@@ -354,7 +354,7 @@ export class FormIntelligenceService {
 
     private static analyzeLoanDetails(data: Full1003Data): FormInsight[] {
         const insights: FormInsight[] = [];
-        const loanAndProperty = data.loanAndProperty || {};
+        const loanAndProperty = data.loanAndProperty || { loanAmount: 0, propertyValue: 0 } as any;
         const loanAmount = loanAndProperty.loanAmount || 0;
         const propertyValue = loanAndProperty.propertyValue || 0;
 
