@@ -115,67 +115,67 @@ export class MiniAUSService {
             // This is tricky because one doc might contain 2022 and 2023 references.
             // Better logic: iterate through FILES in the W2 requirement.
 
+
+
+            // [STRICT] W2 Year Count Check
+            w2Docs.forEach(docRequirement => {
+                // 1. Check if requirement asks for "2 years"
+                const requiresTwoYears = docRequirement.name.toLowerCase().includes('2 years');
+
+                if (requiresTwoYears) {
+                    // Get all years found across all files in this requirement
+                    const allYears = new Set<string>();
+                    docRequirement.files.forEach(f => {
+                        if (f.extractedText) {
+                            const matches = f.extractedText.match(yearRegex);
+                            if (matches) {
+                                matches.forEach(y => {
+                                    const val = parseInt(y);
+                                    if (val >= 2018 && val <= 2026) allYears.add(y);
+                                });
+                            }
+                        }
+                    });
+
+                    if (allYears.size < 2) {
+                        errors.push(`Requirement "${docRequirement.name}" was not met. We detected ${allYears.size} year(s) (${Array.from(allYears).join(', ')}) but 2 distinct years are required.`);
+                    }
+                }
+
+                // 2. Check for Duplicates (Existing Logic)
+                if (docRequirement.files.length > 1) {
+                    // ... (keep existing duplicate check if useful, or rely on the set check above)
+                    // The Set check above covers "Same Year" error implicitly because size < 2.
+                    // So we can simplify or keep detailed warning.
+                }
+            });
         }
 
-        // [STRICT] W2 Year Count Check
-        w2Docs.forEach(docRequirement => {
-            // 1. Check if requirement asks for "2 years"
-            const requiresTwoYears = docRequirement.name.toLowerCase().includes('2 years');
-
-            if (requiresTwoYears) {
-                // Get all years found across all files in this requirement
-                const allYears = new Set<string>();
-                docRequirement.files.forEach(f => {
-                    if (f.extractedText) {
-                        const matches = f.extractedText.match(yearRegex);
-                        if (matches) {
-                            matches.forEach(y => {
-                                const val = parseInt(y);
-                                if (val >= 2018 && val <= 2026) allYears.add(y);
-                            });
-                        }
-                    }
+        // Similar check for Paystubs (Check for different dates)
+        // Paystubs usually have "Period Ending: MM/DD/YYYY"
+        const paystubDocs = documents.filter(d => d.type === 'PAY_STUB');
+        paystubDocs.forEach(doc => {
+            if (doc.files.length > 1) {
+                const dates = new Set();
+                doc.files.forEach(f => {
+                    // Look for date patterns MM/DD/YYYY
+                    const dateMatch = f.extractedText?.match(/\d{1,2}\/\d{1,2}\/\d{4}/);
+                    if (dateMatch) dates.add(dateMatch[0]);
                 });
 
-                if (allYears.size < 2) {
-                    errors.push(`Requirement "${docRequirement.name}" was not met. We detected ${allYears.size} year(s) (${Array.from(allYears).join(', ')}) but 2 distinct years are required.`);
+                if (dates.size < doc.files.length && dates.size > 0) {
+                    // Note: This is aggressive, might be false positive if OCR fails. Use Warning.
+                    warnings.push("Some paystubs appear to have the same dates. Please ensure they are consecutive.");
                 }
             }
-
-            // 2. Check for Duplicates (Existing Logic)
-            if (docRequirement.files.length > 1) {
-                // ... (keep existing duplicate check if useful, or rely on the set check above)
-                // The Set check above covers "Same Year" error implicitly because size < 2.
-                // So we can simplify or keep detailed warning.
-            }
-        });
-    }
-
-    // Similar check for Paystubs (Check for different dates)
-    // Paystubs usually have "Period Ending: MM/DD/YYYY"
-    const paystubDocs = documents.filter(d => d.type === 'PAY_STUB');
-        paystubDocs.forEach(doc => {
-        if (doc.files.length > 1) {
-    const dates = new Set();
-    doc.files.forEach(f => {
-        // Look for date patterns MM/DD/YYYY
-        const dateMatch = f.extractedText?.match(/\d{1,2}\/\d{1,2}\/\d{4}/);
-        if (dateMatch) dates.add(dateMatch[0]);
-    });
-
-    if (dates.size < doc.files.length && dates.size > 0) {
-        // Note: This is aggressive, might be false positive if OCR fails. Use Warning.
-        warnings.push("Some paystubs appear to have the same dates. Please ensure they are consecutive.");
-    }
-}
         });
 
 
-return {
-    passed: errors.length === 0,
-    errors,
-    warnings
-};
+        return {
+            passed: errors.length === 0,
+            errors,
+            warnings
+        };
     }
 }
 
