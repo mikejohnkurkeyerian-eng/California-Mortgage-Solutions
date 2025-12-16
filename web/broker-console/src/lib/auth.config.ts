@@ -31,24 +31,29 @@ export const authConfig = {
             if (isLoggedIn) {
                 const userRole = (auth?.user as any)?.role;
 
-                // Prevent Access to Auth Pages if already logged in
+                // A. Handle Auth/Start Pages (Entry Points)
                 if (isAuthPage || isStartPage) {
-                    if (userRole === 'BROKER') {
+                    // Prevent entering SAME-ROLE auth pages (already logged in)
+                    if (userRole === 'BROKER' && isOnBrokerLine) {
                         return Response.redirect(new URL('/broker/dashboard', nextUrl));
-                    } else {
+                    }
+                    if (userRole !== 'BROKER' && isOnBorrowerLine) {
                         return Response.redirect(new URL('/borrower/dashboard', nextUrl));
                     }
+                    // Allow Cross-Role access (e.g. Borrower accessing Broker Login) to facilitate switching
+                    return true;
                 }
 
-                // Enforce Role Separation
+                // B. Enforce Strict Role Separation for PRIVATE routes
+                // (We know it is NOT an Auth/Start page because we returned above if it was)
                 if (isOnBrokerLine) {
                     if (userRole !== 'BROKER') {
-                        // Borrower trying to access Broker pages -> Bounce to Borrower Dashboard
+                        // Borrower trying to access Broker PRIVATE pages -> Bounce to Borrower Dashboard
                         return Response.redirect(new URL('/borrower/dashboard', nextUrl));
                     }
                 } else if (isOnBorrowerLine) {
                     if (userRole === 'BROKER') {
-                        // Broker trying to access Borrower pages -> Bounce to Broker Dashboard
+                        // Broker trying to access Borrower PRIVATE pages -> Bounce to Broker Dashboard
                         return Response.redirect(new URL('/broker/dashboard', nextUrl));
                     }
                 }
