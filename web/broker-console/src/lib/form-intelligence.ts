@@ -109,14 +109,20 @@ export class FormIntelligenceService {
 
             const totalMonths = ((currentAddress.yearsAtAddress || 0) * 12) + (currentAddress.monthsAtAddress || 0);
             if (totalMonths === 0) { missingAddress.push('Duration at Address'); addressTargetFields.push('currentAddress.yearsAtAddress'); addressTargetFields.push('currentAddress.monthsAtAddress'); }
-            severity: 'WARNING',
-                title: 'Missing Current Address',
+            if (missingAddress.length > 0) {
+                insights.push({
+                    id: 'BORROWER-MISSING-ADDRESS',
+                    field: 'loanAndProperty',
+                    severity: 'WARNING',
+                    title: 'Missing Current Address',
                     message: `You are missing the following address details: ${missingAddress.join(', ')}.`,
-                        action: {
-                type: 'REQUIRE_FIELD',
-                    payload: { field: 'borrower', targetFields: addressTargetFields, message: 'Go back to Borrower Info to complete address.' }
+                    action: {
+                        type: 'REQUIRE_FIELD',
+                        payload: { field: 'borrower', targetFields: addressTargetFields, message: 'Go back to Borrower Info to complete address.' }
+                    }
+                });
             }
-        });
+        }
     }
 
             return insights;
