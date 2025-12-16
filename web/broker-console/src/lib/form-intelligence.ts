@@ -319,10 +319,11 @@ export class FormIntelligenceService {
         });
 
         const totalAssets = assets.reduce((sum, a) => sum + (a.cashOrMarketValue || 0), 0);
-        const loanAmount = data.loanAndProperty.loanAmount || 0;
-        const purchasePrice = data.loanAndProperty.propertyValue || 0;
+        const loanAndProperty = data.loanAndProperty || {};
+        const loanAmount = loanAndProperty.loanAmount || 0;
+        const purchasePrice = loanAndProperty.propertyValue || 0;
 
-        if (data.loanAndProperty.loanPurpose === 'Purchase' && purchasePrice > 0) {
+        if (loanAndProperty.loanPurpose === 'Purchase' && purchasePrice > 0) {
             const downPayment = purchasePrice - loanAmount;
             const estimatedClosingCosts = loanAmount * 0.03;
             const totalCashRequired = downPayment + estimatedClosingCosts;
@@ -353,8 +354,9 @@ export class FormIntelligenceService {
 
     private static analyzeLoanDetails(data: Full1003Data): FormInsight[] {
         const insights: FormInsight[] = [];
-        const loanAmount = data.loanAndProperty.loanAmount || 0;
-        const propertyValue = data.loanAndProperty.propertyValue || 0;
+        const loanAndProperty = data.loanAndProperty || {};
+        const loanAmount = loanAndProperty.loanAmount || 0;
+        const propertyValue = loanAndProperty.propertyValue || 0;
 
         if (loanAmount === 0 && propertyValue > 0) {
             insights.push({
