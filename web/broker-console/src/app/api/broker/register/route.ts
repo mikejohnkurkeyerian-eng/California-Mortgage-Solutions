@@ -59,7 +59,11 @@ export async function POST(request: Request) {
         });
 
     } catch (error: any) {
-        console.error('Broker Registration Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('CRITICAL REGISTRATION ERROR:', error);
+        // Return more specific error for debugging
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            details: error instanceof Error ? error.message : String(error)
+        }, { status: 500 });
     }
 }
