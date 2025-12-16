@@ -256,8 +256,9 @@ export class FormIntelligenceService {
         // DTI Logic (simplified for brevity, keeping existing logic structure)
         const totalMonthlyIncome = (data.employment || []).reduce((sum, emp) => sum + (emp.monthlyIncome?.total || 0), 0);
         const totalNonHousingLiabilities = liabilities.reduce((sum, debt) => sum + (debt.monthlyPayment || 0), 0);
-        const loanAmount = data.loanAndProperty.loanAmount || 0;
-        const propertyValue = data.loanAndProperty.propertyValue || 0;
+        const loanAndProperty = data.loanAndProperty || { loanAmount: 0, propertyValue: 0 } as any;
+        const loanAmount = loanAndProperty.loanAmount || 0;
+        const propertyValue = loanAndProperty.propertyValue || 0;
 
         // ... (DTI calc code remains similar, but we focus on the missing info highlighting here)
         // Re-implementing DTI check to ensure it's not lost
