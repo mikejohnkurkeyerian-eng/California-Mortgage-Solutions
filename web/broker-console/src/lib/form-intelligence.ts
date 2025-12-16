@@ -128,8 +128,9 @@ export class FormIntelligenceService {
         return insights;
     }
 
-    private static analyzeRealEstate(realEstate: any[]): FormInsight[] {
+    private static analyzeRealEstate(realEstate: any[] = []): FormInsight[] {
         const insights: FormInsight[] = [];
+        if (!realEstate || !Array.isArray(realEstate)) return insights;
 
         realEstate.forEach((property, index) => {
             const hasAddress = property.address?.street && property.address.street.trim().length > 0;
@@ -160,8 +161,9 @@ export class FormIntelligenceService {
         return insights;
     }
 
-    private static analyzeEmployment(employment: Employment[]): FormInsight[] {
+    private static analyzeEmployment(employment: Employment[] = []): FormInsight[] {
         const insights: FormInsight[] = [];
+        if (!employment || !Array.isArray(employment)) return insights;
 
         // Calculate total employment duration
         let totalMonths = 0;
@@ -222,8 +224,9 @@ export class FormIntelligenceService {
 
     private static analyzeLiabilities(data: Full1003Data): FormInsight[] {
         const insights: FormInsight[] = [];
+        const liabilities = data.liabilities || [];
 
-        data.liabilities.forEach((liability, index) => {
+        liabilities.forEach((liability, index) => {
             const hasCompany = liability.companyName && liability.companyName.trim().length > 0;
             const hasBalance = liability.unpaidBalance !== undefined && liability.unpaidBalance > 0;
             const hasPayment = liability.monthlyPayment !== undefined && liability.monthlyPayment > 0;
@@ -251,8 +254,8 @@ export class FormIntelligenceService {
         });
 
         // DTI Logic (simplified for brevity, keeping existing logic structure)
-        const totalMonthlyIncome = data.employment.reduce((sum, emp) => sum + (emp.monthlyIncome.total || 0), 0);
-        const totalNonHousingLiabilities = data.liabilities.reduce((sum, debt) => sum + (debt.monthlyPayment || 0), 0);
+        const totalMonthlyIncome = (data.employment || []).reduce((sum, emp) => sum + (emp.monthlyIncome?.total || 0), 0);
+        const totalNonHousingLiabilities = liabilities.reduce((sum, debt) => sum + (debt.monthlyPayment || 0), 0);
         const loanAmount = data.loanAndProperty.loanAmount || 0;
         const propertyValue = data.loanAndProperty.propertyValue || 0;
 
@@ -294,8 +297,9 @@ export class FormIntelligenceService {
 
     private static analyzeAssets(data: Full1003Data): FormInsight[] {
         const insights: FormInsight[] = [];
+        const assets = data.assets || [];
 
-        data.assets.forEach((asset, index) => {
+        assets.forEach((asset, index) => {
             const hasInfo = (asset.institutionName && asset.institutionName.trim().length > 0) || (asset.accountNumber && asset.accountNumber.trim().length > 0);
             const hasValue = asset.cashOrMarketValue !== undefined && asset.cashOrMarketValue > 0;
 
@@ -314,7 +318,7 @@ export class FormIntelligenceService {
             }
         });
 
-        const totalAssets = data.assets.reduce((sum, a) => sum + (a.cashOrMarketValue || 0), 0);
+        const totalAssets = assets.reduce((sum, a) => sum + (a.cashOrMarketValue || 0), 0);
         const loanAmount = data.loanAndProperty.loanAmount || 0;
         const purchasePrice = data.loanAndProperty.propertyValue || 0;
 
@@ -379,8 +383,9 @@ export class FormIntelligenceService {
             }
         }
 
-        const totalIncome = data.employment.reduce((sum, emp) => sum + (emp.monthlyIncome.total || 0), 0);
-        const hasEmployer = data.employment.some(e => e.employerName && e.employerName.trim().length > 0);
+        const employment = data.employment || [];
+        const totalIncome = employment.reduce((sum, emp) => sum + (emp.monthlyIncome?.total || 0), 0);
+        const hasEmployer = employment.some(e => e.employerName && e.employerName.trim().length > 0);
 
         if (totalIncome === 0 && hasEmployer) {
             insights.push({
