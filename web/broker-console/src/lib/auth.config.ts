@@ -14,7 +14,15 @@ export const authConfig = {
             // Allow start pages and auth pages
             if (isStartPage || isAuthPage) {
                 if (isLoggedIn) {
-                    // Redirect logged-in users to their respective dashboards
+                    const userRole = (auth?.user as any)?.role;
+                    // Strict Role-Based Redirection
+                    if (userRole === 'BROKER') {
+                        return Response.redirect(new URL('/broker/dashboard', nextUrl));
+                    } else if (userRole === 'BORROWER') {
+                        return Response.redirect(new URL('/borrower/dashboard', nextUrl));
+                    }
+
+                    // Fallback for unknown roles (e.g. initial setup)
                     if (nextUrl.pathname.startsWith('/broker')) {
                         return Response.redirect(new URL('/broker/dashboard', nextUrl));
                     }

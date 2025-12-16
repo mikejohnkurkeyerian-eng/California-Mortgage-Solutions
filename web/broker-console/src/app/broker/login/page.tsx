@@ -86,7 +86,7 @@ export default function BrokerLoginPage() {
                                     type="email"
                                     placeholder="broker@example.com"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
                                     required
                                 />
                                 <Input

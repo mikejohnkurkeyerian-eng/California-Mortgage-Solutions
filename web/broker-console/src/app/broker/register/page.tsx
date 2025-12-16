@@ -57,7 +57,8 @@ export default function BrokerRegisterPage() {
             setIsLoading(false);
             // Save "Remember Me" preference implicitly for new accounts if desired, 
             // or just redirect to dashboard
-            router.push('/dashboard');
+            // or just redirect to dashboard
+            router.push('/broker/dashboard');
         }, 1500);
     };
 
@@ -140,7 +141,7 @@ export default function BrokerRegisterPage() {
                                         label="Email Address"
                                         type="email"
                                         value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
                                         required
                                     />
 

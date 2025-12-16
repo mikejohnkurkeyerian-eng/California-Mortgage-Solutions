@@ -130,7 +130,7 @@ export default function BorrowerSignupPage() {
                                 <input
                                     type="email"
                                     value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
                                     className="w-full px-4 py-2 bg-surface/50 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
                                     placeholder="john@example.com"
                                     required
