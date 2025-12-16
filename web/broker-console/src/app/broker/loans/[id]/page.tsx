@@ -127,8 +127,8 @@ export default function LoanDetailsPage() {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <Link href="/broker/loans" className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
-                                    ← Back
+                                <Link href="/broker/dashboard" className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+                                    ← Back to Dashboard
                                 </Link>
                                 <span className="text-slate-400 dark:text-slate-600">|</span>
                                 <span className="text-slate-500 dark:text-slate-400">Application #{loan.id.slice(0, 8)}</span>
