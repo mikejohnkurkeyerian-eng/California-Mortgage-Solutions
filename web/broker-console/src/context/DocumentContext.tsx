@@ -15,12 +15,14 @@ import { DualAUSResponse } from '@/lib/aus-engine';
 import { Full1003Data } from '@/types/form-1003';
 import { CreditService } from '@/lib/credit-service';
 import { useToast } from '@/context/ToastContext';
+import { MiniAUSService } from '@/lib/pre-aus-check';
 
 export interface DocumentFile {
     name: string;
     date: string;
     file?: File; // Store the actual File object for attachments
     extractedData?: any;
+    extractedText?: string; // Raw text from OCR for advanced validation
 }
 
 export interface DocumentRequirement {
@@ -59,7 +61,7 @@ interface DocumentContextType {
     aiAnalysisResult?: AIAnalysisResult | null; // New: Expose AI analysis result
     dualAusResult?: DualAUSResponse | null; // New: Expose Dual AUS Result
     runDualAUS: () => void;
-    addDocumentFile: (id: string, file: File, insights?: string[], extractedData?: any) => void;
+    addDocumentFile: (id: string, file: File, insights?: string[], extractedData?: any, extractedText?: string) => void;
     setDocuments: (documents: DocumentRequirement[]) => void;
     addRequirement: (type: DocumentType, name: string) => void;
     submitApplication: () => void;
@@ -556,7 +558,7 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [applicationStatus]);
 
-    const addDocumentFile = (id: string, file: File, insights: string[] = [], extractedData?: any) => {
+    const addDocumentFile = (id: string, file: File, insights: string[] = [], extractedData?: any, extractedText?: string) => {
         setDocuments(prev => {
             const newDocs = prev.map(doc => {
                 if (doc.id === id) {
@@ -564,7 +566,8 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                         name: file.name,
                         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
                         file: file, // Store the file object
-                        extractedData
+                        extractedData,
+                        extractedText
                     };
                     // Merge new insights with existing ones, avoiding duplicates
                     const updatedInsights = Array.from(new Set([...doc.insights, ...insights]));
@@ -621,6 +624,48 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                 duration: 6000
             });
             return;
+        }
+
+        // [MINI AUS] Pre-Check Gatekeeper
+        // Extract 1003 Data early for validation
+        let checkData: Full1003Data | null = null;
+        if (currentLoan) {
+            const rawData = (currentLoan as any).data;
+            if (rawData) {
+                const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+                checkData = parsed?.full1003 || parsed;
+            }
+        }
+
+        if (checkData) {
+            const preCheck = MiniAUSService.runPreCheck(checkData, documents);
+            if (!preCheck.passed) {
+                // BLOCK SUBMISSION
+                console.warn("[Mini AUS] Blocked Submission:", preCheck.errors);
+
+                // Show blocking errors
+                setToast({
+                    message: `Pre-Check Failed:\n${preCheck.errors[0]}`, // Show first error prominently
+                    type: 'error',
+                    duration: 8000
+                });
+
+                // Also log warnings if any
+                if (preCheck.warnings.length > 0) {
+                    console.warn("[Mini AUS] Warnings:", preCheck.warnings);
+                }
+
+                return; // STOP HERE
+            }
+
+            // Show Warnings non-blocking
+            if (preCheck.warnings.length > 0) {
+                setToast({
+                    message: `Warning: ${preCheck.warnings[0]}`,
+                    type: 'warning',
+                    duration: 6000
+                });
+            }
         }
 
         setApplicationStatus('processing_aus');

@@ -125,7 +125,7 @@ export default function BorrowerDashboard() {
                 if (match) {
                     // Extract insight messages if any
                     const insightMessages = result.insights ? result.insights.map(i => i.message) : [];
-                    addDocumentFile(match.id, file, insightMessages, result.extractedData);
+                    addDocumentFile(match.id, file, insightMessages, result.extractedData, result.extractedText);
                     processedCount++;
 
                     // Run Verification against Application Data

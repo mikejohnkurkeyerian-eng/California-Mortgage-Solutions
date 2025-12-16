@@ -50,7 +50,7 @@ export default function DocumentsPage() {
 
                 if (match) {
                     const insightMessages = result.insights ? result.insights.map(i => i.message) : [];
-                    addDocumentFile(match.id, file, insightMessages, result.extractedData);
+                    addDocumentFile(match.id, file, insightMessages, result.extractedData, result.extractedText);
                     processedCount++;
                 } else {
                     unclassifiedFiles.push(file.name);
