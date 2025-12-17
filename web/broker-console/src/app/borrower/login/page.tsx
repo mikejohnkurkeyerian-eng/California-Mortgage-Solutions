@@ -9,7 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { signIn, useSession, signOut } from 'next-auth/react';
 import { useEffect } from 'react';
 
-export default function BorrowerLoginPage() {
+import { Suspense } from 'react';
+
+function BorrowerLoginContent() {
     const { data: session, status } = useSession();
     const router = useRouter();
 
@@ -180,6 +182,14 @@ export default function BorrowerLoginPage() {
                 </Card>
             </div>
         </main>
+    );
+}
+
+export default function BorrowerLoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-white">Loading...</div>}>
+            <BorrowerLoginContent />
+        </Suspense>
     );
 }
 
