@@ -43,9 +43,8 @@ export async function POST(request: Request) {
                 name: `${firstName} ${lastName}`,
                 role: 'BROKER',
                 brokerId: newBroker.id,
-                // Store NMLS and License info in separate metadata if needed, 
-                // but schema doesn't have specific fields for it on User. 
-                // For MVP, we assume verified and created.
+                nmlsId,
+                licenseStates
             }
         });
 

@@ -87,7 +87,8 @@ export default function BrokerRegisterPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                alert(data.error || 'Registration failed');
+                console.error("Registration failed:", data);
+                alert(data.details || data.error || 'Registration failed');
                 setIsLoading(false);
                 return;
             }
