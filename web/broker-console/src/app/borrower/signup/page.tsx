@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
@@ -22,6 +22,12 @@ function BorrowerSignupContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const brokerId = searchParams.get('ref');
+
+    useEffect(() => {
+        if (brokerId) {
+            localStorage.setItem('broker_ref_v2', brokerId);
+        }
+    }, [brokerId]);
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();

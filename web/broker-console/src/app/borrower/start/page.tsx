@@ -30,6 +30,7 @@ function BorrowerStartContent() {
     const loginParams = new URLSearchParams();
     loginParams.set('role', 'BORROWER');
     if (callbackUrl) loginParams.set('callbackUrl', callbackUrl);
+    if (ref) loginParams.set('ref', ref);
     // Login doesn't usually need ref but good for context if they sign up from login page later? 
     // Usually only signup needs it.
 
