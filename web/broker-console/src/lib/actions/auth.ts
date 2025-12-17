@@ -99,17 +99,30 @@ export async function linkBorrowerToBroker(brokerId: string) {
         });
 
         if (user?.brokerId) {
-            console.log(`[LINK_USER] User already linked to ${user.brokerId}. Skipping overwrite.`);
-            return { success: false, message: "Already linked" };
+            console.log(`[LINK_USER] User already linked to ${user.brokerId}. Checking for unlinked loans...`);
+            // fall through to fix loans even if user is linked
+        } else {
+            await prisma.user.update({
+                where: { id: session.user.id },
+                data: { brokerId }
+            });
+            console.log(`[LINK_USER] User ${session.user.id} linked to ${brokerId}`);
         }
 
-        await prisma.user.update({
-            where: { id: session.user.id },
-            data: { brokerId }
+        // BACKFILL: Fix any existing unlinked loans
+        const unlinkedLoans = await prisma.loanApplication.updateMany({
+            where: {
+                userId: session.user.id,
+                brokerId: null
+            },
+            data: {
+                brokerId: brokerId
+            }
         });
 
-        console.log(`[LINK_USER] Success.`);
-        return { success: true };
+        console.log(`[LINK_USER] Backfilled ${unlinkedLoans.count} unlinked loans.`);
+
+        return { success: true, backfilled: unlinkedLoans.count };
     } catch (error) {
         console.error("Link user error:", error);
         return { error: "Failed to link user" };
