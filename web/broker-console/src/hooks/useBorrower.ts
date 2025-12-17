@@ -54,8 +54,9 @@ export function useBorrowerAuth() {
     };
 
     const logout = async () => {
-        await signOut({ redirect: false });
-        window.location.href = '/login';
+        // Clear local storage logic here if needed
+        localStorage.removeItem('broker_ref_v2');
+        await signOut({ callbackUrl: '/borrower/login' });
     };
 
     return {
