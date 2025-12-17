@@ -98,7 +98,12 @@ export async function getLoans() {
 
         if (user?.role === 'BROKER' && user.brokerId) {
             whereClause = { brokerId: user.brokerId };
+            console.log(`[GET_LOANS] Broker Logic Triggered. BrokerID: ${user.brokerId}`);
+        } else {
+            console.log(`[GET_LOANS] Broker Logic SKIPPED. Role: ${user?.role}, BrokerID: ${user?.brokerId}`);
         }
+
+        console.log('[GET_LOANS] Executing Query:', JSON.stringify(whereClause));
 
         const loans = await prisma.loanApplication.findMany({
             where: whereClause,
