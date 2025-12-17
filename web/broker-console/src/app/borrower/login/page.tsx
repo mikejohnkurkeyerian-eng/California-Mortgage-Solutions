@@ -132,52 +132,52 @@ function BorrowerLoginContent() {
                                     <span className="flex-shrink-0 mx-4 text-slate-400 text-xs uppercase">Or with email</span>
                                     <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
                                 </div>
+
+                                <form onSubmit={handleLogin} className="space-y-6">
+                                    <div>
+                                        <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1">
+                                            Email Address
+                                        </label>
+                                        <input
+                                            id="email"
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value.toLowerCase())}
+                                            className="w-full px-4 py-2 bg-surface/50 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
+                                            placeholder="Enter your email"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1">
+                                            Password
+                                        </label>
+                                        <input
+                                            id="password"
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="w-full px-4 py-2 bg-surface/50 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
+                                            placeholder="Enter your password"
+                                            required
+                                        />
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        className="w-full bg-primary-600 hover:bg-primary-500"
+                                        isLoading={isLoading}
+                                    >
+                                        Access Dashboard
+                                    </Button>
+
+                                    <p className="text-xs text-center text-slate-500 mt-4">
+                                        Don't have an account? <a href="/borrower/signup" className="text-primary-400 hover:underline">Sign up</a>
+                                    </p>
+                                </form>
                             </>
                         )}
-
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1">
-                                    Email Address
-                                </label>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
-                                    className="w-full px-4 py-2 bg-surface/50 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
-                                    placeholder="Enter your email"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1">
-                                    Password
-                                </label>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-4 py-2 bg-surface/50 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
-                                    placeholder="Enter your password"
-                                    required
-                                />
-                            </div>
-
-                            <Button
-                                type="submit"
-                                className="w-full bg-primary-600 hover:bg-primary-500"
-                                isLoading={isLoading}
-                            >
-                                Access Dashboard
-                            </Button>
-
-                            <p className="text-xs text-center text-slate-500 mt-4">
-                                Don't have an account? <a href="/borrower/signup" className="text-primary-400 hover:underline">Sign up</a>
-                            </p>
-                        </form>
                     </CardContent>
                 </Card>
             </div>
