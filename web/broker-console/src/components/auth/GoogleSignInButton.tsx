@@ -2,14 +2,24 @@
 
 import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
+import { useSearchParams } from 'next/navigation';
 
 export function GoogleSignInButton() {
+    const searchParams = useSearchParams();
+    const ref = searchParams.get('ref');
+    const callbackUrl = searchParams.get('callbackUrl') || '/borrower/dashboard';
+
+    // Append ref to callback if present to ensure it persists to dashboard
+    const finalCallbackUrl = ref
+        ? `${callbackUrl}${callbackUrl.includes('?') ? '&' : '?'}ref=${ref}`
+        : callbackUrl;
+
     return (
         <Button
             type="button"
             variant="outline"
             className="w-full flex items-center justify-center gap-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
-            onClick={() => signIn('google', { callbackUrl: '/borrower/dashboard' })}
+            onClick={() => signIn('google', { callbackUrl: finalCallbackUrl })}
         >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
