@@ -46,8 +46,12 @@ export function BrokerNavbar() {
                             <Link href="/broker/clara" className="text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">
                                 CLARA AI
                             </Link>
-                            <span className="text-slate-400 cursor-not-allowed" title="Coming Soon">Commission</span>
-                            <span className="text-slate-400 cursor-not-allowed" title="Coming Soon">Resources</span>
+                            <Link href="/broker/commissions" className="text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">
+                                Commission
+                            </Link>
+                            <Link href="/broker/resources" className="text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">
+                                Resources
+                            </Link>
                         </div>
                     </div>
 
