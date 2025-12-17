@@ -20,6 +20,7 @@ import { Full1003Data } from '@/types/form-1003';
 import { AUSResults } from '@/components/dashboard/AUSResults';
 import { UnderwriterSimulator } from '@/components/debug/UnderwriterSimulator';
 import { Badge } from '@/components/ui/Badge';
+import { BorrowerDebugFooter } from '@/components/debug/BorrowerDebugFooter';
 
 export default function BorrowerDashboard() {
     const { borrowerId, isLoading, logout } = useBorrowerAuth();
@@ -684,6 +685,7 @@ export default function BorrowerDashboard() {
 
 
             <UnderwriterSimulator />
+            <BorrowerDebugFooter />
         </main>
     );
 }
