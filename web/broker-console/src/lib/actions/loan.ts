@@ -16,16 +16,24 @@ export async function createLoan(data: any) {
     try {
         console.log('[CREATE_LOAN] 1. Auth Verified. User:', session.user.id);
 
+        // DEBUG: Explicitly log session details to check for brokerId
+        const user = session.user as any;
+        console.log('[CREATE_LOAN] Session Data:', {
+            role: user.role,
+            brokerId: user.brokerId,
+            providedBrokerId: data.brokerId
+        });
+
         const createData = {
             userId: session.user.id,
             // Use provided brokerId (from invite) OR fallback to session (if user is broker)
-            brokerId: data.brokerId || (session.user as any).brokerId || undefined,
+            brokerId: data.brokerId || user.brokerId || undefined,
             status: 'Draft',
             stage: 'Application Review',
             // DEBUG: Minimal payload to test size limits
             data: JSON.stringify({ debug: "Minimal payload test", originalSize: JSON.stringify(data).length }),
         };
-        console.log('[CREATE_LOAN] 2. Payload Prepared. Size:', createData.data.length);
+        console.log('[CREATE_LOAN] 2. Payload Prepared. Target BrokerId:', createData.brokerId);
         console.log('[CREATE_LOAN] 3. Inserting into DB...');
 
         const loan = await prisma.loanApplication.create({
