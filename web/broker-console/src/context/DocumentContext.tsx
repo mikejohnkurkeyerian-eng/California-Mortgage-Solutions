@@ -767,6 +767,22 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
 
                 if (borrowerId) {
                     const brokerRef = typeof window !== 'undefined' ? localStorage.getItem('broker_ref_v2') : null;
+                    console.log("SUBMITTING APPLICATION. Broker Ref:", brokerRef);
+
+                    if (!brokerRef) {
+                        setToast({
+                            message: "DEBUG: No Broker ID found in storage. Application will be unlinked.",
+                            type: 'warning',
+                            duration: 5000
+                        });
+                    } else {
+                        setToast({
+                            message: `DEBUG: Linking to Broker ID: ${brokerRef}`,
+                            type: 'info',
+                            duration: 3000
+                        });
+                    }
+
                     const newLoan = await createLoan({
                         borrowerId,
                         brokerId: brokerRef || undefined,
