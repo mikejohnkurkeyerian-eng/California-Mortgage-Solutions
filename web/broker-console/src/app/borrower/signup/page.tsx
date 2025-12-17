@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
@@ -8,7 +8,7 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { registerUser } from '@/lib/actions/auth';
 
-export default function BorrowerSignupPage() {
+function BorrowerSignupContent() {
     const [formData, setFormData] = useState({
         firstName: '',
         middleName: '',
@@ -186,6 +186,14 @@ export default function BorrowerSignupPage() {
                 </Card>
             </div>
         </main>
+    );
+}
+
+export default function BorrowerSignupPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-white">Loading...</div>}>
+            <BorrowerSignupContent />
+        </Suspense>
     );
 }
 
