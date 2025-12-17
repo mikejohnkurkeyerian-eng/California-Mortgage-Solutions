@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { LoanCard } from '@/components/LoanCard';
 import { getLoans } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { LoanApplication } from '@/types/shared';
 import { InvitationLink } from '@/components/broker/InvitationLink';
@@ -62,14 +63,11 @@ export default function BrokerDashboardPage() {
 
                     {/* DEBUG PANEL */}
                     <div className="mb-8 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 rounded-lg text-xs font-mono text-yellow-800 dark:text-yellow-200">
-                        <h4 className="font-bold mb-2 uppercase">Debug Session Info</h4>
-                        <div>Total Loans Fetched: {loans?.length ?? 'Loading...'}</div>
-                        {/* We needs to fetch session info client side or use a server component for this. 
-                            For now, let's just show what we have in the loans object if possible, 
-                            or assume the user can check the logs I added to getLoans.
-                        */}
-                        <div className="mt-2 text-[10px] opacity-75">
-                            Check server logs for: [GET_LOANS] Query Details
+                        {/* We need to get the session here to see what the client sees */}
+                        <DebugSessionInfo />
+                        <div className="mt-2 text-[10px] opacity-75 border-t border-yellow-200 dark:border-yellow-900/30 pt-2">
+                            <div>Server Fetched Loans: {loans?.length ?? 'Loading...'}</div>
+                            <div>Check server logs for: [GET_LOANS] Query Details</div>
                         </div>
                     </div>
 
