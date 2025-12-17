@@ -18,16 +18,24 @@ export async function createLoan(data: any) {
 
         // DEBUG: Explicitly log session details to check for brokerId
         const user = session.user as any;
+
+        // RELIABILITY FIX: Fetch user from DB to ensure we get the persisted brokerId
+        const dbUser = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { brokerId: true }
+        });
+
         console.log('[CREATE_LOAN] Session Data:', {
             role: user.role,
             brokerId: user.brokerId,
+            dbBrokerId: dbUser?.brokerId,
             providedBrokerId: data.brokerId
         });
 
         const createData = {
             userId: session.user.id,
-            // Use provided brokerId (from invite) OR fallback to session (if user is broker)
-            brokerId: data.brokerId || user.brokerId || undefined,
+            // Use provided brokerId (from invite) OR fallback to DB User (most reliable) OR Session
+            brokerId: data.brokerId || dbUser?.brokerId || user.brokerId || undefined,
             status: 'Draft',
             stage: 'Application Review',
             // DEBUG: Minimal payload to test size limits
