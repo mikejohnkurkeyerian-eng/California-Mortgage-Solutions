@@ -38,8 +38,7 @@ export async function createLoan(data: any) {
             brokerId: data.brokerId || dbUser?.brokerId || user.brokerId || undefined,
             status: 'Draft',
             stage: 'Application Review',
-            // DEBUG: Minimal payload to test size limits
-            data: JSON.stringify({ debug: "Minimal payload test", originalSize: JSON.stringify(data).length }),
+            data: JSON.stringify(data),
         };
         console.log('[CREATE_LOAN] 2. Payload Prepared. Target BrokerId:', createData.brokerId);
         console.log('[CREATE_LOAN] 3. Inserting into DB...');
@@ -127,12 +126,16 @@ export async function getLoans() {
             }
         });
 
-        return loans.map((loan: any) => ({
-            ...loan,
-            data: JSON.parse(loan.data),
-            borrowerName: loan.user.name,
-            borrowerEmail: loan.user.email
-        }));
+        return loans.map((loan: any) => {
+            const parsedData = loan.data ? JSON.parse(loan.data) : {};
+            return {
+                ...loan,
+                ...parsedData, // Flatten data to top level
+                data: parsedData,
+                borrowerName: loan.user.name,
+                borrowerEmail: loan.user.email
+            };
+        });
     } catch (error) {
         console.error("Get loans error:", error);
         return [];
