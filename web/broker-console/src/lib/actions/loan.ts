@@ -131,3 +131,32 @@ export async function getLoans() {
     }
 }
 
+
+export async function getDebugLoans() {
+    const session = await auth();
+    if (!session?.user) return [];
+
+    // Only allow Brokers to see this debug info
+    if ((session.user as any).role !== 'BROKER') return [];
+
+    try {
+        const loans = await prisma.loanApplication.findMany({
+            take: 10,
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                brokerId: true,
+                userId: true,
+                status: true,
+                createdAt: true,
+                user: {
+                    select: { email: true }
+                }
+            }
+        });
+        return loans;
+    } catch (error) {
+        console.error("Debug Loans Error:", error);
+        return [];
+    }
+}

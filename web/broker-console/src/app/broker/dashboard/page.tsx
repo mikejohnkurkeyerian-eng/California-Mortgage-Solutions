@@ -3,7 +3,7 @@
 import { BrokerNavbar } from '@/components/layout/BrokerNavbar';
 import { Button } from '@/components/ui/Button';
 import { LoanCard } from '@/components/LoanCard';
-import { getLoans } from '@/lib/api';
+import { getLoans, getDebugLoans } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -68,6 +68,7 @@ export default function BrokerDashboardPage() {
                         <div className="mt-2 text-[10px] opacity-75 border-t border-yellow-200 dark:border-yellow-900/30 pt-2">
                             <div>Server Fetched Loans: {loans?.length ?? 'Loading...'}</div>
                             <div>Check server logs for: [GET_LOANS] Query Details</div>
+                            <DebugLoanTable />
                         </div>
                     </div>
 

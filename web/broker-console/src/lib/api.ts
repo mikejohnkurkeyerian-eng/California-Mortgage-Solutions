@@ -1,4 +1,4 @@
-import { createLoan as createLoanAction, updateLoan as updateLoanAction, getLoans as getLoansAction } from '@/lib/actions/loan';
+import { createLoan as createLoanAction, updateLoan as updateLoanAction, getLoans as getLoansAction, getDebugLoans as getDebugLoansAction } from '@/lib/actions/loan';
 import { LoanApplication } from '@/types/shared';
 
 // Re-export types
@@ -14,6 +14,15 @@ export const getLoans = async (): Promise<LoanApplication[]> => {
     return loans as any[];
   } catch (error) {
     console.error('getLoans wrapper error:', error);
+    return [];
+  }
+};
+
+export const getDebugLoans = async () => {
+  try {
+    return await getDebugLoansAction();
+  } catch (error) {
+    console.error('getDebugLoans error:', error);
     return [];
   }
 };
