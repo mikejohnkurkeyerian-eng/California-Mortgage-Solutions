@@ -3,7 +3,7 @@
 import { BrokerNavbar } from '@/components/layout/BrokerNavbar';
 import { Button } from '@/components/ui/Button';
 import { LoanCard } from '@/components/LoanCard';
-import { getLoans, getDebugLoans } from '@/lib/api';
+import { getLoans } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -59,17 +59,6 @@ export default function BrokerDashboardPage() {
                     </div>
                     <div id="invite-section" className="mb-8">
                         <InvitationLink />
-                    </div>
-
-                    {/* DEBUG PANEL */}
-                    <div className="mb-8 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 rounded-lg text-xs font-mono text-yellow-800 dark:text-yellow-200">
-                        {/* We need to get the session here to see what the client sees */}
-                        <DebugSessionInfo />
-                        <div className="mt-2 text-[10px] opacity-75 border-t border-yellow-200 dark:border-yellow-900/30 pt-2">
-                            <div>Server Fetched Loans: {loans?.length ?? 'Loading...'}</div>
-                            <div>Check server logs for: [GET_LOANS] Query Details</div>
-                            <DebugLoanTable />
-                        </div>
                     </div>
 
                     {/* Stats Grid */}
@@ -190,64 +179,4 @@ function ChartIcon() {
     );
 }
 
-function DebugSessionInfo() {
-    const { data: session, status } = useSession();
 
-    if (status === 'loading') return <div>Loading Session...</div>;
-
-    return (
-        <div>
-            <h4 className="font-bold mb-2 uppercase">Client Session Info</h4>
-            <div>Status: {status}</div>
-            <div>User ID: {session?.user?.id?.slice(0, 8)}...</div>
-            <div>Role: {(session?.user as any)?.role}</div>
-            <div className={(session?.user as any)?.brokerId ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
-                Broker ID: {(session?.user as any)?.brokerId || "MISSING"}
-            </div>
-        </div>
-    );
-}
-
-
-function DebugLoanTable() {
-    const { data: debugLoans, isLoading } = useQuery({
-        queryKey: ['debug-loans'],
-        queryFn: async () => getDebugLoans(),
-    });
-
-    if (isLoading) return <div className="mt-2 text-yellow-600">Loading Raw DB Data...</div>;
-
-    if (!debugLoans || debugLoans.length === 0) return <div className="mt-2 text-yellow-600">No Loans Found in DB (Top 10)</div>;
-
-    return (
-        <div className="mt-2 overflow-x-auto">
-            <h5 className="font-bold mb-1 border-b border-yellow-200 pb-1">Raw DB Data (Top 10 Recent)</h5>
-            <table className="w-full text-left text-[10px] border-collapse">
-                <thead>
-                    <tr className="border-b border-yellow-200 dark:border-yellow-800">
-                        <th className="p-1">Created</th>
-                        <th className="p-1">User Email</th>
-                        <th className="p-1">Broker ID in DB</th>
-                        <th className="p-1">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {debugLoans.map((l: any) => (
-                        <tr key={l.id} className="border-b border-yellow-100 dark:border-yellow-900/50">
-                            <td className="p-1">{new Date(l.createdAt).toLocaleTimeString()}</td>
-                            <td className="p-1">{l.user?.email || 'N/A'}</td>
-                            <td className="p-1 font-bold font-mono">
-                                {l.brokerId ? (
-                                    <span className="text-green-600">{l.brokerId.slice(0, 8)}...</span>
-                                ) : (
-                                    <span className="text-red-500">NULL</span>
-                                )}
-                            </td>
-                            <td className="p-1">{l.status}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-}

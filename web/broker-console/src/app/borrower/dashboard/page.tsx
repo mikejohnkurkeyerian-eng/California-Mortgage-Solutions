@@ -696,7 +696,6 @@ export default function BorrowerDashboard() {
 
 
             <UnderwriterSimulator />
-            <BorrowerDebugFooter />
         </main>
     );
 }
