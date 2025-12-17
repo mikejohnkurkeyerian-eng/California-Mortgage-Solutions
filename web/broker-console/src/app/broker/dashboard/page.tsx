@@ -189,3 +189,21 @@ function ChartIcon() {
     );
 }
 
+function DebugSessionInfo() {
+    const { data: session, status } = useSession();
+
+    if (status === 'loading') return <div>Loading Session...</div>;
+
+    return (
+        <div>
+            <h4 className="font-bold mb-2 uppercase">Client Session Info</h4>
+            <div>Status: {status}</div>
+            <div>User ID: {session?.user?.id?.slice(0, 8)}...</div>
+            <div>Role: {(session?.user as any)?.role}</div>
+            <div className={(session?.user as any)?.brokerId ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
+                Broker ID: {(session?.user as any)?.brokerId || "MISSING"}
+            </div>
+        </div>
+    );
+}
+
