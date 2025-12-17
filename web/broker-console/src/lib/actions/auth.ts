@@ -3,6 +3,7 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import { auth } from '@/lib/auth';
 
 const RegisterSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
