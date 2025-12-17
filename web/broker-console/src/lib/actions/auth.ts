@@ -82,3 +82,35 @@ export async function registerUser(data: z.infer<typeof RegisterSchema>) {
     }
 }
 
+
+export async function linkBorrowerToBroker(brokerId: string) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { error: "Unauthorized" };
+    }
+
+    try {
+        console.log(`[LINK_USER] Attempting to link User ${session.user.id} to Broker ${brokerId}`);
+
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { brokerId: true }
+        });
+
+        if (user?.brokerId) {
+            console.log(`[LINK_USER] User already linked to ${user.brokerId}. Skipping overwrite.`);
+            return { success: false, message: "Already linked" };
+        }
+
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { brokerId }
+        });
+
+        console.log(`[LINK_USER] Success.`);
+        return { success: true };
+    } catch (error) {
+        console.error("Link user error:", error);
+        return { error: "Failed to link user" };
+    }
+}

@@ -62,6 +62,17 @@ export default function BorrowerDashboard() {
             }
 
             if (borrowerId) {
+                // SELF-REPAIR: Check for missing Broker Linkage
+                const localRef = localStorage.getItem('broker_ref_v2');
+                if (localRef) {
+                    // We don't have easy access to user.brokerId here without checking the session or invalidating
+                    // But we can blindly try to link. The server action checks if already linked.
+                    console.log("Self-Repair: Attempting to link to", localRef);
+                    // Dynamically import to avoid server-side issues if any
+                    const { linkBorrowerToBroker } = await import('@/lib/actions/auth');
+                    await linkBorrowerToBroker(localRef);
+                }
+
                 // Sync with backend to get latest loan data
                 await syncWithBackend();
                 setIsCheckingLoan(false);
