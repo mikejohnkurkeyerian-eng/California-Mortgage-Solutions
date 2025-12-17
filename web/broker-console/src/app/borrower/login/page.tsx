@@ -106,19 +106,39 @@ function BorrowerLoginContent() {
                     </CardHeader>
                     <CardContent>
                         {status === 'authenticated' && session?.user ? (
-                            <div className="mb-6 p-4 bg-primary-500/10 border border-primary-500/30 rounded-lg text-center">
-                                <p className="text-white mb-2">You are logged in as <span className="font-bold">{session.user.email}</span></p>
-                                <div className="flex flex-col gap-2">
+                            <div className="flex flex-col items-center py-6 animate-in fade-in duration-500">
+                                <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mb-4 border border-primary-500/20">
+                                    <svg className="w-8 h-8 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">Welcome Back!</h3>
+                                <p className="text-slate-400 mb-8 text-center text-sm">
+                                    You are currently signed in as <br />
+                                    <span className="text-white font-medium bg-white/5 px-2 py-1 rounded mt-1 inline-block">{session.user.email}</span>
+                                </p>
+
+                                <div className="w-full space-y-3">
                                     <Button
                                         onClick={() => window.location.href = '/borrower/dashboard'}
-                                        className="w-full"
+                                        className="w-full bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 shadow-lg shadow-primary-500/20 border-0 py-6 text-lg"
                                     >
                                         Go to Dashboard
                                     </Button>
+
+                                    <div className="relative flex py-2 items-center">
+                                        <div className="flex-grow border-t border-white/5"></div>
+                                        <span className="flex-shrink-0 mx-4 text-slate-600 text-[10px] uppercase tracking-wider">OR</span>
+                                        <div className="flex-grow border-t border-white/5"></div>
+                                    </div>
+
                                     <button
                                         onClick={() => signOut({ callbackUrl: '/borrower/login' })}
-                                        className="text-xs text-slate-400 hover:text-white underline"
+                                        className="w-full py-3 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all flex items-center justify-center gap-2 group"
                                     >
+                                        <svg className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
                                         Sign Out & Switch Account
                                     </button>
                                 </div>
