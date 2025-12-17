@@ -276,9 +276,13 @@ export default function BrokerSettingsPage() {
     const { resetSettings } = useBrokerSettings();
     const [activeTab, setActiveTab] = useState('general');
 
+    const handleLogout = async () => {
+        await signOut({ callbackUrl: '/broker/login' });
+    };
+
     return (
         <main className="min-h-screen bg-background text-slate-100">
-            <Navbar />
+            <BrokerNavbar />
             <div className="pt-28 pb-12 px-4 max-w-6xl mx-auto">
 
                 {/* Header */}
@@ -325,7 +329,7 @@ export default function BrokerSettingsPage() {
                             </button>
                         ))}
 
-                        <div className="pt-8 mt-8 border-t border-white/10">
+                        <div className="pt-8 mt-8 border-t border-white/10 space-y-2">
                             <button
                                 onClick={() => {
                                     if (confirm('Reset all settings to default?')) {
@@ -333,12 +337,22 @@ export default function BrokerSettingsPage() {
                                         window.location.reload();
                                     }
                                 }}
-                                className="w-full flex items-center gap-3 p-3 rounded-lg text-left text-red-400 hover:bg-red-500/10 transition-colors"
+                                className="w-full flex items-center gap-3 p-3 rounded-lg text-left text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                                 <span className="font-medium">Reset Defaults</span>
+                            </button>
+
+                            <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center gap-3 p-3 rounded-lg text-left text-red-400 hover:bg-red-500/10 transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span className="font-medium">Log Out</span>
                             </button>
                         </div>
                     </div>

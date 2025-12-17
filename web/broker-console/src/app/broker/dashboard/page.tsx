@@ -1,6 +1,6 @@
 'use client';
 
-import { Navbar } from '@/components/layout/Navbar';
+import { BrokerNavbar } from '@/components/layout/BrokerNavbar';
 import { Button } from '@/components/ui/Button';
 import { LoanCard } from '@/components/LoanCard';
 import { getLoans } from '@/lib/api';
@@ -36,7 +36,7 @@ export default function BrokerDashboardPage() {
 
     return (
         <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-            <Navbar />
+            <BrokerNavbar />
             <div className="pt-32 pb-20 px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-8 gap-4">
