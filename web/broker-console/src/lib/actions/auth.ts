@@ -12,6 +12,7 @@ const RegisterSchema = z.object({
     password: z.string().min(6),
     role: z.enum(['BORROWER', 'BROKER']),
     brokerName: z.string().optional(),
+    brokerId: z.string().optional(),
 });
 
 export async function registerUser(data: z.infer<typeof RegisterSchema>) {
@@ -21,7 +22,7 @@ export async function registerUser(data: z.infer<typeof RegisterSchema>) {
         return { error: "Invalid fields" };
     }
 
-    const { firstName, lastName, middleName, email, password, role, brokerName } = validatedFields.data;
+    const { firstName, lastName, middleName, email, password, role, brokerName, brokerId: providedBrokerId } = validatedFields.data;
     const normalizedEmail = email.toLowerCase();
     const fullName = `${firstName} ${middleName ? middleName + ' ' : ''}${lastName}`;
 
@@ -37,7 +38,7 @@ export async function registerUser(data: z.infer<typeof RegisterSchema>) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        let brokerId = null;
+        let brokerId = providedBrokerId || null;
 
         // If Broker, create the Broker entity first
         if (role === 'BROKER' && brokerName) {

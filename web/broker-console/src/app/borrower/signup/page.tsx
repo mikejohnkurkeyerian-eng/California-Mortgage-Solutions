@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
@@ -20,6 +20,8 @@ export default function BorrowerSignupPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const brokerId = searchParams.get('ref');
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,7 +41,8 @@ export default function BorrowerSignupPage() {
                 lastName: formData.lastName,
                 email: formData.email,
                 password: formData.password,
-                role: 'BORROWER'
+                role: 'BORROWER',
+                brokerId: brokerId || undefined
             });
 
             if (result.error) {

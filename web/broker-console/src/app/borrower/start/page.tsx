@@ -14,6 +14,7 @@ function BorrowerStartContent() {
     const router = useRouter();
     const { borrowerId, isLoading } = useBorrowerAuth();
     const callbackUrl = searchParams.get('callbackUrl');
+    const ref = searchParams.get('ref');
 
     useEffect(() => {
         if (!isLoading && borrowerId) {
@@ -21,13 +22,19 @@ function BorrowerStartContent() {
         }
     }, [borrowerId, isLoading, router]);
 
-    const registerLink = callbackUrl
-        ? `/borrower/signup?role=BORROWER&callbackUrl=${encodeURIComponent(callbackUrl)}`
-        : '/borrower/signup?role=BORROWER';
+    const registerParams = new URLSearchParams();
+    registerParams.set('role', 'BORROWER');
+    if (callbackUrl) registerParams.set('callbackUrl', callbackUrl);
+    if (ref) registerParams.set('ref', ref);
 
-    const loginLink = callbackUrl
-        ? `/borrower/login?role=BORROWER&callbackUrl=${encodeURIComponent(callbackUrl)}`
-        : '/borrower/login?role=BORROWER';
+    const loginParams = new URLSearchParams();
+    loginParams.set('role', 'BORROWER');
+    if (callbackUrl) loginParams.set('callbackUrl', callbackUrl);
+    // Login doesn't usually need ref but good for context if they sign up from login page later? 
+    // Usually only signup needs it.
+
+    const registerLink = `/borrower/signup?${registerParams.toString()}`;
+    const loginLink = `/borrower/login?${loginParams.toString()}`;
 
     return (
         <main className="min-h-screen bg-white dark:bg-slate-900">
