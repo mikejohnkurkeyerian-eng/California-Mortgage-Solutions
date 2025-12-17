@@ -48,22 +48,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const { email, password, twoFactorCode } = parsedCredentials.data;
                     const normalizedEmail = email.toLowerCase();
                     const user = await getUser(normalizedEmail);
-                    if (!user) return null;
+                    if (!user) {
+                        console.warn(`❌ Auth Failed: User not found for email ${normalizedEmail}`);
+                        return null;
+                    }
 
                     const passwordsMatch = await bcrypt.compare(password, user.password || '');
-                    if (!passwordsMatch) return null;
+                    if (!passwordsMatch) {
+                        console.warn(`❌ Auth Failed: Password mismatch for user ${normalizedEmail}`);
+                        return null;
+                    }
 
                     if (user.twoFactorEnabled) {
                         if (!twoFactorCode) {
+                            console.warn(`❌ Auth Failed: 2FA validation required for ${normalizedEmail}`);
                             throw new Error("2FA_REQUIRED");
                         }
                         const { authenticator } = await import('otplib');
                         const isValid = authenticator.check(twoFactorCode, user.twoFactorSecret || '');
                         if (!isValid) {
+                            console.warn(`❌ Auth Failed: Invalid 2FA code for ${normalizedEmail}`);
                             throw new Error("INVALID_2FA_CODE");
                         }
                     }
 
+                    console.log(`✅ Auth Success: User ${normalizedEmail} logged in.`);
                     return {
                         id: user.id,
                         email: user.email,
@@ -76,6 +85,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         brokerId: user.brokerId
                     };
                 }
+                console.warn('❌ Auth Failed: Invalid credential format');
                 return null;
             },
         }),
