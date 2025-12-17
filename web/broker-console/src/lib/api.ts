@@ -5,9 +5,17 @@ import { LoanApplication } from '@/types/shared';
 export type { LoanApplication };
 
 export const getLoans = async (): Promise<LoanApplication[]> => {
-  const loans = await getLoansAction();
-  // Map database shape to frontend shape if needed, currently handled in action
-  return loans as any[];
+  try {
+    const loans = await getLoansAction();
+    if (!Array.isArray(loans)) {
+      console.warn('getLoansAction returned non-array:', loans);
+      return [];
+    }
+    return loans as any[];
+  } catch (error) {
+    console.error('getLoans wrapper error:', error);
+    return [];
+  }
 };
 
 export const getLoanById = async (id: string): Promise<LoanApplication | undefined> => {
