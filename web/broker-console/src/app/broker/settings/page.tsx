@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Navbar } from '@/components/layout/Navbar';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Link } from 'next/link';
+import { BrokerNavbar } from '@/components/layout/BrokerNavbar';
 import { useBrokerSettings, EmailSettings } from '@/context/BrokerContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
