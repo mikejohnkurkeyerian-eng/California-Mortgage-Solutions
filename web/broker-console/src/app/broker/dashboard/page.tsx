@@ -56,7 +56,7 @@ export default function BrokerDashboardPage() {
                             </Link>
                         </div>
                     </div>
-                    <div className="mb-8">
+                    <div id="invite-section" className="mb-8">
                         <InvitationLink />
                     </div>
 
@@ -111,10 +111,10 @@ export default function BrokerDashboardPage() {
                     ) : (
                         <div className="text-center py-12 bg-white dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm">
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Applications Yet</h3>
-                            <p className="text-slate-600 dark:text-slate-400 mb-6">Start a new loan application to see it here.</p>
-                            <Link href="/borrower/start">
+                            <p className="text-slate-600 dark:text-slate-400 mb-6">Invite a borrower to start a new application.</p>
+                            <Link href="#invite-section">
                                 <button className="px-6 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg font-medium transition-colors">
-                                    Start New Application
+                                    Invite Borrower
                                 </button>
                             </Link>
                         </div>
