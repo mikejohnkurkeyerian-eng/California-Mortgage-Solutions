@@ -40,6 +40,17 @@ export async function registerUser(data: z.infer<typeof RegisterSchema>) {
 
         let brokerId = providedBrokerId || null;
 
+        // Verify Broker exists if ID is provided
+        if (brokerId) {
+            const brokerExists = await prisma.broker.findUnique({
+                where: { id: brokerId }
+            });
+            if (!brokerExists) {
+                console.warn(`Invalid brokerId provided during registration: ${brokerId}. Ignoring.`);
+                brokerId = null;
+            }
+        }
+
         // If Broker, create the Broker entity first
         if (role === 'BROKER' && brokerName) {
             const broker = await prisma.broker.create({
