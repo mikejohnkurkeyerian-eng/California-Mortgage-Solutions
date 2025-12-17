@@ -48,14 +48,12 @@ export function Navbar() {
                         <Link href="/about" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
                             How it Works
                         </Link>
-                        {borrowerId ? (
-                            <button
-                                onClick={() => logout()}
-                                className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold"
-                            >
-                                Sign Out
-                            </button>
-                        ) : (
+                        {borrowerId && (
+                            <Link href="/borrower/resources" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                                Resources
+                            </Link>
+                        )}
+                        {!borrowerId && (
                             <Link href="/borrower/login" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
                                 Login
                             </Link>
