@@ -62,16 +62,19 @@ export const authConfig = {
             return true;
         },
         async session({ session, token }) {
+            // DEBUG: Log session creation to trace brokerId
+            // console.log("Session Callback - Token:", { role: token.role, brokerId: token.brokerId });
+
             if (token.sub && session.user) {
                 session.user.id = token.sub;
             }
             if (token.role && session.user) {
                 (session.user as any).role = token.role;
             }
-            if (token.brokerId && session.user) {
-                (session.user as any).brokerId = token.brokerId;
-            }
+            // Always attempt to set brokerId, even if undefined, to ensure the field exists on the object
+            // Cast to any to avoid strict TS if types aren't perfect yet
             if (session.user) {
+                (session.user as any).brokerId = token.brokerId || null;
                 (session.user as any).firstName = token.firstName as string;
                 (session.user as any).lastName = token.lastName as string;
                 (session.user as any).middleName = token.middleName as string;
