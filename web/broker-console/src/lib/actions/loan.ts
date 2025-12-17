@@ -6,12 +6,12 @@ import { revalidatePath } from 'next/cache';
 
 export async function createLoan(data: any) {
     // DEBUG: Bypassing Auth to isolate deadlock
-    // const session = await auth(); 
-    const session = { user: { id: "db49b3b9-60db-482d-8cb6-2b119695da1d" } };
+    const session = await auth();
+    // const session = { user: { id: "db49b3b9-60db-482d-8cb6-2b119695da1d" } };
 
-    // if (!session?.user?.id) {
-    //     return { error: "Unauthorized" };
-    // }
+    if (!session?.user?.id) {
+        return { error: "Unauthorized" };
+    }
 
     try {
         console.log('[CREATE_LOAN] 1. Auth Verified. User:', session.user.id);
