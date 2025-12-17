@@ -10,8 +10,11 @@ import { useRouter } from 'next/navigation';
 
 import { signIn } from 'next-auth/react';
 
+import { useToast } from '@/context/ToastContext';
+
 export default function BrokerLoginPage() {
     const router = useRouter();
+    const { setToast } = useToast();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
@@ -48,9 +51,11 @@ export default function BrokerLoginPage() {
                 setError('Invalid email or password');
                 setIsLoading(false);
             } else {
-                console.log("Login Success. Hard Redirecting...");
-                // Force hard reload to ensure session cookies are picked up by Middleware
-                window.location.href = '/broker/dashboard';
+                console.log("Login Success. Redirecting...");
+                setToast({ message: 'Login successful! Redirecting...', type: 'success' });
+                // Refresh router cache to ensure server components see new session
+                router.refresh();
+                router.replace('/broker/dashboard');
             }
         } catch (err: any) {
             console.error('Login Exception:', err);

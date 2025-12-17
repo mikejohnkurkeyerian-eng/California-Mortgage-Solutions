@@ -66,15 +66,16 @@ export default function BorrowerLoginPage() {
                 setIsLoading(false);
             } else {
                 // Success
-                console.log("Login Success. Hard Redirecting...");
+                console.log("Login Success. Redirecting...");
                 let dest = '/borrower/dashboard';
                 if (window.location.search.includes('callbackUrl')) {
                     const params = new URLSearchParams(window.location.search);
                     dest = params.get('callbackUrl') || '/borrower/dashboard';
                 }
 
-                // Force hard reload
-                window.location.href = dest;
+                // Refresh and navigate
+                router.refresh();
+                router.replace(dest);
             }
         } catch (err) {
             console.error('Login error:', err);
