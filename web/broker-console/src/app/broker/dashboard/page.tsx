@@ -208,3 +208,46 @@ function DebugSessionInfo() {
     );
 }
 
+
+function DebugLoanTable() {
+    const { data: debugLoans, isLoading } = useQuery({
+        queryKey: ['debug-loans'],
+        queryFn: async () => getDebugLoans(),
+    });
+
+    if (isLoading) return <div className="mt-2 text-yellow-600">Loading Raw DB Data...</div>;
+
+    if (!debugLoans || debugLoans.length === 0) return <div className="mt-2 text-yellow-600">No Loans Found in DB (Top 10)</div>;
+
+    return (
+        <div className="mt-2 overflow-x-auto">
+            <h5 className="font-bold mb-1 border-b border-yellow-200 pb-1">Raw DB Data (Top 10 Recent)</h5>
+            <table className="w-full text-left text-[10px] border-collapse">
+                <thead>
+                    <tr className="border-b border-yellow-200 dark:border-yellow-800">
+                        <th className="p-1">Created</th>
+                        <th className="p-1">User Email</th>
+                        <th className="p-1">Broker ID in DB</th>
+                        <th className="p-1">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {debugLoans.map((l: any) => (
+                        <tr key={l.id} className="border-b border-yellow-100 dark:border-yellow-900/50">
+                            <td className="p-1">{new Date(l.createdAt).toLocaleTimeString()}</td>
+                            <td className="p-1">{l.user?.email || 'N/A'}</td>
+                            <td className="p-1 font-bold font-mono">
+                                {l.brokerId ? (
+                                    <span className="text-green-600">{l.brokerId.slice(0, 8)}...</span>
+                                ) : (
+                                    <span className="text-red-500">NULL</span>
+                                )}
+                            </td>
+                            <td className="p-1">{l.status}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
