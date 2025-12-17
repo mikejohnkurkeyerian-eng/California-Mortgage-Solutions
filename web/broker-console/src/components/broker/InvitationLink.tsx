@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useBrokerSettings } from '@/context/BrokerContext';
 import { EmailService } from '@/lib/email-service';
@@ -12,15 +13,16 @@ export function InvitationLink() {
     const [recipientEmail, setRecipientEmail] = useState('');
     const [isSending, setIsSending] = useState(false);
 
-    // Get Broker ID from settings or session (mocking session access here or passed prop)
-    // For now, we'll use the first underwriter ID or a default if not found
-    const brokerId = settings.underwriters[0]?.id || 'default-broker';
-    const brokerName = settings.emailSettings?.fromName || 'Mortgage Broker';
+    const { data: session } = useSession();
+    // Get Broker ID from session
+    // This ensures we linking to the actual Broker entity associated with this user
+    const brokerId = session?.user?.brokerId;
+    const brokerName = session?.user?.name || settings.emailSettings?.fromName || 'Mortgage Broker';
 
     // Construct Link (Assuming running on localhost:3000 or production domain)
     // We use window.location.origin if available, else placeholder
     const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-    const inviteLink = `${origin}/borrower/start?ref=${brokerId}`;
+    const inviteLink = brokerId ? `${origin}/borrower/start?ref=${brokerId}` : 'Loading...';
 
     const handleCopy = () => {
         navigator.clipboard.writeText(inviteLink);
@@ -31,6 +33,11 @@ export function InvitationLink() {
         e.preventDefault();
         if (!recipientEmail || !recipientEmail.includes('@')) {
             setToast({ message: 'Please enter a valid email address.', type: 'error' });
+            return;
+        }
+
+        if (!brokerId) {
+            setToast({ message: 'Broker ID not found. Please refresh.', type: 'error' });
             return;
         }
 
@@ -85,7 +92,8 @@ export function InvitationLink() {
                             />
                             <button
                                 onClick={handleCopy}
-                                className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium"
+                                disabled={!brokerId}
+                                className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium disabled:opacity-50"
                             >
                                 Copy
                             </button>
