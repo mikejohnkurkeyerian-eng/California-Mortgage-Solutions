@@ -816,6 +816,18 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                         assets: extractedLoanData.assets,
                         debts: extractedLoanData.debts,
                         transactionDetails: extractedLoanData.transactionDetails,
+                        full1003: real1003Data,
+                        documents: documents.flatMap(doc =>
+                            doc.files.map(f => ({
+                                id: Math.random().toString(36).substr(2, 9),
+                                type: doc.type,
+                                fileName: f.name,
+                                fileSize: f.file ? f.file.size : 0,
+                                mimeType: f.file ? f.file.type : 'application/pdf',
+                                uploadedAt: new Date().toISOString(),
+                                verificationStatus: 'Pending'
+                            }))
+                        ),
                         // Save AUS Metrics
                         debtToIncomeRatio: result.metrics.dti / 100, // Convert % to decimal
                         loanToValueRatio: result.metrics.ltv / 100,
