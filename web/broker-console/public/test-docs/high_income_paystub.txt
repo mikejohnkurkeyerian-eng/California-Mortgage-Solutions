@@ -1,4 +1,0 @@
-This is a dummy paystub file for testing high income extraction.
-Employer: Tech Corp
-Gross Pay: $12,500.00
-Period: Monthly

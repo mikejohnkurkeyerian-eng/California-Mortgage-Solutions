@@ -162,7 +162,17 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
             // 1. Check Type Mismatch
             if (forcedType && forcedType !== 'Other') {
                 if (result.type !== 'OTHER' && result.type !== forcedType && result.confidence > 0.4) {
-                    issues.push(`This looks like a ${result.type.replace(/_/g, ' ')} (${Math.round(result.confidence * 100)}% confidence), but you are uploading it to ${forcedType.replace(/_/g, ' ')}.`);
+                    let mismatchMsg = `This looks like a ${result.type.replace(/_/g, ' ')} (${Math.round(result.confidence * 100)}% confidence), but you are uploading it to ${forcedType.replace(/_/g, ' ')}.`;
+
+                    // Recommendation Logic
+                    if (requirements) {
+                        const betterMatch = requirements.find(r => r.type === result.type);
+                        if (betterMatch) {
+                            mismatchMsg += ` Recommended: Upload to "${betterMatch.name}" instead.`;
+                        }
+                    }
+
+                    issues.push(mismatchMsg);
                 }
             }
 

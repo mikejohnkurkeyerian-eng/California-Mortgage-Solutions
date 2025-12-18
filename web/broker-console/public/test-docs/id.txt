@@ -1,7 +1,4 @@
-Driver License
-State ID
-Date of Birth: 01/01/1980
-DOB: 01/01/1980
-DL No: D1234567
-Iss: 01/01/2020
-Exp: 01/01/2025
+This is a dummy paystub file for testing high income extraction.
+Employer: Tech Corp
+Gross Pay: $12,500.00
+Period: Monthly
