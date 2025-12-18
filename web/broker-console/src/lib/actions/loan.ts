@@ -69,8 +69,21 @@ export async function updateLoan(id: string, data: any) {
             where: { id },
         });
 
-        if (!existingLoan || existingLoan.userId !== session.user.id) {
-            return { error: "Loan not found or unauthorized" };
+        if (!existingLoan) {
+            return { error: "Loan not found" };
+        }
+
+        // Check if user is the borrower OR the assigned broker
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { role: true, brokerId: true }
+        });
+
+        const isBorrower = existingLoan.userId === session.user.id;
+        const isAssignedBroker = user?.role === 'BROKER' && user.brokerId && existingLoan.brokerId === user.brokerId;
+
+        if (!isBorrower && !isAssignedBroker) {
+            return { error: "Unauthorized access to this loan" };
         }
 
         const loan = await prisma.loanApplication.update({
