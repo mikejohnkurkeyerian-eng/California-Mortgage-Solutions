@@ -1,60 +1,59 @@
 import { LoanApplication } from '@/types/shared'
+import { Button } from '@/components/ui/Button'
+import Link from 'next/link'
 
 interface LoanDocumentsProps {
   loan: LoanApplication
 }
 
 export function LoanDocuments({ loan }: LoanDocumentsProps) {
-  if (loan.documents.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">No documents uploaded yet</p>
-      </div>
-    )
-  }
-
+  // We'll show a summary card that links to the full manager
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents ({loan.documents.length})</h3>
-      <div className="grid grid-cols-1 gap-4">
-        {loan.documents.map((doc) => (
-          <div
-            key={doc.id}
-            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl">📄</span>
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Documents</h3>
+        <Link href={`/broker/loans/${loan.id}/documents`}>
+          <Button variant="outline" size="sm">Manage Documents</Button>
+        </Link>
+      </div>
+
+      <div className="p-6">
+        {loan.documents.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-400 mb-3">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <p className="text-slate-500 mb-4">No documents uploaded yet.</p>
+            <Link href={`/broker/loans/${loan.id}/documents`}>
+              <Button variant="secondary">View Requirements</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {loan.documents.slice(0, 3).map((doc) => (
+              <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">📄</span>
                   <div>
-                    <h4 className="font-medium text-gray-900">{doc.fileName}</h4>
-                    <p className="text-sm text-gray-500">{doc.type}</p>
+                    <p className="font-medium text-sm text-slate-900 dark:text-white truncate max-w-[180px]">{doc.fileName}</p>
+                    <p className="text-xs text-slate-500">{doc.type}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-600 ml-11">
-                  <span>{(doc.fileSize / 1024).toFixed(2)} KB</span>
-                  <span>•</span>
-                  <span>Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    doc.verificationStatus === 'Verified'
-                      ? 'bg-green-100 text-green-800'
-                      : doc.verificationStatus === 'Rejected'
-                      ? 'bg-red-100 text-red-800'
-                      : doc.verificationStatus === 'NeedsReview'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
+                <span className={`text-[10px] px-2 py-0.5 rounded-full ${doc.verificationStatus === 'Verified' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                  }`}>
                   {doc.verificationStatus}
                 </span>
               </div>
-            </div>
+            ))}
+            {loan.documents.length > 3 && (
+              <div className="text-center pt-2">
+                <Link href={`/broker/loans/${loan.id}/documents`} className="text-sm text-blue-600 hover:underline">
+                  + {loan.documents.length - 3} more
+                </Link>
+              </div>
+            )}
           </div>
-        ))}
+        )}
       </div>
     </div>
   )
