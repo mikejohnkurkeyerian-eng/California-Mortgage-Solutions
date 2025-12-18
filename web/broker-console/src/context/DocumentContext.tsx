@@ -226,21 +226,57 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                     setDocuments(prev => {
                         const mergedDocs: DocumentRequirement[] = [];
 
-                        // First, process all calculated requirements
+                        // 1. Process Calculated Requirements (Standard 1003 logic)
                         requiredDocs.forEach(req => {
                             const existing = prev.find(p => p.type === req.type);
                             if (existing) {
-                                // Keep existing state but ensure it's marked as required
                                 mergedDocs.push({ ...existing, required: true });
                             } else {
-                                // Add new requirement
                                 mergedDocs.push(req);
                             }
                         });
 
-                        // Second, keep any other existing docs that have files uploaded (don't lose user data)
+                        // 2. Process Custom Conditions (Added by Broker)
+                        if (loanWithFull1003.customConditions && Array.isArray(loanWithFull1003.customConditions)) {
+                            loanWithFull1003.customConditions.forEach((condition: any) => {
+                                // Check if this condition is already in our list (by ID)
+                                const existing = prev.find(p => p.id === condition.id);
+
+                                if (existing) {
+                                    // Update status if changed remotely
+                                    mergedDocs.push({
+                                        ...existing,
+                                        required: true,
+                                        name: condition.name // Ensure name is up to date
+                                    });
+                                } else {
+                                    // Add as new requirement
+                                    mergedDocs.push({
+                                        id: condition.id,
+                                        type: 'Other', // Use generic type for custom conditions
+                                        name: condition.name, // Display the custom name
+                                        status: condition.status === 'satisfied' ? 'uploaded' : 'pending',
+                                        required: true,
+                                        files: [],
+                                        insights: []
+                                    });
+                                }
+                            });
+                        }
+
+                        // 3. Keep other existing docs (User added manually or legacy)
                         prev.forEach(p => {
-                            if (!mergedDocs.find(m => m.type === p.type) && p.files.length > 0) {
+                            // If it's not in the merged list yet...
+                            const isAlreadyIncluded = mergedDocs.find(m => m.id === p.id || m.type === p.type);
+
+                            // For custom conditions (type 'Other'), we must check by ID strictly to avoid deduplicating distinct custom items
+                            // For standard types (e.g. 'W2'), type uniqueness is usually identifying
+                            const isCustom = p.type === 'Other';
+                            const matchFound = isCustom
+                                ? mergedDocs.find(m => m.id === p.id)
+                                : mergedDocs.find(m => m.type === p.type);
+
+                            if (!matchFound && p.files.length > 0) {
                                 mergedDocs.push({ ...p, required: false, name: p.name + ' (Optional)' });
                             }
                         });
