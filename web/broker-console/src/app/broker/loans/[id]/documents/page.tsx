@@ -11,6 +11,7 @@ import { LoanApplication } from '@/types/shared';
 import { useToast } from '@/context/ToastContext';
 import { useBrokerSettings } from '@/context/BrokerContext';
 import { useUpdateLoan } from '@/hooks/useBroker';
+import { classifyDocument } from '@/lib/document-ai';
 
 interface PageProps {
     params: {
@@ -33,6 +34,17 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
     // as we now rely on `loan.customConditions` from the query data, which is persisted.
     // Keeping it here for now as it was in the original code, but it's effectively shadowed.
     const [customConditions, setCustomConditions] = useState<{ id: string, name: string, status: 'pending' | 'satisfied' }[]>([]);
+
+    // Validation State
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [validationModal, setValidationModal] = useState<{
+        isOpen: boolean;
+        file?: File;
+        forcedType?: string;
+        detectedType?: string;
+        warning?: string;
+        confidence?: number;
+    }>({ isOpen: false });
 
     if (isLoading) {
         return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -129,13 +141,82 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
     };
 
     const handleFileUpload = async (files: File[], forcedType?: string) => {
+        if (files.length === 0) return;
+
+        // Only validate single file uploads for now to keep UX simple
+        if (files.length > 1 && !forcedType) {
+            processUpload(files, forcedType);
+            return;
+        }
+
+        const file = files[0];
+        setIsAnalyzing(true);
+        setToast({ message: "Analyzing document...", type: 'info', duration: 2000 });
+
+        try {
+            const result = await classifyDocument(file);
+            console.log("Analysis Result:", result);
+
+            const issues: string[] = [];
+
+            // 1. Check Type Mismatch
+            if (forcedType && forcedType !== 'Other') {
+                if (result.type !== 'OTHER' && result.type !== forcedType && result.confidence > 0.4) {
+                    issues.push(`This looks like a ${result.type.replace(/_/g, ' ')} (${Math.round(result.confidence * 100)}% confidence), but you are uploading it to ${forcedType.replace(/_/g, ' ')}.`);
+                }
+            }
+
+            // 2. Check Name Mismatch
+            if (result.extractedText && result.extractedText.length > 50) {
+                const borrowerLastName = loan.borrower.lastName.toLowerCase();
+                if (!result.extractedText.toLowerCase().includes(borrowerLastName)) {
+                    issues.push(`The borrower's last name "${loan.borrower.lastName}" was not found in the document.`);
+                }
+            }
+
+            setIsAnalyzing(false);
+
+            if (issues.length > 0) {
+                // Show Warning Modal
+                setValidationModal({
+                    isOpen: true,
+                    file: file,
+                    forcedType: forcedType,
+                    detectedType: result.type,
+                    warning: issues.join(' '),
+                    confidence: result.confidence
+                });
+            } else {
+                // All good, proceed
+                processUpload([file], forcedType);
+            }
+
+        } catch (error) {
+            console.error("Analysis failed", error);
+            setIsAnalyzing(false);
+            processUpload([file], forcedType);
+        }
+    };
+
+    const confirmValidation = () => {
+        if (validationModal.file) {
+            processUpload([validationModal.file], validationModal.forcedType);
+            setValidationModal({ isOpen: false });
+        }
+    };
+
+    const cancelValidation = () => {
+        setValidationModal({ isOpen: false });
+        setToast({ message: "Upload cancelled", type: 'info' });
+    };
+
+    const processUpload = async (files: File[], forcedType?: string) => {
         setToast({ message: `Uploading ${files.length} documents...`, type: 'info' });
 
-        // Prepare new documents metadata
         const newDocs: any[] = [];
 
         for (const file of files) {
-            const type = forcedType || 'Other'; // Simple fallback or use classification if imported
+            const type = forcedType || 'Other';
 
             newDocs.push({
                 id: 'doc-' + Math.random().toString(36).substr(2, 9),
@@ -145,13 +226,12 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                 fileSize: file.size,
                 mimeType: file.type,
                 uploadedAt: new Date().toISOString(),
-                uploadedBy: 'Broker', // Distinct from Borrower
-                storagePath: 'mock/path', // Mock S3
-                verificationStatus: 'Verified' // Broker uploads are trusted? Or Pending? Let's say Verified for now.
+                uploadedBy: 'Broker',
+                storagePath: 'mock/path',
+                verificationStatus: 'Verified'
             });
         }
 
-        // Merge with existing
         const updatedDocuments = [...(loan.documents || []), ...newDocs];
 
         updateLoan.mutate({
@@ -516,6 +596,58 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Validation Modal */}
+            {
+                validationModal.isOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full mx-4 border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200">
+                            <div className="p-6">
+                                <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mb-4 mx-auto">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                </div>
+
+                                <h3 className="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">
+                                    Potential Issue Detected
+                                </h3>
+
+                                <p className="text-center text-slate-600 dark:text-slate-400 mb-6">
+                                    {validationModal.warning}
+                                </p>
+
+                                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 mb-6 border border-slate-100 dark:border-slate-700">
+                                    <div className="flex justify-between text-sm mb-1">
+                                        <span className="text-slate-500">File:</span>
+                                        <span className="font-medium truncate max-w-[200px]">{validationModal.file?.name}</span>
+                                    </div>
+                                    {validationModal.detectedType && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-slate-500">Detected:</span>
+                                            <span className="font-medium text-primary-600">{validationModal.detectedType}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <Button
+                                        variant="outline"
+                                        onClick={cancelValidation}
+                                        className="flex-1 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={confirmValidation}
+                                        className="flex-1 bg-amber-500 hover:bg-amber-600 text-white border-none"
+                                    >
+                                        Proceed Anyway
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </main>
     );
 }
