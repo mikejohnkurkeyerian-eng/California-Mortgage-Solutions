@@ -12,8 +12,9 @@ export interface LoanApplication {
         firstName: string;
         lastName: string;
         email: string;
-        phone: string;
+        phone?: string;
         citizenship?: string;
+        maritalStatus?: string;
     };
     employment: {
         incomeType: 'W2' | 'SelfEmployed' | 'Retired' | 'Unemployed' | 'Other' | 'Military';
