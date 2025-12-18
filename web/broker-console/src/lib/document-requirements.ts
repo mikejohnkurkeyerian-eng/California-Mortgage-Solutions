@@ -17,7 +17,7 @@ export interface LoanApplication {
         maritalStatus?: string;
     };
     employment: {
-        incomeType: 'W2' | 'SelfEmployed' | 'Retired' | 'Unemployed' | 'Other' | 'Military';
+        incomeType: 'W2' | 'SelfEmployed' | 'Retired' | 'Unemployed' | 'Other' | 'Military' | 'BusinessOwner';
         employerName?: string;
         jobTitle?: string;
         monthlyIncome: number;
