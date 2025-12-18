@@ -182,6 +182,14 @@ export interface LoanApplication {
     borrower: BorrowerProfile;
     coBorrower?: BorrowerProfile;
 
+    // Broker's Custom Conditions
+    customConditions?: {
+        id: string;
+        name: string;
+        status: 'pending' | 'satisfied';
+        requestedAt: string;
+    }[];
+
     // Property
     property: PropertyInfo;
 

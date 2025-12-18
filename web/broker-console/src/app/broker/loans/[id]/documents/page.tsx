@@ -68,6 +68,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
     // Grouping
     const groupedReqs: Record<string, typeof requirements> = {};
     const otherReqs: typeof requirements = [];
+    const customConditions = loan.customConditions || [];
 
     requirements.forEach(req => {
         const cat = getCategoryForType(req.type);
@@ -79,11 +80,91 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
         }
     });
 
-    const handleAddCondition = () => {
+    const handleAddCondition = async () => {
         const name = prompt("Enter new condition/document name:");
         if (name) {
-            setCustomConditions([...customConditions, { id: Math.random().toString(), name, status: 'pending' }]);
-            setToast({ message: "Condition added", type: 'success' });
+            const newCondition = {
+                id: Math.random().toString(36).substr(2, 9),
+                name,
+                status: 'pending' as const,
+                requestedAt: new Date().toISOString()
+            };
+
+            const updatedConditions = [...customConditions, newCondition];
+
+            // Persist to DB
+            updateLoan.mutate({
+                id: loan.id,
+                data: { ...loan, customConditions: updatedConditions }
+            }, {
+                onSuccess: () => {
+                    setToast({ message: "Condition added", type: 'success' });
+                },
+                onError: () => {
+                    setToast({ message: "Failed to save condition", type: "error" });
+                }
+            });
+        }
+    };
+
+    const handleRemoveCondition = async (id: string) => {
+        if (!confirm("Remove this condition?")) return;
+
+        const updatedConditions = customConditions.filter(c => c.id !== id);
+        updateLoan.mutate({
+            id: loan.id,
+            data: { ...loan, customConditions: updatedConditions }
+        });
+    };
+
+    const handleRequestMissing = async () => {
+        if (!settings.emailSettings) {
+            setToast({ message: "Please configure email settings first", type: 'error' });
+            return;
+        }
+
+        const missing = requirements.filter(req => {
+            const uploaded = docStatusMap.get(req.type) || [];
+            return uploaded.length === 0;
+        });
+
+        if (missing.length === 0 && customConditions.every(c => c.status === 'satisfied')) {
+            setToast({ message: "No missing documents!", type: 'success' });
+            return;
+        }
+
+        const emailBody = `
+            <h2>Missing Document Request</h2>
+            <p>Dear ${loan.borrower.firstName},</p>
+            <p>We are processing your loan application and need the following documents to proceed:</p>
+            <ul>
+                ${missing.map(r => `<li><b>${r.name}</b>: ${r.insights[0] || ''}</li>`).join('')}
+                ${customConditions.filter(c => c.status !== 'satisfied').map(c => `<li><b>${c.name}</b> (Additional Request)</li>`).join('')}
+            </ul>
+            <p>Please upload these to your portal as soon as possible.</p>
+            <p>Thank you,<br/>Broker Team</p>
+        `;
+
+        try {
+            setToast({ message: "Sending request...", type: "info" });
+            const res = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: loan.borrower.email,
+                    subject: `Action Required: Missing Documents for Loan ${loan.id.split('-')[0]}`,
+                    html: emailBody,
+                    settings: settings.emailSettings
+                })
+            });
+
+            if (res.ok) {
+                setToast({ message: "Request sent successfully!", type: 'success' });
+            } else {
+                setToast({ message: "Failed to send email", type: 'error' });
+            }
+        } catch (e) {
+            setToast({ message: "Error sending email", type: 'error' });
         }
     };
 
@@ -115,7 +196,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                         <Button variant="outline" onClick={handleAddCondition} className="border-dashed border-slate-300 dark:border-slate-700">
                             + Add Condition
                         </Button>
-                        <Button className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                        <Button onClick={handleRequestMissing} className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
                             Request Missing
                         </Button>
                     </div>
@@ -202,115 +283,113 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                                             const isSatisfied = uploadedFiles.length > 0;
                                             return (
                                                 <div key={req.id} className="p-4 sm:p-5">
-                                                    <div className="flex justify-between items-center">
-                                                        <h3 className="font-medium">{req.name}</h3>
-                                                        {isSatisfied ? <span className="text-green-500 text-sm">Satisfied</span> : <span className="text-amber-500 text-sm">Pending</span>}
-                                                    </div>
+                                                    {isSatisfied ? <span className="text-green-500 text-sm">Satisfied</span> : <span className="text-amber-500 text-sm">Pending</span>}
                                                 </div>
-                                            )
+                                                </div>
+                                    )
                                         })}
-                                    </div>
                                 </div>
+                            </div>
                             </section>
                         )}
 
 
-                        {/* Additional Conditions Section */}
-                        {customConditions.length > 0 && (
-                            <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="h-8 w-1 bg-purple-500 rounded-full"></div>
-                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Underwriting Conditions</h2>
-                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300">
-                                        {customConditions.length}
-                                    </span>
-                                </div>
-                                <div className="bg-purple-50/50 dark:bg-purple-900/5 rounded-xl border border-purple-100 dark:border-purple-500/20 shadow-sm overflow-hidden">
-                                    <div className="divide-y divide-purple-100/50 dark:divide-purple-500/10">
-                                        {customConditions.map((cond) => (
-                                            <div key={cond.id} className="p-4 sm:p-5 flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="bg-white dark:bg-purple-900/30 p-2 rounded-lg shadow-sm border border-purple-100 dark:border-purple-500/20">
-                                                        <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-semibold text-slate-900 dark:text-white">{cond.name}</h3>
-                                                        <p className="text-xs text-purple-600 dark:text-purple-400">Manual Condition Added by Broker</p>
-                                                    </div>
+                    {/* Additional Conditions Section */}
+                    {customConditions.length > 0 && (
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-8 w-1 bg-purple-500 rounded-full"></div>
+                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Underwriting Conditions</h2>
+                                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300">
+                                    {customConditions.length}
+                                </span>
+                            </div>
+                            <div className="bg-purple-50/50 dark:bg-purple-900/5 rounded-xl border border-purple-100 dark:border-purple-500/20 shadow-sm overflow-hidden">
+                                <div className="divide-y divide-purple-100/50 dark:divide-purple-500/10">
+                                    {customConditions.map((cond) => (
+                                        <div key={cond.id} className="p-4 sm:p-5 flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="bg-white dark:bg-purple-900/30 p-2 rounded-lg shadow-sm border border-purple-100 dark:border-purple-500/20">
+                                                    <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                                                 </div>
-                                                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-red-500">
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                                </Button>
+                                                <div>
+                                                    <h3 className="font-semibold text-slate-900 dark:text-white">{cond.name}</h3>
+                                                    <p className="text-xs text-purple-600 dark:text-purple-400">Manual Condition Added by Broker</p>
+                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </section>
-                        )}
-                    </div>
-
-                    {/* Right Column: Sticky Stats */}
-                    <div className="xl:col-span-1">
-                        <div className="sticky top-24 space-y-6">
-                            <Card className="border-0 shadow-lg bg-gradient-to-br from-slate-900 to-slate-800 text-white overflow-hidden relative">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
-                                <CardContent className="p-6 relative z-10">
-                                    <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
-                                        <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        Document Health
-                                    </h3>
-
-                                    <div className="space-y-6">
-                                        <div>
-                                            <div className="flex justify-between text-sm mb-2 text-slate-300">
-                                                <span>Completion</span>
-                                                <span className="font-bold text-white">
-                                                    {Math.round((Array.from(docStatusMap.keys()).length / Math.max(requirements.length, 1)) * 100)}%
-                                                </span>
-                                            </div>
-                                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-1000 ease-out"
-                                                    style={{ width: `${(Array.from(docStatusMap.keys()).length / Math.max(requirements.length, 1)) * 100}%` }}
-                                                />
-                                            </div>
+                                            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-red-500">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </Button>
                                         </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+                    )}
+                </div>
 
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm border border-white/5">
-                                                <div className="text-2xl font-bold text-white mb-1">{documents.filter(d => d.verificationStatus === 'Verified').length}</div>
-                                                <div className="text-xs text-slate-300 font-medium">Verified</div>
-                                            </div>
-                                            <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm border border-white/5">
-                                                <div className="text-2xl font-bold text-white mb-1">{documents.filter(d => d.verificationStatus === 'Pending').length}</div>
-                                                <div className="text-xs text-slate-300 font-medium">Pending</div>
-                                            </div>
+                {/* Right Column: Sticky Stats */}
+                <div className="xl:col-span-1">
+                    <div className="sticky top-24 space-y-6">
+                        <Card className="border-0 shadow-lg bg-gradient-to-br from-slate-900 to-slate-800 text-white overflow-hidden relative">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
+                            <CardContent className="p-6 relative z-10">
+                                <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    Document Health
+                                </h3>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <div className="flex justify-between text-sm mb-2 text-slate-300">
+                                            <span>Completion</span>
+                                            <span className="font-bold text-white">
+                                                {Math.round((Array.from(docStatusMap.keys()).length / Math.max(requirements.length, 1)) * 100)}%
+                                            </span>
+                                        </div>
+                                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-1000 ease-out"
+                                                style={{ width: `${(Array.from(docStatusMap.keys()).length / Math.max(requirements.length, 1)) * 100}%` }}
+                                            />
                                         </div>
                                     </div>
-                                </CardContent>
-                            </Card>
 
-                            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
-                                <h4 className="font-semibold mb-3 text-sm text-slate-500 uppercase tracking-wider">Quick Actions</h4>
-                                <div className="space-y-2">
-                                    <Button variant="outline" className="w-full justify-start text-left h-auto py-3">
-                                        <div className="flex flex-col items-start gap-0.5">
-                                            <span className="font-medium text-slate-900 dark:text-white">Regenerate Requirements</span>
-                                            <span className="text-xs text-slate-500 leading-none">Refresh based on recent 1003 updates</span>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm border border-white/5">
+                                            <div className="text-2xl font-bold text-white mb-1">{documents.filter(d => d.verificationStatus === 'Verified').length}</div>
+                                            <div className="text-xs text-slate-300 font-medium">Verified</div>
                                         </div>
-                                    </Button>
-                                    <Button variant="outline" className="w-full justify-start text-left h-auto py-3">
-                                        <div className="flex flex-col items-start gap-0.5">
-                                            <span className="font-medium text-slate-900 dark:text-white">Email Reminder</span>
-                                            <span className="text-xs text-slate-500 leading-none">Send nudges for missing docs</span>
+                                        <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm border border-white/5">
+                                            <div className="text-2xl font-bold text-white mb-1">{documents.filter(d => d.verificationStatus === 'Pending').length}</div>
+                                            <div className="text-xs text-slate-300 font-medium">Pending</div>
                                         </div>
-                                    </Button>
+                                    </div>
                                 </div>
+                            </CardContent>
+                        </Card>
+
+                        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+                            <h4 className="font-semibold mb-3 text-sm text-slate-500 uppercase tracking-wider">Quick Actions</h4>
+                            <div className="space-y-2">
+                                <Button variant="outline" className="w-full justify-start text-left h-auto py-3">
+                                    <div className="flex flex-col items-start gap-0.5">
+                                        <span className="font-medium text-slate-900 dark:text-white">Regenerate Requirements</span>
+                                        <span className="text-xs text-slate-500 leading-none">Refresh based on recent 1003 updates</span>
+                                    </div>
+                                </Button>
+                                <Button variant="outline" className="w-full justify-start text-left h-auto py-3">
+                                    <div className="flex flex-col items-start gap-0.5">
+                                        <span className="font-medium text-slate-900 dark:text-white">Email Reminder</span>
+                                        <span className="text-xs text-slate-500 leading-none">Send nudges for missing docs</span>
+                                    </div>
+                                </Button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
+        </main >
     );
 }
