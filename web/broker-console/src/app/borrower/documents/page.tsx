@@ -4,20 +4,31 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { classifyDocument } from '@/lib/document-ai';
 import { Toast } from '@/components/ui/Toast';
 import { useDocuments } from '@/context/DocumentContext';
 import { FileDropZone } from '@/components/documents/FileDropZone';
 
 export default function DocumentsPage() {
-    const { documents, addDocumentFile, addRequirement, submitApplication } = useDocuments();
+    const { documents, addDocumentFile, addRequirement, submitApplication, currentLoan } = useDocuments();
     const router = useRouter();
 
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const activeUploadId = useRef<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Validation State
+    const [validationModal, setValidationModal] = useState<{
+        isOpen: boolean;
+        file?: File;
+        targetDocId?: string;
+        targetDocName?: string;
+        detectedType?: string;
+        warning?: string;
+        confidence?: number;
+    }>({ isOpen: false });
 
     // Filter documents
     const submittedDocs = documents.filter(doc => doc.status === 'uploaded' || doc.status === 'verified');
@@ -98,20 +109,82 @@ export default function DocumentsPage() {
         if (!targetDoc) return;
 
         setIsProcessing(true);
-        setToast({ message: "Uploading...", type: 'info' });
+        setToast({ message: "Analyzing document...", type: 'info' });
 
         try {
-            // Direct upload to the target ID, skipping classification check for manual override
-            addDocumentFile(targetDocId, file, [], undefined);
+            // Run Classification
+            const result = await classifyDocument(file);
+            console.log("Analysis Result:", result);
+
+            const issues: string[] = [];
+
+            // 1. Check Type Mismatch
+            // Allow matching if detected type is exact match OR if detected is generic "OTHER" and target is "Other"
+            if (targetDoc.type !== 'Other') {
+                if (result.type !== 'OTHER' && result.type !== targetDoc.type && result.confidence > 0.4) {
+                    issues.push(`This looks like a ${result.type.replace(/_/g, ' ')} (${Math.round(result.confidence * 100)}% confidence), but you are uploading it to ${targetDoc.name}.`);
+                }
+            }
+
+            // 2. Check Name Mismatch
+            if (result.extractedText && result.extractedText.length > 50 && currentLoan?.borrower?.lastName) {
+                const borrowerLastName = currentLoan.borrower.lastName.toLowerCase();
+                if (!result.extractedText.toLowerCase().includes(borrowerLastName)) {
+                    issues.push(`The borrower's last name "${currentLoan.borrower.lastName}" was not found in the document.`);
+                }
+            }
+
+            setIsProcessing(false);
+
+            if (issues.length > 0) {
+                // Show Warning Modal
+                setValidationModal({
+                    isOpen: true,
+                    file: file,
+                    targetDocId: targetDocId, // Store ID to finish upload
+                    targetDocName: targetDoc.name,
+                    detectedType: result.type,
+                    warning: issues.join(' '),
+                    confidence: result.confidence
+                });
+            } else {
+                // All good, directly upload
+                completeUpload(targetDocId, file);
+            }
+
+        } catch (error) {
+            console.error("Analysis failed", error);
+            setIsProcessing(false);
+            // Fallback: upload anyway if analysis fails
+            completeUpload(targetDocId, file);
+        } finally {
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const completeUpload = (docId: string, file: File) => {
+        try {
+            addDocumentFile(docId, file, [], undefined);
             setToast({ message: "Document uploaded successfully!", type: 'success' });
         } catch (error) {
             console.error(error);
             setToast({ message: "Error processing document.", type: 'error' });
         } finally {
-            setIsProcessing(false);
             activeUploadId.current = null;
-            if (fileInputRef.current) fileInputRef.current.value = '';
         }
+    };
+
+    const confirmValidation = () => {
+        if (validationModal.file && validationModal.targetDocId) {
+            completeUpload(validationModal.targetDocId, validationModal.file);
+            setValidationModal({ isOpen: false });
+        }
+    };
+
+    const cancelValidation = () => {
+        setValidationModal({ isOpen: false });
+        activeUploadId.current = null;
+        setToast({ message: "Upload cancelled", type: 'info' });
     };
 
     const handleSubmit = async () => {
@@ -296,7 +369,60 @@ export default function DocumentsPage() {
                     )}
                 </div>
             </div>
+
+            {/* Validation Modal */}
+            {validationModal.isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full mx-4 border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6">
+                            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500 rounded-full flex items-center justify-center mb-4 mx-auto">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            </div>
+
+                            <h3 className="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">
+                                Potential Issue Detected
+                            </h3>
+
+                            <p className="text-center text-slate-600 dark:text-slate-400 mb-6">
+                                {validationModal.warning}
+                            </p>
+
+                            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 mb-6 border border-slate-100 dark:border-slate-700">
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span className="text-slate-500">File:</span>
+                                    <span className="font-medium truncate max-w-[200px]">{validationModal.file?.name}</span>
+                                </div>
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span className="text-slate-500">Targeting:</span>
+                                    <span className="font-medium text-slate-900 dark:text-white">{validationModal.targetDocName}</span>
+                                </div>
+                                {validationModal.detectedType && (
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-500">Detected:</span>
+                                        <span className="font-medium text-primary-600">{validationModal.detectedType}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="outline"
+                                    onClick={cancelValidation}
+                                    className="flex-1 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={confirmValidation}
+                                    className="flex-1 bg-amber-500 hover:bg-amber-600 text-white border-none"
+                                >
+                                    Proceed Anyway
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
-
