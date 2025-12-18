@@ -40,8 +40,9 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
 
     // 2. Map Uploaded Docs to Requirements
     const docStatusMap = new Map<string, any[]>();
+    const documents = loan.documents || [];
 
-    loan.documents.forEach(doc => {
+    documents.forEach(doc => {
         const existing = docStatusMap.get(doc.type) || [];
         existing.push(doc);
         docStatusMap.set(doc.type, existing);
@@ -199,11 +200,11 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                                     </div>
                                     <div className="p-4 bg-slate-50 rounded-lg">
                                         <div className="text-sm text-slate-500">Documents Verified</div>
-                                        <div className="text-2xl font-bold">{loan.documents.filter(d => d.verificationStatus === 'Verified').length}</div>
+                                        <div className="text-2xl font-bold">{documents.filter(d => d.verificationStatus === 'Verified').length}</div>
                                     </div>
                                     <div className="p-4 bg-slate-50 rounded-lg">
                                         <div className="text-sm text-slate-500">Pending Review</div>
-                                        <div className="text-2xl font-bold">{loan.documents.filter(d => d.verificationStatus === 'Pending').length}</div>
+                                        <div className="text-2xl font-bold">{documents.filter(d => d.verificationStatus === 'Pending').length}</div>
                                     </div>
                                 </div>
                             </CardContent>
