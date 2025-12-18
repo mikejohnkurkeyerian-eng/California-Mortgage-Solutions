@@ -7,7 +7,9 @@ interface LoanDocumentsProps {
 }
 
 export function LoanDocuments({ loan }: LoanDocumentsProps) {
-  // We'll show a summary card that links to the full manager
+  // Guard against undefined documents
+  const documents = loan.documents || [];
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
       <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
@@ -18,7 +20,7 @@ export function LoanDocuments({ loan }: LoanDocumentsProps) {
       </div>
 
       <div className="p-6">
-        {loan.documents.length === 0 ? (
+        {documents.length === 0 ? (
           <div className="text-center py-8">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-400 mb-3">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -30,7 +32,7 @@ export function LoanDocuments({ loan }: LoanDocumentsProps) {
           </div>
         ) : (
           <div className="space-y-3">
-            {loan.documents.slice(0, 3).map((doc) => (
+            {documents.slice(0, 3).map((doc) => (
               <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <span className="text-xl">📄</span>
@@ -45,10 +47,10 @@ export function LoanDocuments({ loan }: LoanDocumentsProps) {
                 </span>
               </div>
             ))}
-            {loan.documents.length > 3 && (
+            {documents.length > 3 && (
               <div className="text-center pt-2">
                 <Link href={`/broker/loans/${loan.id}/documents`} className="text-sm text-blue-600 hover:underline">
-                  + {loan.documents.length - 3} more
+                  + {documents.length - 3} more
                 </Link>
               </div>
             )}
