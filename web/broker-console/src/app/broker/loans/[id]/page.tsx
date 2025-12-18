@@ -8,17 +8,12 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { UnderwritingSubmissionModal } from '@/components/broker/UnderwritingSubmissionModal';
+import { LoanDocuments } from '@/components/LoanDocuments';
 
 export default function LoanDetailsPage() {
     const params = useParams();
     const id = params.id as string;
     const { data: loan, isLoading } = useLoan(id);
-    const updateLoanMutation = useUpdateLoan();
-
-    // Local state for editing documents
-    const [isEditingDocs, setIsEditingDocs] = useState(false);
-    const [tempDocs, setTempDocs] = useState<any[]>([]);
-    const [newDocTitle, setNewDocTitle] = useState('');
 
     // Submission Modal State
     const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
@@ -51,45 +46,6 @@ export default function LoanDetailsPage() {
         setMessages(updatedMessages);
         localStorage.setItem(`messages_${id}`, JSON.stringify(updatedMessages));
         setNewMessage('');
-    };
-
-    // Sync tempDocs with loan data when not editing
-    useEffect(() => {
-        if (loan?.documents && !isEditingDocs) {
-            setTempDocs(loan.documents);
-        }
-    }, [loan, isEditingDocs]);
-
-    const handleSaveDocs = () => {
-        if (!loan) return;
-        updateLoanMutation.mutate({
-            id: loan.id,
-            data: { documents: tempDocs }
-        });
-        setIsEditingDocs(false);
-    };
-
-    const handleDeleteDoc = (index: number) => {
-        const newDocs = [...tempDocs];
-        newDocs.splice(index, 1);
-        setTempDocs(newDocs);
-    };
-
-    const handleAddDoc = () => {
-        if (!newDocTitle.trim()) return;
-        setTempDocs([
-            ...tempDocs,
-            {
-                id: `manual-${Date.now()}`,
-                type: 'OTHER', // Default or generic
-                name: newDocTitle,
-                status: 'pending',
-                required: true,
-                files: [],
-                insights: ['Manually added by broker']
-            }
-        ]);
-        setNewDocTitle('');
     };
 
     if (isLoading) {
@@ -366,88 +322,8 @@ export default function LoanDetailsPage() {
 
                         {/* Sidebar */}
                         <div className="space-y-8">
-                            {/* Documents Card */}
-                            <Card variant="glass">
-                                <CardHeader>
-                                    <div className="flex justify-between items-center">
-                                        <CardTitle>Documents</CardTitle>
-                                        {!isEditingDocs ? (
-                                            <Button variant="ghost" size="sm" onClick={() => setIsEditingDocs(true)}>
-                                                Edit
-                                            </Button>
-                                        ) : (
-                                            <div className="flex gap-2">
-                                                <Button variant="ghost" size="sm" onClick={() => setIsEditingDocs(false)}>
-                                                    Cancel
-                                                </Button>
-                                                <Button size="sm" onClick={handleSaveDocs} disabled={updateLoanMutation.isPending}>
-                                                    {updateLoanMutation.isPending ? 'Saving...' : 'Save'}
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    {isEditingDocs ? (
-                                        <div className="space-y-4">
-                                            <ul className="space-y-3">
-                                                {tempDocs.map((doc: any, i: number) => (
-                                                    <li key={i} className="flex items-center justify-between p-3 rounded bg-white/5 border border-white/10">
-                                                        <div className="flex items-center overflow-hidden">
-                                                            <span className="text-sm text-slate-300 truncate">{doc.name || doc.type}</span>
-                                                        </div>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
-                                                            onClick={() => handleDeleteDoc(i)}
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
-                                                        </Button>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                            <div className="flex gap-2 pt-2 border-t border-white/10">
-                                                <input
-                                                    type="text"
-                                                    placeholder="New condition..."
-                                                    className="flex-1 bg-white/5 border border-white/10 rounded px-3 py-1 text-sm text-white focus:outline-none focus:border-primary-500"
-                                                    value={newDocTitle}
-                                                    onChange={(e) => setNewDocTitle(e.target.value)}
-                                                    onKeyDown={(e) => e.key === 'Enter' && handleAddDoc()}
-                                                />
-                                                <Button size="sm" variant="outline" onClick={handleAddDoc}>
-                                                    Add
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        loan.documents && loan.documents.length > 0 ? (
-                                            <ul className="space-y-3">
-                                                {loan.documents.map((doc: any, i: number) => (
-                                                    <li key={i} className="flex items-center justify-between p-3 rounded bg-white/5 border border-white/10">
-                                                        <div className="flex items-center overflow-hidden">
-                                                            <svg className="w-5 h-5 text-primary-400 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                            </svg>
-                                                            <span className="text-sm text-slate-300 truncate">{doc.name || doc.type}</span>
-                                                        </div>
-                                                        <Button variant="ghost" size="sm" className="text-primary-400 hover:text-primary-300">
-                                                            View
-                                                        </Button>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ) : (
-                                            <div className="text-center py-6 text-slate-500 text-sm">
-                                                No documents uploaded yet.
-                                            </div>
-                                        )
-                                    )}
-                                </CardContent>
-                            </Card>
+                            {/* Documents Card (Now using Component) */}
+                            <LoanDocuments loan={loan} />
 
                             {/* Messaging Card */}
                             <Card variant="glass">
