@@ -128,6 +128,45 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
         });
     };
 
+    const handleFileUpload = async (files: File[], forcedType?: string) => {
+        setToast({ message: `Uploading ${files.length} documents...`, type: 'info' });
+
+        // Prepare new documents metadata
+        const newDocs: any[] = [];
+
+        for (const file of files) {
+            const type = forcedType || 'Other'; // Simple fallback or use classification if imported
+
+            newDocs.push({
+                id: 'doc-' + Math.random().toString(36).substr(2, 9),
+                loanId: loan.id,
+                type: type,
+                fileName: file.name,
+                fileSize: file.size,
+                mimeType: file.type,
+                uploadedAt: new Date().toISOString(),
+                uploadedBy: 'Broker', // Distinct from Borrower
+                storagePath: 'mock/path', // Mock S3
+                verificationStatus: 'Verified' // Broker uploads are trusted? Or Pending? Let's say Verified for now.
+            });
+        }
+
+        // Merge with existing
+        const updatedDocuments = [...(loan.documents || []), ...newDocs];
+
+        updateLoan.mutate({
+            id: loan.id,
+            data: { ...loan, documents: updatedDocuments }
+        }, {
+            onSuccess: () => {
+                setToast({ message: "Documents uploaded successfully", type: 'success' });
+            },
+            onError: () => {
+                setToast({ message: "Failed to upload documents", type: 'error' });
+            }
+        });
+    };
+
     const handleRequestMissing = async () => {
         if (!settings.emailSettings) {
             setToast({ message: "Please configure email settings first", type: 'error' });
@@ -146,10 +185,10 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
 
         const emailBody = `
             <h2>Missing Document Request</h2>
-            <p>Dear ${loan.borrower.firstName},</p>
+            <p>Dear ${loan.borrower.firstName || 'Borrower'},</p>
             <p>We are processing your loan application and need the following documents to proceed:</p>
             <ul>
-                ${missing.map(r => `<li><b>${r.name}</b>: ${r.insights[0] || ''}</li>`).join('')}
+                ${missing.map(r => `<li><b>${r.name}</b>: ${r.insights?.[0] || ''}</li>`).join('')}
                 ${effectiveCustomConditions.filter(c => c.status !== 'satisfied').map(c => `<li><b>${c.name}</b> (Additional Request)</li>`).join('')}
             </ul>
             <p>Please upload these to your portal as soon as possible.</p>
@@ -217,6 +256,31 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                     {/* Main Content: Requirements List */}
                     <div className="xl:col-span-3 space-y-10">
 
+                        {/* Drop Zone */}
+                        <section className="mb-8">
+                            <Card className="border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                                <CardContent className="p-8 flex flex-col items-center justify-center text-center">
+                                    <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full flex items-center justify-center mb-4">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                                    </div>
+                                    <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Upload Documents</h3>
+                                    <p className="text-slate-500 max-w-md mb-6">Drag and drop files here to automatically categorize them, or browse to upload specific documents.</p>
+                                    <input
+                                        type="file"
+                                        id="general-upload"
+                                        className="hidden"
+                                        multiple
+                                        onChange={(e) => {
+                                            if (e.target.files) handleFileUpload(Array.from(e.target.files));
+                                        }}
+                                    />
+                                    <Button onClick={() => document.getElementById('general-upload')?.click()}>
+                                        Browse Files
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        </section>
+
                         {CATEGORIES.map(cat => {
                             const reqs = groupedReqs[cat.id];
                             if (!reqs || reqs.length === 0) return null;
@@ -264,9 +328,23 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                                                                         ))}
                                                                     </div>
                                                                 ) : (
-                                                                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/10 px-3 py-1.5 rounded-md text-sm font-medium">
-                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                                        <span>Waiting for upload</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-amber-600 dark:text-amber-500 text-sm italic mr-2">Missing</span>
+                                                                        <input
+                                                                            type="file"
+                                                                            id={`upload-${req.id}`}
+                                                                            className="hidden"
+                                                                            onChange={(e) => {
+                                                                                if (e.target.files?.[0]) handleFileUpload([e.target.files[0]], req.type);
+                                                                            }}
+                                                                        />
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline"
+                                                                            onClick={() => document.getElementById(`upload-${req.id}`)?.click()}
+                                                                        >
+                                                                            Upload
+                                                                        </Button>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -296,7 +374,21 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                                                 <div key={req.id} className="p-4 sm:p-5">
                                                     <div className="flex justify-between items-center">
                                                         <h3 className="font-medium">{req.name}</h3>
-                                                        {isSatisfied ? <span className="text-green-500 text-sm">Satisfied</span> : <span className="text-amber-500 text-sm">Pending</span>}
+                                                        {isSatisfied ? <span className="text-green-500 text-sm">Satisfied</span> : (
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="file"
+                                                                    id={`upload-${req.id}`}
+                                                                    className="hidden"
+                                                                    onChange={(e) => {
+                                                                        if (e.target.files?.[0]) handleFileUpload([e.target.files[0]], req.type);
+                                                                    }}
+                                                                />
+                                                                <Button size="sm" variant="outline" onClick={() => document.getElementById(`upload-${req.id}`)?.click()}>
+                                                                    Upload
+                                                                </Button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )
@@ -319,22 +411,43 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                                 </div>
                                 <div className="bg-purple-50/50 dark:bg-purple-900/5 rounded-xl border border-purple-100 dark:border-purple-500/20 shadow-sm overflow-hidden">
                                     <div className="divide-y divide-purple-100/50 dark:divide-purple-500/10">
-                                        {effectiveCustomConditions.map((cond) => (
-                                            <div key={cond.id} className="p-4 sm:p-5 flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="bg-white dark:bg-purple-900/30 p-2 rounded-lg shadow-sm border border-purple-100 dark:border-purple-500/20">
-                                                        <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                        {effectiveCustomConditions.map((cond) => {
+                                            const uploadedFiles = docStatusMap.get('Other') || [];
+                                            // TODO: Match condition ID if we stored it in metadata. For now check if satisfied.
+                                            const isSatisfied = cond.status === 'satisfied';
+
+                                            return (
+                                                <div key={cond.id} className="p-4 sm:p-5 flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="bg-white dark:bg-purple-900/30 p-2 rounded-lg shadow-sm border border-purple-100 dark:border-purple-500/20">
+                                                            <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-semibold text-slate-900 dark:text-white">{cond.name}</h3>
+                                                            <p className="text-xs text-purple-600 dark:text-purple-400">Manual Condition Added by Broker</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h3 className="font-semibold text-slate-900 dark:text-white">{cond.name}</h3>
-                                                        <p className="text-xs text-purple-600 dark:text-purple-400">Manual Condition Added by Broker</p>
+                                                    <div className="flex gap-2">
+                                                        {!isSatisfied && (
+                                                            <Button variant="outline" size="sm" onClick={() => {
+                                                                const updatedConditions = (loan.customConditions || []).map(c =>
+                                                                    c.id === cond.id ? { ...c, status: 'satisfied' as const } : c
+                                                                );
+                                                                updateLoan.mutate({
+                                                                    id: loan.id,
+                                                                    data: { ...loan, customConditions: updatedConditions }
+                                                                });
+                                                            }}>
+                                                                Mark Satisfied
+                                                            </Button>
+                                                        )}
+                                                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-red-500" onClick={() => handleRemoveCondition(cond.id)}>
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        </Button>
                                                     </div>
                                                 </div>
-                                                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-red-500" onClick={() => handleRemoveCondition(cond.id)}>
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                                </Button>
-                                            </div>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
                                 </div>
                             </section>
