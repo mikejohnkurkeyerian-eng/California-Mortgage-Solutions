@@ -32,7 +32,9 @@ export default function ResourcesPage() {
                             <p className="text-slate-600 dark:text-slate-400 mb-4">
                                 Step-by-step guides on how to use the dashboard, upload documents, and interpret AI decisions.
                             </p>
-                            <Button variant="outline">View Guides</Button>
+                            <Link href="/resources/guides">
+                                <Button variant="outline">View Guides</Button>
+                            </Link>
                         </CardContent>
                     </Card>
 
@@ -49,7 +51,9 @@ export default function ResourcesPage() {
                             <p className="text-slate-600 dark:text-slate-400 mb-4">
                                 Technical documentation for integrating LoanAuto with your existing CRM or flexible frontend.
                             </p>
-                            <Button variant="outline">Read Docs</Button>
+                            <Link href="/resources/api-docs">
+                                <Button variant="outline">Read Docs</Button>
+                            </Link>
                         </CardContent>
                     </Card>
                 </div>
@@ -57,7 +61,9 @@ export default function ResourcesPage() {
                 <div className="max-w-3xl mx-auto bg-white dark:bg-surface rounded-xl p-8 border border-slate-200 dark:border-white/10 text-center">
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Need Personalized Support?</h3>
                     <p className="text-slate-600 dark:text-slate-400 mb-6">Our dedicated broker success team is standing by to help you close difficult files.</p>
-                    <Button variant="primary">Contact Support</Button>
+                    <Link href="/resources/support">
+                        <Button variant="primary">Contact Support</Button>
+                    </Link>
                 </div>
             </section>
         </main>
