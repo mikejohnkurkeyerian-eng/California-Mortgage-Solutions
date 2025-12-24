@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/Button';
 import { useBrokerSettings } from '@/context/BrokerContext';
 import { useBorrowerAuth } from '@/hooks/useBorrower';
 
+import { usePathname } from 'next/navigation';
+
 export function Navbar() {
     const { settings, toggleTheme } = useBrokerSettings();
     const isDark = settings.theme === 'dark';
     const [isCooldown, setIsCooldown] = useState(false);
     const { borrowerId, logout } = useBorrowerAuth();
+    const pathname = usePathname();
 
     const handleThemeToggle = () => {
         if (isCooldown) return;
@@ -37,13 +40,22 @@ export function Navbar() {
 
                     <div className="hidden md:flex items-center space-x-8">
                         {/* Broker Links Only */}
-                        <Link href="/#features" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                        <Link
+                            href={pathname === '/' ? '#features' : '/#features'}
+                            className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold"
+                        >
                             Features
                         </Link>
-                        <Link href="/#benefits" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                        <Link
+                            href={pathname === '/' ? '#benefits' : '/#benefits'}
+                            className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold"
+                        >
                             Benefits
                         </Link>
-                        <Link href="/#resources" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                        <Link
+                            href={pathname === '/' ? '#resources' : '/#resources'}
+                            className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold"
+                        >
                             Resources
                         </Link>
                     </div>
