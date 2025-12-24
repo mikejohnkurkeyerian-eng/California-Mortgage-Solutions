@@ -37,22 +37,13 @@ export function Navbar() {
 
                     <div className="hidden md:flex items-center space-x-8">
                         {/* Broker Links Only */}
-                        <Link
-                            href={pathname === '/' ? '#features' : '/#features'}
-                            className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold"
-                        >
+                        <Link href="/features" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
                             Features
                         </Link>
-                        <Link
-                            href={pathname === '/' ? '#benefits' : '/#benefits'}
-                            className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold"
-                        >
+                        <Link href="/benefits" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
                             Benefits
                         </Link>
-                        <Link
-                            href={pathname === '/' ? '#resources' : '/#resources'}
-                            className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold"
-                        >
+                        <Link href="/resources" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
                             Resources
                         </Link>
                     </div>
