@@ -49,8 +49,8 @@ export default function Home() {
       </section>
 
       {/* Value Props */}
-      <section className="py-20 bg-white dark:bg-surface/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="features" className="py-20 bg-white dark:bg-surface/30">
+        <div id="benefits" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-heading font-bold text-slate-900 dark:text-white mb-4">Why Top Brokers Choose LoanAuto</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">We've built the platform you've always wanted. No more chasing underwriters, no more lost emails.</p>
@@ -97,7 +97,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20">
+      <section id="resources" className="py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-4xl font-heading font-bold text-slate-900 dark:text-white mb-6">Ready to Streamline Your Workflow?</h2>
           <Link href="/register">

@@ -37,11 +37,14 @@ export function Navbar() {
 
                     <div className="hidden md:flex items-center space-x-8">
                         {/* Broker Links Only */}
-                        <Link href="/about" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
-                            How it Works
+                        <Link href="/#features" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                            Features
                         </Link>
-                        <Link href="/register" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
-                            Join Network
+                        <Link href="/#benefits" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                            Benefits
+                        </Link>
+                        <Link href="/#resources" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                            Resources
                         </Link>
                     </div>
 
