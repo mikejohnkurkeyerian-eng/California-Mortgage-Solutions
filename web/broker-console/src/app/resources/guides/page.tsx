@@ -35,13 +35,13 @@ export default function GuidesPage() {
                         <CardContent>
                             <ul className="space-y-4">
                                 <li>
-                                    <a href="#" className="text-primary-600 hover:text-primary-500 block">Setting up your Broker Profile</a>
+                                    <Link href="/resources/guides/setting-up-profile" className="text-primary-600 hover:text-primary-500 block">Setting up your Broker Profile</Link>
                                 </li>
                                 <li>
-                                    <a href="#" className="text-primary-600 hover:text-primary-500 block">Inviting your first client</a>
+                                    <Link href="/resources/guides/inviting-client" className="text-primary-600 hover:text-primary-500 block">Inviting your first client</Link>
                                 </li>
                                 <li>
-                                    <a href="#" className="text-primary-600 hover:text-primary-500 block">Understanding the Dashboard</a>
+                                    <Link href="/resources/guides/dashboard-overview" className="text-primary-600 hover:text-primary-500 block">Understanding the Dashboard</Link>
                                 </li>
                             </ul>
                         </CardContent>
@@ -55,13 +55,13 @@ export default function GuidesPage() {
                         <CardContent>
                             <ul className="space-y-4">
                                 <li>
-                                    <a href="#" className="text-primary-600 hover:text-primary-500 block">Best practices for scanning</a>
+                                    <Link href="/resources/guides/scanning-best-practices" className="text-primary-600 hover:text-primary-500 block">Best practices for scanning</Link>
                                 </li>
                                 <li>
-                                    <a href="#" className="text-primary-600 hover:text-primary-500 block">Resolving OCR errors</a>
+                                    <Link href="/resources/guides/resolving-ocr-errors" className="text-primary-600 hover:text-primary-500 block">Resolving OCR errors</Link>
                                 </li>
                                 <li>
-                                    <a href="#" className="text-primary-600 hover:text-primary-500 block">Secure document sharing</a>
+                                    <Link href="/resources/guides/secure-sharing" className="text-primary-600 hover:text-primary-500 block">Secure document sharing</Link>
                                 </li>
                             </ul>
                         </CardContent>
@@ -75,13 +75,13 @@ export default function GuidesPage() {
                         <CardContent>
                             <ul className="space-y-4">
                                 <li>
-                                    <a href="#" className="text-primary-600 hover:text-primary-500 block">Interpreting AI decisions</a>
+                                    <Link href="/resources/guides/interpreting-ai" className="text-primary-600 hover:text-primary-500 block">Interpreting AI decisions</Link>
                                 </li>
                                 <li>
-                                    <a href="#" className="text-primary-600 hover:text-primary-500 block">Clearing conditions automatically</a>
+                                    <Link href="/resources/guides/clearing-conditions" className="text-primary-600 hover:text-primary-500 block">Clearing conditions automatically</Link>
                                 </li>
                                 <li>
-                                    <a href="#" className="text-primary-600 hover:text-primary-500 block">Requesting manual review</a>
+                                    <Link href="/resources/guides/manual-review" className="text-primary-600 hover:text-primary-500 block">Requesting manual review</Link>
                                 </li>
                             </ul>
                         </CardContent>
