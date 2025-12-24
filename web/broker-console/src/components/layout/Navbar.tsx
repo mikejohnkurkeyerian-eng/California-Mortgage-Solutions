@@ -36,28 +36,13 @@ export function Navbar() {
                     </div>
 
                     <div className="hidden md:flex items-center space-x-8">
-                        {borrowerId ? (
-                            <Link href="/borrower/dashboard" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
-                                Dashboard
-                            </Link>
-                        ) : (
-                            <Link href="/borrower/start" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
-                                Apply Now
-                            </Link>
-                        )}
+                        {/* Broker Links Only */}
                         <Link href="/about" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
                             How it Works
                         </Link>
-                        {borrowerId && (
-                            <Link href="/borrower/resources" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
-                                Resources
-                            </Link>
-                        )}
-                        {!borrowerId && (
-                            <Link href="/borrower/login" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
-                                Login
-                            </Link>
-                        )}
+                        <Link href="/register" className="text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-300 transition-colors font-semibold">
+                            Join Network
+                        </Link>
                     </div>
 
                     <div className="flex items-center space-x-4">
@@ -81,12 +66,14 @@ export function Navbar() {
                             )}
                         </button>
 
-                        <Link href="/broker/login" target="_blank" rel="noopener noreferrer">
-                            <span className="text-sm text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white transition-colors mr-6 font-semibold">Broker Portal</span>
+                        <Link href="/broker/login">
+                            <Button variant="ghost" className="text-slate-900 dark:text-slate-300 hover:text-primary-600 dark:hover:text-white mr-2">
+                                Login
+                            </Button>
                         </Link>
-                        <Link href={borrowerId ? "/borrower/dashboard" : "/borrower/start"}>
-                            <Button variant="primary" size="sm" className="bg-secondary-600 hover:bg-secondary-500 mr-2">
-                                {borrowerId ? "Dashboard" : "Get Started"}
+                        <Link href="/register">
+                            <Button variant="primary" size="sm" className="bg-secondary-600 hover:bg-secondary-500">
+                                Get Started
                             </Button>
                         </Link>
                     </div>
