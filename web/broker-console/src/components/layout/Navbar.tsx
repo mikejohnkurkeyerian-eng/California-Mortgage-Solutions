@@ -6,14 +6,11 @@ import { Button } from '@/components/ui/Button';
 import { useBrokerSettings } from '@/context/BrokerContext';
 import { useBorrowerAuth } from '@/hooks/useBorrower';
 
-import { usePathname } from 'next/navigation';
-
 export function Navbar() {
     const { settings, toggleTheme } = useBrokerSettings();
     const isDark = settings.theme === 'dark';
     const [isCooldown, setIsCooldown] = useState(false);
     const { borrowerId, logout } = useBorrowerAuth();
-    const pathname = usePathname();
 
     const handleThemeToggle = () => {
         if (isCooldown) return;
