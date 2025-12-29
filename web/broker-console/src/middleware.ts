@@ -35,7 +35,7 @@ export default auth((req) => {
       nextUrl.pathname === '/borrower/signup' ||
       nextUrl.pathname === '/borrower/rates' ||
       nextUrl.pathname === '/borrower/calculators' ||
-      nextUrl.pathname === '/borrower/resources';
+      nextUrl.pathname.startsWith('/borrower/resources');
 
     // If it's a public route, allow access
     if (isPublicBorrowerRoute) {
