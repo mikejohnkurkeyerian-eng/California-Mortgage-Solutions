@@ -2,7 +2,7 @@
 
 import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Navbar } from '@/components/layout/Navbar';
+
 import { Button } from '@/components/ui/Button';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -67,7 +67,7 @@ function BorrowerSignupContent() {
 
     return (
         <main className="min-h-screen bg-background">
-            <Navbar />
+
 
             <div className="pt-32 px-4 flex justify-center items-center min-h-[80vh]">
                 <Card variant="glass" className="w-full max-w-md">

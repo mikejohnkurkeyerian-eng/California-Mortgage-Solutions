@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { Navbar } from '@/components/layout/Navbar';
+
 import { generateTwoFactorSecret, enableTwoFactor, disableTwoFactor } from '@/lib/actions/security';
 import { useBorrowerAuth } from '@/hooks/useBorrower';
 import { toDataURL } from 'qrcode';
@@ -102,7 +102,7 @@ export default function SecuritySettingsPage() {
 
     return (
         <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-            <Navbar />
+
             <div className="pt-32 pb-20 px-4">
                 <div className="max-w-3xl mx-auto">
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Security Settings</h1>

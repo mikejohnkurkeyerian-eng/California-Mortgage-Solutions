@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Navbar } from '@/components/layout/Navbar';
+
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { classifyDocument } from '@/lib/document-ai';
@@ -120,7 +120,7 @@ export default function DocumentsPage() {
 
             // 1. Check Type Mismatch
             // Allow matching if detected type is exact match OR if detected is generic "OTHER" and target is "Other"
-            if (targetDoc.type !== 'Other') {
+            if (targetDoc.type !== 'OTHER') {
                 if (result.type !== 'OTHER' && result.type !== targetDoc.type && result.confidence > 0.4) {
                     issues.push(`This looks like a ${result.type.replace(/_/g, ' ')} (${Math.round(result.confidence * 100)}% confidence), but you are uploading it to ${targetDoc.name}.`);
                 }
@@ -201,7 +201,7 @@ export default function DocumentsPage() {
 
     return (
         <main className="min-h-screen bg-background">
-            <Navbar />
+
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             {/* Hidden input for manual uploads */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Navbar } from '@/components/layout/Navbar';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useDocuments } from '@/context/DocumentContext';
 import { useEffect, useState } from 'react';
@@ -143,7 +143,7 @@ export default function UnderwritingPendingPage() {
             <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-20" />
 
             <div className="max-w-4xl mx-auto relative z-10">
-                <Navbar />
+
 
                 <div className="mt-8 space-y-8">
                     {/* Header Section */}

@@ -253,7 +253,7 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                                     // Add as new requirement
                                     mergedDocs.push({
                                         id: condition.id,
-                                        type: 'Other', // Use generic type for custom conditions
+                                        type: 'OTHER', // Use generic type for custom conditions
                                         name: condition.name, // Display the custom name
                                         status: condition.status === 'satisfied' ? 'uploaded' : 'pending',
                                         required: true,
@@ -271,7 +271,7 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
 
                             // For custom conditions (type 'Other'), we must check by ID strictly to avoid deduplicating distinct custom items
                             // For standard types (e.g. 'W2'), type uniqueness is usually identifying
-                            const isCustom = p.type === 'Other';
+                            const isCustom = p.type === 'OTHER';
                             const matchFound = isCustom
                                 ? mergedDocs.find(m => m.id === p.id)
                                 : mergedDocs.find(m => m.type === p.type);

@@ -1,6 +1,6 @@
 'use client';
 
-import { Navbar } from '@/components/layout/Navbar';
+
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useDocuments } from '@/context/DocumentContext';
@@ -34,7 +34,7 @@ export default function LoanOptionsPage() {
 
     return (
         <main className="min-h-screen bg-background">
-            <Navbar />
+
             <div className="pt-32 pb-20 px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-12">

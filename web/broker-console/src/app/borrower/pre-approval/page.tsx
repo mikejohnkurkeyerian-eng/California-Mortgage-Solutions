@@ -1,6 +1,6 @@
 'use client';
 
-import { Navbar } from '@/components/layout/Navbar';
+
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useDocuments } from '@/context/DocumentContext';
@@ -29,7 +29,7 @@ export default function PreApprovalPage() {
 
     return (
         <main className="min-h-screen bg-background pb-20">
-            <Navbar />
+
             <div className="pt-32 px-4">
                 <div className="max-w-4xl mx-auto">
                     <div className="mb-8 flex justify-between items-center">

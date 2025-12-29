@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Navbar } from '@/components/layout/Navbar';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -39,7 +39,7 @@ export default function BorrowerSettingsPage() {
 
     return (
         <main className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
-            <Navbar />
+
 
             <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="mb-8">
@@ -126,8 +126,8 @@ export default function BorrowerSettingsPage() {
                                         <button
                                             onClick={() => isDark && toggleTheme()}
                                             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!isDark
-                                                    ? 'bg-white text-slate-900 shadow-sm'
-                                                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                                                ? 'bg-white text-slate-900 shadow-sm'
+                                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                                                 }`}
                                         >
                                             Light
@@ -135,8 +135,8 @@ export default function BorrowerSettingsPage() {
                                         <button
                                             onClick={() => !isDark && toggleTheme()}
                                             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${isDark
-                                                    ? 'bg-slate-700 text-white shadow-sm'
-                                                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                                                ? 'bg-slate-700 text-white shadow-sm'
+                                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                                                 }`}
                                         >
                                             Dark

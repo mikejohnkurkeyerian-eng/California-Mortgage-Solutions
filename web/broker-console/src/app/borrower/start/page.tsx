@@ -3,7 +3,7 @@
 import React, { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Navbar } from '@/components/layout/Navbar';
+
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useBorrowerAuth } from '@/hooks/useBorrower';
@@ -39,7 +39,7 @@ function BorrowerStartContent() {
 
     return (
         <main className="min-h-screen bg-white dark:bg-slate-900">
-            <Navbar />
+
 
             <div className="relative pt-32 pb-20 px-4 min-h-screen flex flex-col items-center justify-center overflow-hidden">
                 {/* Background Elements */}
