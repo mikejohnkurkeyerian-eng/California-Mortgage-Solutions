@@ -40,6 +40,20 @@ export function BorrowerNavbar() {
                     </div>
 
                     <div className="hidden md:flex items-center space-x-8">
+                        {/* Common Attraction Links (Visible to All) */}
+                        <Link
+                            href="/borrower/rates"
+                            className={`text-sm font-semibold transition-colors ${isActive('/borrower/rates') ? 'text-secondary-600 dark:text-secondary-400' : 'text-slate-900 dark:text-white hover:text-secondary-600 dark:hover:text-secondary-300'}`}
+                        >
+                            Rates
+                        </Link>
+                        <Link
+                            href="/borrower/calculators"
+                            className={`text-sm font-semibold transition-colors ${isActive('/borrower/calculators') ? 'text-secondary-600 dark:text-secondary-400' : 'text-slate-900 dark:text-white hover:text-secondary-600 dark:hover:text-secondary-300'}`}
+                        >
+                            Calculators
+                        </Link>
+
                         {/* Borrower Links */}
                         {borrowerId ? (
                             <>
@@ -67,7 +81,6 @@ export function BorrowerNavbar() {
                                 <Link href="/borrower/start" className="text-slate-900 dark:text-white hover:text-secondary-600 dark:hover:text-secondary-300 transition-colors font-semibold">
                                     Home
                                 </Link>
-                                {/* Add generic attractors if needed, e.g. "Rates", "Calculator" */}
                             </>
                         )}
                         <Link
