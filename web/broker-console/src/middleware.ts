@@ -10,7 +10,7 @@ export default auth((req) => {
   const isBorrowerRoute = nextUrl.pathname.startsWith('/borrower');
 
   // Check for invite param or existing access cookie
-  const inviteCode = nextUrl.searchParams.get('invite');
+  const inviteCode = nextUrl.searchParams.get('invite') || nextUrl.searchParams.get('ref');
   const hasAccessCookie = req.cookies.get('borrower_access');
 
   // 1. Handle New Invites: If "invite" param is present, authorize the user (set cookie)
