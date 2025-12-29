@@ -1,6 +1,0 @@
-packages:
-  - "services/*"
-  - "libs/*"
-  - "apps/*"
-  - "web/*"
-
