@@ -28,6 +28,20 @@ export default auth((req) => {
 
   // 2. Protect Borrower Routes
   if (isBorrowerRoute) {
+    // Define public routes that don't require invite or login
+    const isPublicBorrowerRoute =
+      nextUrl.pathname === '/borrower/start' ||
+      nextUrl.pathname === '/borrower/login' ||
+      nextUrl.pathname === '/borrower/signup' ||
+      nextUrl.pathname === '/borrower/rates' ||
+      nextUrl.pathname === '/borrower/calculators' ||
+      nextUrl.pathname === '/borrower/resources';
+
+    // If it's a public route, allow access
+    if (isPublicBorrowerRoute) {
+      return NextResponse.next();
+    }
+
     // If authenticated (as borrower), allow always
     if (isLoggedIn) {
       return NextResponse.next();
