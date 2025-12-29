@@ -152,72 +152,71 @@ export function BorrowerNavbar() {
                     </button>
                 </div>
             </div>
-        </div>
 
-            {/* Mobile Menu */ }
-    {
-        isMobileMenuOpen && (
-            <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-                <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                    <Link
-                        href="/borrower/rates"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/rates') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
-                    >
-                        Rates
-                    </Link>
-                    <Link
-                        href="/borrower/calculators"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/calculators') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
-                    >
-                        Calculators
-                    </Link>
+            {/* Mobile Menu */}
+            {
+                isMobileMenuOpen && (
+                    <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                            <Link
+                                href="/borrower/rates"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/rates') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
+                            >
+                                Rates
+                            </Link>
+                            <Link
+                                href="/borrower/calculators"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/calculators') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
+                            >
+                                Calculators
+                            </Link>
 
-                    {borrowerId ? (
-                        <>
+                            {borrowerId ? (
+                                <>
+                                    <Link
+                                        href="/borrower/dashboard"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/dashboard') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <Link
+                                        href="/borrower/documents"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/documents') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
+                                    >
+                                        Documents
+                                    </Link>
+                                    <Link
+                                        href="/borrower/loan-options"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/loan-options') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
+                                    >
+                                        Loan Options
+                                    </Link>
+                                </>
+                            ) : (
+                                <Link
+                                    href="/borrower/start"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400"
+                                >
+                                    Home
+                                </Link>
+                            )}
                             <Link
-                                href="/borrower/dashboard"
+                                href="/borrower/resources"
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/dashboard') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
+                                className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/resources') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
                             >
-                                Dashboard
+                                Resources
                             </Link>
-                            <Link
-                                href="/borrower/documents"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/documents') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
-                            >
-                                Documents
-                            </Link>
-                            <Link
-                                href="/borrower/loan-options"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/loan-options') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
-                            >
-                                Loan Options
-                            </Link>
-                        </>
-                    ) : (
-                        <Link
-                            href="/borrower/start"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400"
-                        >
-                            Home
-                        </Link>
-                    )}
-                    <Link
-                        href="/borrower/resources"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/borrower/resources') ? 'bg-secondary-50 dark:bg-secondary-900/20 text-secondary-600 dark:text-secondary-400' : 'text-slate-700 dark:text-slate-300 hover:text-secondary-600 dark:hover:text-secondary-400'}`}
-                    >
-                        Resources
-                    </Link>
-                </div>
-            </div>
-        )
-    }
+                        </div>
+                    </div>
+                )
+            }
         </nav >
     );
 }
