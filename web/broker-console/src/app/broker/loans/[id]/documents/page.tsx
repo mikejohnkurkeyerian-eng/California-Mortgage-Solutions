@@ -54,13 +54,14 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
     // Helper to render view button
     const renderViewButton = (doc: any) => (
         <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="h-6 w-6 p-0 text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-full"
+            className="h-7 gap-1 px-2 text-slate-600 border-slate-200 hover:border-primary-500 hover:text-primary-600 hover:bg-white dark:border-slate-700 dark:text-slate-400 dark:hover:text-primary-400 dark:hover:bg-slate-800"
             onClick={() => setViewingDoc({ doc, blob: localFileBlobs[doc.id] })}
             title="View Document"
         >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+            <span className="text-xs font-medium">View</span>
         </Button>
     );
 
