@@ -1,7 +1,0 @@
-Driver License
-State ID
-Date of Birth: 01/01/1980
-DOB: 01/01/1980
-DL No: D1234567
-Iss: 01/01/2020
-Exp: 01/01/2025

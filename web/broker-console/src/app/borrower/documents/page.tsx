@@ -11,7 +11,7 @@ import { useDocuments } from '@/context/DocumentContext';
 import { FileDropZone } from '@/components/documents/FileDropZone';
 
 export default function DocumentsPage() {
-    const { documents, addDocumentFile, addRequirement, submitApplication, currentLoan } = useDocuments();
+    const { documents, addDocumentFile, addRequirement, submitApplication, currentLoan, removeDocumentFile } = useDocuments();
     const router = useRouter();
 
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null);
@@ -312,12 +312,23 @@ export default function DocumentsPage() {
                                                     <div className="flex flex-col space-y-1 mt-1">
                                                         {doc.files && doc.files.length > 0 ? (
                                                             doc.files.map((file, index) => (
-                                                                <div key={index} className="flex items-center space-x-2">
-                                                                    <span className="text-xs text-green-400">
-                                                                        {doc.status === 'verified' ? 'Verified' : 'Uploaded'}
-                                                                    </span>
-                                                                    <span className="text-xs text-slate-500 dark:text-slate-400">• {file.name}</span>
-                                                                    <span className="text-xs text-slate-500 dark:text-slate-500">({file.date})</span>
+                                                                <div key={index} className="flex items-center justify-between w-full bg-slate-50 dark:bg-white/5 rounded px-2 py-1">
+                                                                    <div className="flex items-center space-x-2">
+                                                                        <span className="text-xs text-green-400">
+                                                                            {doc.status === 'verified' ? 'Verified' : 'Uploaded'}
+                                                                        </span>
+                                                                        <span className="text-xs text-slate-500 dark:text-slate-400">• {file.name}</span>
+                                                                        <span className="text-xs text-slate-500 dark:text-slate-500">({file.date})</span>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => removeDocumentFile(doc.id, file.name)}
+                                                                        className="text-slate-400 hover:text-red-500 transition-colors p-1"
+                                                                        title="Remove file"
+                                                                    >
+                                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                        </svg>
+                                                                    </button>
                                                                 </div>
                                                             ))
                                                         ) : (

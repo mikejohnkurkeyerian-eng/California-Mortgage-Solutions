@@ -1,0 +1,8 @@
+Pay Stub
+Period Ending: 11/15/2024
+Gross Pay: $4,166.67
+Net Pay: $3,200.00
+Year to Date: $95,000.00
+Deductions: $966.67
+Regular Pay
+Overtime Hours: 0
