@@ -39,6 +39,7 @@ export default function BrokerRegisterPage() {
     const [licenseState, setLicenseState] = useState<string[]>([]);
 
     // Account Creation State
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -51,6 +52,7 @@ export default function BrokerRegisterPage() {
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError('');
 
         // Simulate NMLS Verification API call
         setTimeout(() => {
@@ -58,16 +60,18 @@ export default function BrokerRegisterPage() {
             // Mock success - in real app would validate against NMLS database
             if (nmlsId.length >= 4) {
                 setStep('create');
+                setError('');
             } else {
-                alert('Invalid NMLS ID. Please try again.');
+                setError('Invalid NMLS ID. Please try again.');
             }
         }, 1500);
     };
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
         if (formData.password !== formData.confirmPassword) {
-            alert('Passwords do not match');
+            setError('Passwords do not match');
             return;
         }
 
@@ -88,7 +92,7 @@ export default function BrokerRegisterPage() {
 
             if (!response.ok) {
                 console.error("Registration failed:", data);
-                alert(data.details || data.error || 'Registration failed');
+                setError(data.details || data.error || 'Registration failed');
                 setIsLoading(false);
                 return;
             }
@@ -116,7 +120,7 @@ export default function BrokerRegisterPage() {
             }
         } catch (error) {
             console.error('Registration error:', error);
-            alert('Something went wrong. Please try again.');
+            setError('Something went wrong. Please try again.');
             setIsLoading(false);
         }
     };
@@ -143,6 +147,11 @@ export default function BrokerRegisterPage() {
                         <CardContent>
                             {step === 'verify' ? (
                                 <form onSubmit={handleVerify} className="space-y-6 animate-fade-in">
+                                    {error && (
+                                        <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                            {error}
+                                        </div>
+                                    )}
                                     <div className="bg-primary-500/10 border border-primary-500/20 rounded-lg p-4 mb-6">
                                         <p className="text-sm text-primary-200">
                                             To maintain platform security, we verify all broker licenses against the NMLS database before account creation.
@@ -174,6 +183,11 @@ export default function BrokerRegisterPage() {
                                 </form>
                             ) : (
                                 <form onSubmit={handleRegister} className="space-y-4 animate-fade-in">
+                                    {error && (
+                                        <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                            {error}
+                                        </div>
+                                    )}
                                     <div className="grid grid-cols-2 gap-4">
                                         <Input
                                             label="First Name"
