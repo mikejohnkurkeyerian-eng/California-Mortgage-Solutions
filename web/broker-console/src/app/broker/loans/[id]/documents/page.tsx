@@ -87,18 +87,24 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
     });
 
     // 3. Group Requirements by Category
+    // User Request: All initial application docs under "Legal & Declarations"
+    const ALL_STANDARD_TYPES = [
+        'PAY_STUB', 'W2', 'TAX_RETURN', 'VOE', 'OFFER_LETTER', 'BUSINESS_LICENSE', 'PROFIT_AND_LOSS', 'BALANCE_SHEET', 'BUSINESS_TAX_RETURN', 'K1', 'PENSION_STATEMENT', 'FORM_1099', 'SOCIAL_SECURITY_AWARD', 'DIVORCE_DECREE', 'LES', 'RENT_ROLL',
+        'BANK_STATEMENT', 'ASSET_STATEMENT', 'VOD', 'GIFT_LETTER', 'CLOSING_DISCLOSURE', 'CRYPTO_STATEMENT', 'TRUST_AGREEMENT', 'STOCK_OPTION_AGREEMENT', 'EARNEST_MONEY_RECEIPT',
+        'PURCHASE_CONTRACT', 'HOME_INSURANCE_QUOTE', 'PAYOFF_STATEMENT', 'NOTE', 'INSURANCE_DECLARATION', 'LOAN_ESTIMATE', 'BUILDER_CONTRACT', 'CONDO_QUESTIONNAIRE', 'HO6_INSURANCE', 'MORTGAGE_STATEMENT', 'PROPERTY_TAX_BILL', 'SALES_CONTRACT', 'LEASE_AGREEMENT',
+        'ID', 'GREEN_CARD', 'VISA', 'I94', 'ITIN_LETTER', 'BANKRUPTCY_DISCHARGE', 'LETTER_OF_EXPLANATION', 'JUDGMENT_EXPLANATION', 'SEPARATION_AGREEMENT', 'CHILD_SUPPORT_ORDER', 'DD214', 'VA_COE',
+        'BORROWER_AUTH', 'INTENT_TO_PROCEED', 'ESIGN_CONSENT', 'ANTI_STEERING', 'FHA_AMENDATORY', 'VA_ANALYSIS', 'USDA_INCOME_WORKSHEET'
+    ];
+
     const CATEGORIES = [
-        { id: 'INCOME', title: 'Income & Employment', types: ['PAY_STUB', 'W2', 'TAX_RETURN', 'VOE', 'OFFER_LETTER', 'BUSINESS_LICENSE', 'PROFIT_AND_LOSS', 'BALANCE_SHEET', 'BUSINESS_TAX_RETURN', 'K1', 'PENSION_STATEMENT', 'FORM_1099', 'SOCIAL_SECURITY_AWARD', 'DIVORCE_DECREE', 'LES', 'RENT_ROLL'] },
-        { id: 'ASSET', title: 'Assets & Funds', types: ['BANK_STATEMENT', 'ASSET_STATEMENT', 'VOD', 'GIFT_LETTER', 'CLOSING_DISCLOSURE', 'CRYPTO_STATEMENT', 'TRUST_AGREEMENT', 'STOCK_OPTION_AGREEMENT', 'EARNEST_MONEY_RECEIPT'] },
-        { id: 'PROPERTY', title: 'Collateral & Property', types: ['PURCHASE_CONTRACT', 'HOME_INSURANCE_QUOTE', 'PAYOFF_STATEMENT', 'NOTE', 'INSURANCE_DECLARATION', 'LOAN_ESTIMATE', 'BUILDER_CONTRACT', 'CONDO_QUESTIONNAIRE', 'HO6_INSURANCE', 'MORTGAGE_STATEMENT', 'PROPERTY_TAX_BILL', 'SALES_CONTRACT', 'LEASE_AGREEMENT'] },
-        { id: 'LEGAL', title: 'Legal & Declarations', types: ['ID', 'GREEN_CARD', 'VISA', 'I94', 'ITIN_LETTER', 'BANKRUPTCY_DISCHARGE', 'LETTER_OF_EXPLANATION', 'JUDGMENT_EXPLANATION', 'SEPARATION_AGREEMENT', 'CHILD_SUPPORT_ORDER', 'DD214', 'VA_COE'] },
-        { id: 'DISCLOSURE', title: 'Disclosures', types: ['BORROWER_AUTH', 'INTENT_TO_PROCEED', 'ESIGN_CONSENT', 'ANTI_STEERING', 'FHA_AMENDATORY', 'VA_ANALYSIS', 'USDA_INCOME_WORKSHEET'] }
+        { id: 'LEGAL', title: 'Legal & Declarations', types: ALL_STANDARD_TYPES }
     ];
 
     // Helper to find category for a requirement type
     const getCategoryForType = (type: string) => {
-        for (const cat of CATEGORIES) {
-            if (cat.types.includes(type)) return cat;
+        // If it's a standard type, put in Legal & Declarations
+        if (ALL_STANDARD_TYPES.includes(type)) {
+            return CATEGORIES[0];
         }
         return { id: 'OTHER', title: 'Other Requirements', types: [] };
     };
@@ -522,13 +528,46 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                             </section>
                         )}
 
+                        {/* NEW: Formal Conditions Section (if exists in model) */}
+                        {loan.underwritingConditions && loan.underwritingConditions.length > 0 && (
+                            <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="h-8 w-1 bg-amber-500 rounded-full"></div>
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Conditions</h2>
+                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300">
+                                        {loan.underwritingConditions.length}
+                                    </span>
+                                </div>
+                                <div className="bg-amber-50/50 dark:bg-amber-900/5 rounded-xl border border-amber-100 dark:border-amber-500/20 shadow-sm overflow-hidden">
+                                    <div className="divide-y divide-amber-100/50 dark:divide-amber-500/10">
+                                        {loan.underwritingConditions.map((cond) => (
+                                            <div key={cond.id} className="p-4 sm:p-5 flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="bg-white dark:bg-amber-900/30 p-2 rounded-lg shadow-sm border border-amber-100 dark:border-amber-500/20">
+                                                        <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-semibold text-slate-900 dark:text-white">{cond.description}</h3>
+                                                        <p className="text-xs text-amber-600 dark:text-amber-400">Formal Condition ({cond.type.replace(/([A-Z])/g, ' $1').trim()})</p>
+                                                    </div>
+                                                </div>
+                                                <span className={`px-2 py-1 rounded text-xs font-medium ${cond.status === 'Satisfied' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                    {cond.status}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+
 
                         {/* Additional Conditions Section */}
                         {effectiveCustomConditions.length > 0 && (
                             <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="h-8 w-1 bg-purple-500 rounded-full"></div>
-                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Underwriting Conditions</h2>
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Additional Documents</h2>
                                     <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300">
                                         {effectiveCustomConditions.length}
                                     </span>
@@ -627,7 +666,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                                 <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
                                     <div className="flex items-center gap-3 mb-4">
                                         <div className="h-8 w-1 bg-slate-400 rounded-full"></div>
-                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Additional Documents</h2>
+                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Unclassified Uploads</h2>
                                         <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800">
                                             {hiddenDocuments.length}
                                         </span>
