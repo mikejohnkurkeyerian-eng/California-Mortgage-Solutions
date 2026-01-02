@@ -8,6 +8,7 @@ import { MultiSelect } from '@/components/ui/MultiSelect';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { validateEmail } from '@/lib/validators';
 
 const US_STATES = [
     { label: 'Alabama', value: 'AL' }, { label: 'Alaska', value: 'AK' }, { label: 'Arizona', value: 'AZ' },
@@ -49,6 +50,17 @@ export default function BrokerRegisterPage() {
         brokerageName: ''
     });
 
+    const [emailError, setEmailError] = useState('');
+
+    const handleEmailBlur = () => {
+        const result = validateEmail(formData.email);
+        if (!result.isValid) {
+            setEmailError(result.error || 'Invalid email');
+        } else {
+            setEmailError('');
+        }
+    };
+
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -72,6 +84,14 @@ export default function BrokerRegisterPage() {
         setError('');
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
+            return;
+        }
+
+        // Validate Email
+        const emailValidation = validateEmail(formData.email);
+        if (!emailValidation.isValid) {
+            setError(emailValidation.error || 'Invalid email');
+            setEmailError(emailValidation.error || 'Invalid email');
             return;
         }
 
@@ -214,7 +234,12 @@ export default function BrokerRegisterPage() {
                                         label="Email Address"
                                         type="email"
                                         value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, email: e.target.value.toLowerCase() });
+                                            if (emailError) setEmailError('');
+                                        }}
+                                        onBlur={handleEmailBlur}
+                                        error={emailError}
                                         required
                                     />
 

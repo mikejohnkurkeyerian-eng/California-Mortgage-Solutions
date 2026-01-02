@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { registerUser } from '@/lib/actions/auth';
+import { validateEmail } from '@/lib/validators';
 
 function BorrowerSignupContent() {
     const [formData, setFormData] = useState({
@@ -19,6 +20,10 @@ function BorrowerSignupContent() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // New validation state
+    const [emailError, setEmailError] = useState('');
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const brokerId = searchParams.get('ref');
@@ -29,6 +34,15 @@ function BorrowerSignupContent() {
         }
     }, [brokerId]);
 
+    const handleEmailBlur = () => {
+        const result = validateEmail(formData.email);
+        if (!result.isValid) {
+            setEmailError(result.error || 'Invalid email');
+        } else {
+            setEmailError('');
+        }
+    };
+
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -36,6 +50,15 @@ function BorrowerSignupContent() {
 
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match");
+            setIsLoading(false);
+            return;
+        }
+
+        // Validate Email again before submit
+        const emailValidation = validateEmail(formData.email);
+        if (!emailValidation.isValid) {
+            setError(emailValidation.error || "Invalid email usage.");
+            setEmailError(emailValidation.error || "Invalid email");
             setIsLoading(false);
             return;
         }
@@ -132,6 +155,9 @@ function BorrowerSignupContent() {
                                 />
                             </div>
 
+
+
+                            // ... inside JSX ...
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-1">
                                     Email Address
@@ -139,11 +165,21 @@ function BorrowerSignupContent() {
                                 <input
                                     type="email"
                                     value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
-                                    className="w-full px-4 py-2 bg-surface/50 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors"
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, email: e.target.value.toLowerCase() });
+                                        if (emailError) setEmailError(''); // Clear error on edit
+                                    }}
+                                    onBlur={handleEmailBlur}
+                                    className={`w-full px-4 py-2 bg-surface/50 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 transition-colors ${emailError ? 'border-red-500' : 'border-white/10'
+                                        }`}
                                     placeholder="john@example.com"
                                     required
                                 />
+                                {emailError && (
+                                    <p className="mt-1 text-xs text-red-500 font-medium animate-in slide-in-from-top-1">
+                                        {emailError}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
