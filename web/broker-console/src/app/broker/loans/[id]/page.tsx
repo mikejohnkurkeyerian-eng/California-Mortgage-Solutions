@@ -379,6 +379,16 @@ export default function LoanDetailsPage() {
                 onClose={() => setIsSubmissionModalOpen(false)}
                 loan={loan}
             />
+
+            {/* DEBUG SECTION - TEMPORARY */}
+            <div className="max-w-7xl mx-auto px-4 mt-8 pb-8">
+                <details className="bg-slate-900 border border-slate-700 rounded-lg p-4">
+                    <summary className="text-white cursor-pointer font-bold mb-2">Debug: Raw Loan Data</summary>
+                    <pre className="text-xs text-green-400 overflow-auto max-h-96">
+                        {JSON.stringify(loan, null, 2)}
+                    </pre>
+                </details>
+            </div>
         </main >
     );
 }
