@@ -3,6 +3,7 @@
 import type { Metadata } from 'next'
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+import { Footer } from "@/components/layout/Footer";
 import { DocumentProvider } from "@/context/DocumentContext";
 import { BrokerProvider } from "@/context/BrokerContext";
 import { ToastProvider } from "@/context/ToastContext";
@@ -37,6 +38,7 @@ export default function RootLayout({
             <ToastProvider>
               <DocumentProvider>
                 {children}
+                <Footer />
               </DocumentProvider>
             </ToastProvider>
           </BrokerProvider>
