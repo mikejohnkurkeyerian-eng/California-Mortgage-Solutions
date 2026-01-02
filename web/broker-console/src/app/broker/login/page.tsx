@@ -39,6 +39,7 @@ export default function BrokerLoginPage() {
                 signIn('credentials', {
                     email,
                     password,
+                    requiredRole: 'Broker',
                     redirect: false,
                 }),
                 timeoutPromise

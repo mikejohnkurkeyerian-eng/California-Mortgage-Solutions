@@ -33,7 +33,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             credentials: {
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" },
-                twoFactorCode: { label: "2FA Code", type: "text" }
+                twoFactorCode: { label: "2FA Code", type: "text" },
+                requiredRole: { label: "Role", type: "text" }
             },
             async authorize(credentials) {
                 const parsedCredentials = z
@@ -57,6 +58,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     if (!passwordsMatch) {
                         console.warn(`❌ Auth Failed: Password mismatch for user ${normalizedEmail}`);
                         return null;
+                    }
+
+                    // Strict Role Check
+                    if (credentials.requiredRole) {
+                        // Allow "Broker" to also access if they are "LoanOfficer" or "Admin" if needed, 
+                        // but for now strict equality or mapping.
+                        const reqRole = credentials.requiredRole as string;
+
+                        // Map 'Broker' requirement to allowed roles
+                        const allowedRoles = reqRole === 'Broker'
+                            ? ['Broker', 'LoanOfficer', 'Admin']
+                            : [reqRole];
+
+                        if (!allowedRoles.includes(user.role)) {
+                            console.warn(`❌ Auth Failed: Role Mismatch. Required: ${reqRole}, Found: ${user.role}`);
+                            // We return null to fail generic "Invalid credentials" 
+                            // OR we could throw specific error if NextAuth allows passing it to client
+                            return null;
+                        }
                     }
 
                     if (user.twoFactorEnabled) {

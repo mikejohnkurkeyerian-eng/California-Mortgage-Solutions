@@ -36,6 +36,7 @@ function BorrowerLoginContent() {
             const formData = {
                 email,
                 password,
+                requiredRole: 'Borrower',
                 redirect: false,
                 twoFactorCode: twoFactorRequired ? twoFactorCode : undefined
             };
