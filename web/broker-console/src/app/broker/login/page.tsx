@@ -46,8 +46,8 @@ export default function BrokerLoginPage() {
 
             console.log("Login Result:", result);
 
-            if (result?.error) {
-                console.error("Login Failed:", result.error);
+            if (!result || result.error || result.ok === false || result.status === 401) {
+                console.error("Login Failed:", result?.error);
                 setError('Invalid email or password');
                 setIsLoading(false);
             } else {
@@ -82,7 +82,7 @@ export default function BrokerLoginPage() {
                         <CardContent>
                             <form onSubmit={handleLogin} className="space-y-6">
                                 {error && (
-                                    <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                    <div className="p-3 text-sm text-white bg-red-500 rounded-lg shadow-lg shadow-red-500/20 animate-in fade-in slide-in-from-top-2 font-medium">
                                         {error}
                                     </div>
                                 )}

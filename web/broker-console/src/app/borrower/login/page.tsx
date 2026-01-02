@@ -154,6 +154,11 @@ function BorrowerLoginContent() {
                                 </div>
 
                                 <form onSubmit={handleLogin} className="space-y-6">
+                                    {error && (
+                                        <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 animate-in fade-in slide-in-from-top-2">
+                                            {error}
+                                        </div>
+                                    )}
                                     <div>
                                         <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1">
                                             Email Address
