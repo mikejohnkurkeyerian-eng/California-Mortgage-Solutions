@@ -160,7 +160,29 @@ function LoanApplicationContent() {
                     if (typeof savedData === 'string') {
                         savedData = JSON.parse(savedData);
                     }
-                    setFormData(savedData);
+
+                    // Robust Merge: Ensure structural integrity by merging with initial defaults
+                    // This prevents crashes when savedData is partial (e.g. only borrower info from auto-create)
+                    const mergedData: Full1003Data = {
+                        ...initial1003Data,
+                        ...savedData,
+                        // Deep merge objects to preserve default properties
+                        borrower: { ...initial1003Data.borrower, ...(savedData.borrower || {}) },
+                        currentAddress: { ...initial1003Data.currentAddress, ...(savedData.currentAddress || {}) },
+                        loanAndProperty: { ...initial1003Data.loanAndProperty, ...(savedData.loanAndProperty || {}) },
+                        declarations: { ...initial1003Data.declarations, ...(savedData.declarations || {}) },
+                        acknowledgments: { ...initial1003Data.acknowledgments, ...(savedData.acknowledgments || {}) },
+                        military: { ...initial1003Data.military, ...(savedData.military || {}) },
+                        demographics: { ...initial1003Data.demographics, ...(savedData.demographics || {}) },
+                        // Arrays: Take saved if valid array, else default
+                        employment: Array.isArray(savedData.employment) ? savedData.employment : initial1003Data.employment,
+                        assets: Array.isArray(savedData.assets) ? savedData.assets : initial1003Data.assets,
+                        liabilities: Array.isArray(savedData.liabilities) ? savedData.liabilities : initial1003Data.liabilities,
+                        realEstate: Array.isArray(savedData.realEstate) ? savedData.realEstate : initial1003Data.realEstate,
+                        giftsOrGrants: Array.isArray(savedData.giftsOrGrants) ? savedData.giftsOrGrants : initial1003Data.giftsOrGrants,
+                    };
+
+                    setFormData(mergedData);
                     return; // Skip manual mapping
                 } catch (e) {
                     console.error("Failed to parse partial full1003", e);
