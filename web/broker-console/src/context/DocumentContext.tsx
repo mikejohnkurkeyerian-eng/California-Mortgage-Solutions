@@ -803,41 +803,31 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
 
                 if (borrowerId) {
                     const brokerRef = typeof window !== 'undefined' ? localStorage.getItem('broker_ref_v2') : null;
-                    console.log("SUBMITTING APPLICATION. Broker Ref:", brokerRef);
 
-                    if (!brokerRef) {
-                        setToast({
-                            message: "DEBUG: No Broker ID found in storage. Application will be unlinked.",
-                            type: 'warning',
-                            duration: 5000
-                        });
-                    } else {
-                        setToast({
-                            message: `DEBUG: Linking to Broker ID: ${brokerRef}`,
-                            type: 'info',
-                            duration: 3000
-                        });
-                    }
+                    // PREPARE PAYLOAD
+                    // Use existing loan data as primary source to prevent overwriting with "John Doe"
+                    const baseBorrower = (currentLoan?.borrower || {}) as any;
+                    const baseProperty = (currentLoan?.property || {}) as any;
 
-                    const newLoan = await createLoan({
-                        borrowerId,
-                        brokerId: brokerRef || undefined,
+                    const payload = {
                         status: loanStatus as any,
                         stage: 'Underwriting', // Move straight to Underwriting stage
-                        loanPurpose: extractedLoanData.loanPurpose || 'Purchase',
+                        // Merge strategies: Existing Data > 1003 Data > Extracted Data > Defaults
+                        loanPurpose: real1003Data?.loanAndProperty?.loanPurpose || extractedLoanData.loanPurpose || 'Purchase',
                         borrower: {
+                            ...baseBorrower,
                             id: borrowerId,
-                            firstName: extractedLoanData.borrower?.firstName || 'John',
-                            lastName: extractedLoanData.borrower?.lastName || 'Doe',
-                            email: extractedLoanData.borrower?.email || 'john@example.com',
-                            phone: extractedLoanData.borrower?.phone || '555-555-5555',
-                            ssn: extractedLoanData.borrower?.ssn,
-                            dateOfBirth: extractedLoanData.borrower?.dateOfBirth,
-                            createdAt: new Date().toISOString(),
+                            firstName: baseBorrower.firstName || real1003Data?.borrower?.firstName || extractedLoanData.borrower?.firstName || 'John',
+                            lastName: baseBorrower.lastName || real1003Data?.borrower?.lastName || extractedLoanData.borrower?.lastName || 'Doe',
+                            email: baseBorrower.email || real1003Data?.borrower?.email || extractedLoanData.borrower?.email || 'john@example.com',
+                            phone: baseBorrower.phone || real1003Data?.borrower?.homePhone || extractedLoanData.borrower?.phone || '555-555-5555',
+                            ssn: baseBorrower.ssn || real1003Data?.borrower?.ssn || extractedLoanData.borrower?.ssn,
+                            dateOfBirth: baseBorrower.dateOfBirth || real1003Data?.borrower?.dateOfBirth || extractedLoanData.borrower?.dateOfBirth,
                             updatedAt: new Date().toISOString()
                         },
                         property: {
-                            address: extractedLoanData.property?.address || {
+                            ...baseProperty,
+                            address: real1003Data?.loanAndProperty?.address || extractedLoanData.property?.address || baseProperty.address || {
                                 street: '123 Main St',
                                 city: 'Anytown',
                                 state: 'CA',
@@ -848,34 +838,36 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                             downPayment: propertyValue - loanAmount,
                             propertyType: 'SingleFamily'
                         },
-                        employment: extractedLoanData.employment,
-                        assets: extractedLoanData.assets,
-                        debts: extractedLoanData.debts,
-                        transactionDetails: extractedLoanData.transactionDetails,
-                        full1003: real1003Data,
-                        documents: documents.flatMap(doc =>
-                            doc.files.map(f => ({
-                                id: Math.random().toString(36).substr(2, 9),
-                                type: doc.type,
-                                fileName: f.name,
-                                fileSize: f.file ? f.file.size : 0,
-                                mimeType: f.file ? f.file.type : 'application/pdf',
-                                uploadedAt: new Date().toISOString(),
-                                verificationStatus: 'Pending'
-                            }))
-                        ),
+                        employment: real1003Data?.employment || extractedLoanData.employment,
+                        assets: real1003Data?.assets || extractedLoanData.assets,
+                        debts: real1003Data?.liabilities || extractedLoanData.debts, // Map liabilities to debts
+                        full1003: real1003Data, // Ensure 1003 data is persisted
+
                         // Save AUS Metrics
-                        debtToIncomeRatio: result.metrics.dti / 100, // Convert % to decimal
+                        debtToIncomeRatio: result.metrics.dti / 100,
                         loanToValueRatio: result.metrics.ltv / 100,
                         underwritingDecision: underwritingDecision as any,
                         underwritingNotes: JSON.stringify(result.findings)
-                    });
-                    setCurrentLoanId(newLoan.id);
+                    };
+
+                    if (currentLoanId) {
+                        console.log(`[Submit] Updating EXISTING loan ${currentLoanId}`);
+                        await updateLoan(currentLoanId, payload);
+                        setToast({ message: "Application updated and submitted to underwriting!", type: 'success' });
+                    } else {
+                        console.log(`[Submit] Creating NEW loan (No ID found)`);
+                        const newLoan = await createLoan({
+                            ...payload,
+                            borrowerId, // Required for creation
+                            brokerId: brokerRef || undefined,
+                            createdAt: new Date().toISOString()
+                        } as any);
+                        setCurrentLoanId(newLoan.id);
+                        setToast({ message: "Application created and submitting to underwriting!", type: 'success' });
+                    }
                 }
 
                 if (result.eligiblePrograms.length > 0) {
-                    // Even if eligible, we go to underwriting first as per user request
-                    // setApplicationStatus('pre_approved'); 
                     setApplicationStatus('underwriting');
                 } else {
                     setApplicationStatus('underwriting');
@@ -894,10 +886,12 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
             } catch (error) {
                 console.error("Error during underwriting:", error);
                 setApplicationStatus('underwriting');
+                setToast({ message: "Submitted with warnings. Our team will review shortly.", type: 'warning' });
             }
         } catch (error) {
             console.error("Error submitting application:", error);
-            setApplicationStatus('underwriting');
+            setApplicationStatus('underwriting'); // Fallback state so user isn't stuck
+            setToast({ message: "Submission Error. Please check your internet connection.", type: 'error' });
         }
     };
 
