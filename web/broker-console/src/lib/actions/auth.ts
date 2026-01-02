@@ -63,7 +63,7 @@ export async function registerUser(data: z.infer<typeof RegisterSchema>) {
         }
 
         // Create User
-        await prisma.user.create({
+        const newUser = await prisma.user.create({
             data: {
                 firstName,
                 lastName,
@@ -75,6 +75,26 @@ export async function registerUser(data: z.infer<typeof RegisterSchema>) {
                 brokerId,
             },
         });
+
+        // AUTO-CREATE LOAN for Borrowers
+        // This ensures they appear in the Broker's pipeline immediately as a "Draft"
+        if (role === 'BORROWER') {
+            await prisma.loanApplication.create({
+                data: {
+                    userId: newUser.id,
+                    brokerId: brokerId, // Link to broker immediately if exists
+                    status: 'Draft',
+                    stage: 'Application Review',
+                    data: JSON.stringify({
+                        borrower: {
+                            firstName,
+                            lastName,
+                            email: normalizedEmail,
+                        }
+                    })
+                }
+            });
+        }
 
         return { success: "User created!" };
     } catch (error) {
