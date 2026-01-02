@@ -1,9 +1,12 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 
+import { Navbar } from '@/components/layout/Navbar';
+
 export default function PrivacyPolicy() {
     return (
         <main className="min-h-screen bg-slate-50 dark:bg-background pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+            <Navbar />
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 dark:text-white mb-8">Privacy Policy</h1>
 
