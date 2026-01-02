@@ -66,10 +66,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         // but for now strict equality or mapping.
                         const reqRole = credentials.requiredRole as string;
 
-                        // Map 'Broker' requirement to allowed roles
-                        const allowedRoles = reqRole === 'Broker'
-                            ? ['Broker', 'LoanOfficer', 'Admin']
-                            : [reqRole];
+                        // Map 'Broker' requirement to allowed roles (Handle both Case variants for robustness)
+                        let allowedRoles: string[] = [reqRole];
+
+                        if (reqRole === 'Broker' || reqRole === 'BROKER') {
+                            allowedRoles = ['Broker', 'BROKER', 'LoanOfficer', 'LOAN_OFFICER', 'Admin', 'ADMIN'];
+                        } else if (reqRole === 'Borrower' || reqRole === 'BORROWER') {
+                            allowedRoles = ['Borrower', 'BORROWER'];
+                        }
 
                         if (!allowedRoles.includes(user.role)) {
                             console.warn(`❌ Auth Failed: Role Mismatch. Required: ${reqRole}, Found: ${user.role}`);
