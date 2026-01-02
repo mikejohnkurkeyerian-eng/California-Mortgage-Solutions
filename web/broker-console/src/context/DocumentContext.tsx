@@ -621,6 +621,25 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
             // Run AI Analysis on the new state
             runAIAnalysis(newDocs);
 
+            // [REAL-TIME SYNC] Persist to backend immediately if loan exists
+            if (currentLoanId) {
+                console.log(`[Sync] Uploading document ${file.name} to Loan ${currentLoanId}`);
+                // Background sync - don't await to keep UI snappy
+                updateLoan(currentLoanId, {
+                    documents: newDocs.flatMap(doc =>
+                        doc.files.map(f => ({
+                            id: Math.random().toString(36).substr(2, 9),
+                            type: doc.type,
+                            fileName: f.name,
+                            fileSize: f.file ? f.file.size : 0,
+                            mimeType: f.file ? f.file.type : 'application/pdf',
+                            uploadedAt: new Date().toISOString(),
+                            verificationStatus: 'Pending'
+                        }))
+                    )
+                }).catch(err => console.error("[Sync] Failed to sync document:", err));
+            }
+
             return newDocs;
         });
     };
@@ -822,7 +841,7 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                             email: baseBorrower.email || real1003Data?.borrower?.email || extractedLoanData.borrower?.email || 'john@example.com',
                             phone: baseBorrower.phone || real1003Data?.borrower?.homePhone || extractedLoanData.borrower?.phone || '555-555-5555',
                             ssn: baseBorrower.ssn || real1003Data?.borrower?.ssn || extractedLoanData.borrower?.ssn,
-                            dateOfBirth: baseBorrower.dateOfBirth || real1003Data?.borrower?.dateOfBirth || extractedLoanData.borrower?.dateOfBirth,
+                            dateOfBirth: baseBorrower.dateOfBirth || real1003Data?.borrower?.dob || extractedLoanData.borrower?.dateOfBirth,
                             updatedAt: new Date().toISOString()
                         },
                         property: {
@@ -838,7 +857,15 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                             downPayment: propertyValue - loanAmount,
                             propertyType: 'SingleFamily'
                         },
-                        employment: real1003Data?.employment || extractedLoanData.employment,
+                        employment: {
+                            status: (real1003Data?.employment?.[0]?.isSelfEmployed ? 'SelfEmployed' : 'Employed') as any, // Map primary
+                            employerName: real1003Data?.employment?.[0]?.employerName || extractedLoanData.employment?.employerName || 'Unknown',
+                            jobTitle: real1003Data?.employment?.[0]?.position || extractedLoanData.employment?.jobTitle,
+                            startDate: real1003Data?.employment?.[0]?.startDate || extractedLoanData.employment?.startDate,
+                            monthlyIncome: real1003Data?.employment?.[0]?.monthlyIncome?.total || extractedLoanData.employment?.monthlyIncome,
+                            incomeType: (real1003Data?.employment?.[0]?.isSelfEmployed ? 'SelfEmployed' : 'W2') as any,
+                            // Persist "Term" logic by saving full array in full1003 (below)
+                        },
                         assets: real1003Data?.assets || extractedLoanData.assets,
                         debts: real1003Data?.liabilities || extractedLoanData.debts, // Map liabilities to debts
                         full1003: real1003Data, // Ensure 1003 data is persisted
