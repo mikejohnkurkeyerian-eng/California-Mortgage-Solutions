@@ -167,7 +167,7 @@ export interface Full1003Data {
 
     // Section 4: Loan and Property Information
     loanAndProperty: LoanAndProperty;
-    giftsOrGrants?: {
+    giftsOrGrants: {
         type: 'Cash' | 'Equity' | 'Other';
         source: 'Relative' | 'Employer' | 'Agency' | 'Other';
         amount: number;
@@ -217,6 +217,7 @@ export const initial1003Data: Full1003Data = {
     assets: [],
     liabilities: [],
     realEstate: [],
+    giftsOrGrants: [],
     loanAndProperty: {
         loanAmount: 0,
         loanPurpose: 'Purchase',

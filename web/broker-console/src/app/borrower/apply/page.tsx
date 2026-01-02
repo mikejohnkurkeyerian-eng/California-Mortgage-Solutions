@@ -15,6 +15,7 @@ import { EmploymentHistoryForm } from '@/components/borrower/application/Employm
 import { AssetTable } from '@/components/borrower/application/AssetTable';
 import { LiabilityTable } from '@/components/borrower/application/LiabilityTable';
 import { RealEstateTable } from '@/components/borrower/application/RealEstateTable';
+import { GiftGrantTable } from '@/components/borrower/application/GiftGrantTable';
 import { Toast } from '@/components/ui/Toast';
 import { FormIntelligenceService, FormInsight } from '@/lib/form-intelligence';
 
@@ -226,6 +227,7 @@ function LoanApplicationContent() {
                     toBePaidOff: false
                 })) || [],
                 realEstate: [], // Map if available
+                giftsOrGrants: [],
                 loanAndProperty: {
                     loanAmount: currentLoan.property?.loanAmount || 0,
                     propertyValue: currentLoan.property?.purchasePrice || 0,
@@ -625,9 +627,11 @@ function LoanApplicationContent() {
 
                         <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
                             <h3 className="text-lg font-medium mb-4">Gifts or Grants You Have Been Given or Will Receive for this Loan</h3>
-                            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-center text-sm text-slate-500">
-                                (Feature coming soon: Ability to add specific gift/grant details)
-                            </div>
+                            <GiftGrantTable
+                                data={formData.giftsOrGrants || []}
+                                onChange={(data) => setFormData({ ...formData, giftsOrGrants: data })}
+                                onBlur={handleBlur}
+                            />
                         </div>
                     </div>
                 );
