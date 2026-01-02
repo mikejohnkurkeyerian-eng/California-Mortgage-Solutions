@@ -542,6 +542,92 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                                 </div>
                             </section>
                         )}
+
+                        {/* Additional/Unsolicited Documents Section */}
+                        {(() => {
+                            // Calculate displayed IDs to find hidden ones
+                            const displayedDocIds = new Set<string>();
+                            requirements.forEach(req => {
+                                const docs = docStatusMap.get(req.type) || [];
+                                docs.forEach(d => displayedDocIds.add(d.id));
+                            });
+                            // Include 'Other' docs as they might be used in custom conditions (or just general other)
+                            // Note: Effectively we just want to show anything that wasn't shown in the Requirements lists.
+                            // The Requirements lists loops over CATEGORIES (standard types) and otherReqs (OTHER type).
+                            // So actually, if we iterate CATEGORIES and otherReqs, we cover all 'req.type's.
+                            // Let's just track what we rendered.
+
+                            // 1. Standard Categories
+                            CATEGORIES.forEach(cat => {
+                                const reqs = groupedReqs[cat.id] || [];
+                                reqs.forEach(req => {
+                                    const docs = docStatusMap.get(req.type) || [];
+                                    docs.forEach(d => displayedDocIds.add(d.id));
+                                });
+                            });
+
+                            // 2. Other Requirements
+                            otherReqs.forEach(req => {
+                                const docs = docStatusMap.get(req.type) || [];
+                                docs.forEach(d => displayedDocIds.add(d.id));
+                            });
+
+                            // 3. Custom Conditions (which often use 'Other' or specific types)
+                            // Logic in UI above:
+                            /*
+                               effectiveCustomConditions.map((cond) => {
+                                   const uploadedFiles = docStatusMap.get('Other') || [];
+                            */
+                            // The current UI hardcodes getting 'Other' for custom conditions. 
+                            // So we should mark 'Other' docs as displayed if there are custom conditions.
+                            if (effectiveCustomConditions.length > 0) {
+                                const otherDocs = docStatusMap.get('Other') || [];
+                                otherDocs.forEach(d => displayedDocIds.add(d.id));
+                            }
+
+                            const hiddenDocuments = documents.filter(d => !displayedDocIds.has(d.id));
+
+                            if (hiddenDocuments.length === 0) return null;
+
+                            return (
+                                <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="h-8 w-1 bg-slate-400 rounded-full"></div>
+                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Additional Documents</h2>
+                                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800">
+                                            {hiddenDocuments.length}
+                                        </span>
+                                    </div>
+                                    <div className="bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                                        <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                            {hiddenDocuments.map((doc) => (
+                                                <div key={doc.id} className="p-4 sm:p-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/80 transition-colors">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-3 overflow-hidden">
+                                                            <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-lg">
+                                                                <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 00-2-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <h3 className="font-semibold text-slate-900 dark:text-white truncate" title={doc.fileName}>{doc.fileName}</h3>
+                                                                <p className="text-xs text-slate-500">
+                                                                    Uploaded {new Date(doc.uploadedAt).toLocaleDateString()} • {doc.type.replace(/_/g, ' ')}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded font-medium">
+                                                                Received
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
+                            );
+                        })()}
                     </div>
 
                     {/* Right Column: Sticky Stats */}
