@@ -110,7 +110,14 @@ export function DocumentViewerModal({ isOpen, onClose, document, fileBlob }: Doc
                                     </div>
                                     <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Preview Not Available</h3>
                                     <p className="text-slate-500 mb-4">This file type cannot be previewed directly in the browser.</p>
-                                    <Button onClick={() => window.open(previewUrl, '_blank')}>Download File</Button>
+                                    <Button onClick={() => {
+                                        const link = window.document.createElement('a');
+                                        link.href = previewUrl;
+                                        link.download = document.fileName; // Force download
+                                        window.document.body.appendChild(link);
+                                        link.click();
+                                        window.document.body.removeChild(link);
+                                    }}>Download File</Button>
                                 </div>
                             )}
                         </>

@@ -132,6 +132,8 @@ export async function getLoans() {
                 user: {
                     select: {
                         name: true,
+                        firstName: true,
+                        lastName: true,
                         email: true,
                         image: true
                     }
@@ -141,10 +143,18 @@ export async function getLoans() {
 
         return loans.map((loan: any) => {
             const parsedData = loan.data ? JSON.parse(loan.data) : {};
+
+            // Ensure borrower object exists with fallbacks
+            const borrower = parsedData.borrower || {};
+            if (!borrower.firstName) borrower.firstName = loan.user.firstName || loan.user.name.split(' ')[0];
+            if (!borrower.lastName) borrower.lastName = loan.user.lastName || loan.user.name.split(' ').slice(1).join(' ');
+            if (!borrower.email) borrower.email = loan.user.email;
+
             return {
                 ...loan,
                 ...parsedData, // Flatten data to top level
                 data: parsedData,
+                borrower, // Explicitly set robust borrower object
                 borrowerName: loan.user.name,
                 borrowerEmail: loan.user.email
             };
