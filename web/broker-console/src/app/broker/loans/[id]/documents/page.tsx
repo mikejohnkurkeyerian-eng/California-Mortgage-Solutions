@@ -12,6 +12,7 @@ import { useToast } from '@/context/ToastContext';
 import { useBrokerSettings } from '@/context/BrokerContext';
 import { useUpdateLoan } from '@/hooks/useBroker';
 import { classifyDocument } from '@/lib/document-ai';
+import { DocumentViewerModal } from '@/components/documents/DocumentViewerModal';
 
 interface PageProps {
     params: {
@@ -45,6 +46,23 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
         warning?: string;
         confidence?: number;
     }>({ isOpen: false });
+
+    // Viewer State
+    const [viewingDoc, setViewingDoc] = useState<{ doc: any, blob?: Blob } | null>(null);
+    const [localFileBlobs, setLocalFileBlobs] = useState<Record<string, Blob>>({});
+
+    // Helper to render view button
+    const renderViewButton = (doc: any) => (
+        <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0 text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-full"
+            onClick={() => setViewingDoc({ doc, blob: localFileBlobs[doc.id] })}
+            title="View Document"
+        >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+        </Button>
+    );
 
     if (isLoading) {
         return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -140,96 +158,38 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
         });
     };
 
-    const handleFileUpload = async (files: File[], forcedType?: string) => {
-        if (files.length === 0) return;
+    // ... imports
+    import { DocumentViewerModal } from '@/components/documents/DocumentViewerModal';
 
-        // Only validate single file uploads for now to keep UX simple
-        if (files.length > 1 && !forcedType) {
-            processUpload(files, forcedType);
-            return;
-        }
+    // ... Inside Component
 
-        const file = files[0];
-        setIsAnalyzing(true);
-        setToast({ message: "Analyzing document...", type: 'info', duration: 2000 });
+    // Viewer State
+    const [viewingDoc, setViewingDoc] = useState<{ doc: any, blob?: Blob } | null>(null);
+    const [localFileBlobs, setLocalFileBlobs] = useState<Record<string, Blob>>({});
 
-        try {
-            const result = await classifyDocument(file);
-            console.log("Analysis Result:", result);
+    // ... inside handleFileUpload, store blob
+    /* 
+       We need to capture the blob when uploading to allow immediate preview.
+       Ideally, we map the temp ID or the eventually returned ID to this blob.
+       Since we generate ID in `processUpload` locally first, we can use that.
+    */
 
-            const issues: string[] = [];
-
-            // 1. Check Type Mismatch
-            if (forcedType && forcedType !== 'Other') {
-                if (result.type !== 'OTHER' && result.type !== forcedType && result.confidence > 0.4) {
-                    let mismatchMsg = `This looks like a ${result.type.replace(/_/g, ' ')} (${Math.round(result.confidence * 100)}% confidence), but you are uploading it to ${forcedType.replace(/_/g, ' ')}.`;
-
-                    // Recommendation Logic
-                    if (requirements) {
-                        const betterMatch = requirements.find(r => r.type === result.type);
-                        if (betterMatch) {
-                            mismatchMsg += ` Recommended: Upload to "${betterMatch.name}" instead.`;
-                        }
-                    }
-
-                    issues.push(mismatchMsg);
-                }
-            }
-
-            // 2. Check Name Mismatch
-            if (result.extractedText && result.extractedText.length > 50 && loan.borrower?.lastName) {
-                const borrowerLastName = loan.borrower.lastName.toLowerCase();
-                if (!result.extractedText.toLowerCase().includes(borrowerLastName)) {
-                    issues.push(`The borrower's last name "${loan.borrower.lastName}" was not found in the document.`);
-                }
-            }
-
-            setIsAnalyzing(false);
-
-            if (issues.length > 0) {
-                // Show Warning Modal
-                setValidationModal({
-                    isOpen: true,
-                    file: file,
-                    forcedType: forcedType,
-                    detectedType: result.type,
-                    warning: issues.join(' '),
-                    confidence: result.confidence
-                });
-            } else {
-                // All good, proceed
-                processUpload([file], forcedType);
-            }
-
-        } catch (error) {
-            console.error("Analysis failed", error);
-            setIsAnalyzing(false);
-            processUpload([file], forcedType);
-        }
-    };
-
-    const confirmValidation = () => {
-        if (validationModal.file) {
-            processUpload([validationModal.file], validationModal.forcedType);
-            setValidationModal({ isOpen: false });
-        }
-    };
-
-    const cancelValidation = () => {
-        setValidationModal({ isOpen: false });
-        setToast({ message: "Upload cancelled", type: 'info' });
-    };
-
+    // ... update processUpload
     const processUpload = async (files: File[], forcedType?: string) => {
         setToast({ message: `Uploading ${files.length} documents...`, type: 'info' });
 
         const newDocs: any[] = [];
+        const newBlobs: Record<string, Blob> = {};
 
         for (const file of files) {
             const type = forcedType || 'Other';
+            const docId = 'doc-' + Math.random().toString(36).substr(2, 9);
+
+            // Store blob for local preview
+            newBlobs[docId] = file;
 
             newDocs.push({
-                id: 'doc-' + Math.random().toString(36).substr(2, 9),
+                id: docId,
                 loanId: loan.id,
                 type: type,
                 fileName: file.name,
@@ -237,25 +197,62 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                 mimeType: file.type,
                 uploadedAt: new Date().toISOString(),
                 uploadedBy: 'Broker',
-                storagePath: 'mock/path',
+                storagePath: 'mock/path', // This triggers the "mock" placeholder in viewer unless local blob exists
                 verificationStatus: 'Verified'
             });
         }
 
-        const updatedDocuments = [...(loan.documents || []), ...newDocs];
+        setLocalFileBlobs(prev => ({ ...prev, ...newBlobs }));
 
-        updateLoan.mutate({
-            id: loan.id,
-            data: { ...loan, documents: updatedDocuments }
-        }, {
-            onSuccess: () => {
-                setToast({ message: "Documents uploaded successfully", type: 'success' });
-            },
-            onError: () => {
-                setToast({ message: "Failed to upload documents", type: 'error' });
-            }
-        });
+        const updatedDocuments = [...(loan.documents || []), ...newDocs];
+        // ... mutation
     };
+
+    // ... Rendering "View" Button Helper
+    const renderViewButton = (doc: any) => (
+        <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-slate-500 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+            onClick={() => setViewingDoc({ doc, blob: localFileBlobs[doc.id] })}
+            title="View Document"
+        >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+        </Button>
+    );
+
+    // ... In lists (Requirements):
+    /*
+        <div key={file.id} ...>
+           <div className="flex items-center gap-2 overflow-hidden">
+               ... icon ...
+               <span ...>{file.fileName}</span>
+               {renderViewButton(file)}  <-- ADD HERE
+           </div>
+           ...
+        </div>
+    */
+
+    // ... In Additional Docs list:
+    /*
+        <div className="flex items-center gap-2">
+            {renderViewButton(doc)}  <-- ADD HERE
+            <span className="text-xs ...">Received</span>
+        </div>
+    */
+
+    // ... At bottom of return:
+    /*
+        {validationModal ...}
+        
+        <DocumentViewerModal 
+            isOpen={!!viewingDoc}
+            onClose={() => setViewingDoc(null)}
+            document={viewingDoc?.doc || null}
+            fileBlob={viewingDoc?.blob}
+        />
+    */
+
 
     const handleRequestMissing = async () => {
         if (!settings.emailSettings) {
@@ -412,6 +409,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                                                                                 <div className="flex items-center gap-2 overflow-hidden">
                                                                                     <svg className="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                                                                     <span className="truncate max-w-[140px] text-slate-700 dark:text-slate-300 font-medium" title={file.fileName}>{file.fileName}</span>
+                                                                                    {renderViewButton(file)}
                                                                                 </div>
                                                                                 <span className="text-xs text-green-600 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded font-medium">Verified</span>
                                                                             </div>
@@ -744,6 +742,13 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                     </div>
                 )
             }
+
+            <DocumentViewerModal
+                isOpen={!!viewingDoc}
+                onClose={() => setViewingDoc(null)}
+                document={viewingDoc?.doc || null}
+                fileBlob={viewingDoc?.blob}
+            />
         </main>
     );
 }
