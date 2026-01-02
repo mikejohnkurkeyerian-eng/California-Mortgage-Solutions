@@ -158,21 +158,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
         });
     };
 
-    // ... imports
-    import { DocumentViewerModal } from '@/components/documents/DocumentViewerModal';
 
-    // ... Inside Component
-
-    // Viewer State
-    const [viewingDoc, setViewingDoc] = useState<{ doc: any, blob?: Blob } | null>(null);
-    const [localFileBlobs, setLocalFileBlobs] = useState<Record<string, Blob>>({});
-
-    // ... inside handleFileUpload, store blob
-    /* 
-       We need to capture the blob when uploading to allow immediate preview.
-       Ideally, we map the temp ID or the eventually returned ID to this blob.
-       Since we generate ID in `processUpload` locally first, we can use that.
-    */
 
     // ... update processUpload
     const processUpload = async (files: File[], forcedType?: string) => {
