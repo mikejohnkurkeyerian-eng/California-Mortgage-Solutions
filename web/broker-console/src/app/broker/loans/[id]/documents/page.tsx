@@ -165,6 +165,131 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
 
 
 
+
+    const handleFileUpload = async (files: File[], forcedType?: string) => {
+        if (files.length === 0) return;
+
+        // Only validate single file uploads for now to keep UX simple
+        if (files.length > 1 && !forcedType) {
+            processUpload(files, forcedType);
+            return;
+        }
+
+        const file = files[0];
+        setIsAnalyzing(true);
+        setToast({ message: "Analyzing document...", type: 'info', duration: 2000 });
+
+        try {
+            const result = await classifyDocument(file);
+            console.log("Analysis Result:", result);
+
+            const issues: string[] = [];
+
+            // 1. Check Type Mismatch
+            if (forcedType && forcedType !== 'Other') {
+                if (result.type !== 'OTHER' && result.type !== forcedType && result.confidence > 0.4) {
+                    let mismatchMsg = `This looks like a ${result.type.replace(/_/g, ' ')} (${Math.round(result.confidence * 100)}% confidence), but you are uploading it to ${forcedType.replace(/_/g, ' ')}.`;
+
+                    // Recommendation Logic
+                    if (requirements) {
+                        const betterMatch = requirements.find(r => r.type === result.type);
+                        if (betterMatch) {
+                            mismatchMsg += ` Recommended: Upload to "${betterMatch.name}" instead.`;
+                        }
+                    }
+
+                    issues.push(mismatchMsg);
+                }
+            }
+
+            // 2. Check Name Mismatch
+            if (result.extractedText && result.extractedText.length > 50 && loan.borrower?.lastName) {
+                const borrowerLastName = loan.borrower.lastName.toLowerCase();
+                if (!result.extractedText.toLowerCase().includes(borrowerLastName)) {
+                    issues.push(`The borrower's last name "${loan.borrower.lastName}" was not found in the document.`);
+                }
+            }
+
+            setIsAnalyzing(false);
+
+            if (issues.length > 0) {
+                // Show Warning Modal
+                setValidationModal({
+                    isOpen: true,
+                    file: file,
+                    forcedType: forcedType,
+                    detectedType: result.type,
+                    warning: issues.join(' '),
+                    confidence: result.confidence
+                });
+            } else {
+                // All good, proceed
+                processUpload([file], forcedType);
+            }
+
+        } catch (error) {
+            console.error("Analysis failed", error);
+            setIsAnalyzing(false);
+            processUpload([file], forcedType);
+        }
+    };
+
+    const confirmValidation = () => {
+        if (validationModal.file) {
+            processUpload([validationModal.file], validationModal.forcedType);
+            setValidationModal({ isOpen: false });
+        }
+    };
+
+    const cancelValidation = () => {
+        setValidationModal({ isOpen: false });
+        setToast({ message: "Upload cancelled", type: 'info' });
+    };
+
+    const processUpload = async (files: File[], forcedType?: string) => {
+        setToast({ message: `Uploading ${files.length} documents...`, type: 'info' });
+
+        const newDocs: any[] = [];
+        const newBlobs: Record<string, Blob> = {};
+
+        for (const file of files) {
+            const type = forcedType || 'Other';
+            const docId = 'doc-' + Math.random().toString(36).substr(2, 9);
+
+            // Store blob for local preview
+            newBlobs[docId] = file;
+
+            newDocs.push({
+                id: docId,
+                loanId: loan.id,
+                type: type,
+                fileName: file.name,
+                fileSize: file.size,
+                mimeType: file.type,
+                uploadedAt: new Date().toISOString(),
+                uploadedBy: 'Broker',
+                storagePath: 'mock/path',
+                verificationStatus: 'Verified'
+            });
+        }
+
+        setLocalFileBlobs(prev => ({ ...prev, ...newBlobs }));
+
+        const updatedDocuments = [...(loan.documents || []), ...newDocs];
+
+        updateLoan.mutate({
+            id: loan.id,
+            data: { ...loan, documents: updatedDocuments }
+        }, {
+            onSuccess: () => {
+                setToast({ message: "Documents uploaded successfully", type: 'success' });
+            },
+            onError: () => {
+                setToast({ message: "Failed to upload documents", type: 'error' });
+            }
+        });
+    };
+
     const handleRequestMissing = async () => {
         if (!settings.emailSettings) {
             setToast({ message: "Please configure email settings first", type: 'error' });
