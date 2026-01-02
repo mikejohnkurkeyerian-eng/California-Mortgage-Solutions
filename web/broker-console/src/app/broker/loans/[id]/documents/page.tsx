@@ -177,7 +177,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
             }
 
             // 2. Check Name Mismatch
-            if (result.extractedText && result.extractedText.length > 50) {
+            if (result.extractedText && result.extractedText.length > 50 && loan.borrower?.lastName) {
                 const borrowerLastName = loan.borrower.lastName.toLowerCase();
                 if (!result.extractedText.toLowerCase().includes(borrowerLastName)) {
                     issues.push(`The borrower's last name "${loan.borrower.lastName}" was not found in the document.`);
@@ -275,7 +275,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
 
         const emailBody = `
             <h2>Missing Document Request</h2>
-            <p>Dear ${loan.borrower.firstName || 'Borrower'},</p>
+            <p>Dear ${loan.borrower?.firstName || 'Borrower'},</p>
             <p>We are processing your loan application and need the following documents to proceed:</p>
             <ul>
                 ${missing.map(r => `<li><b>${r.name}</b>: ${r.insights?.[0] || ''}</li>`).join('')}
@@ -291,8 +291,8 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    to: loan.borrower.email,
-                    subject: `Action Required: Missing Documents for Loan ${loan.id.split('-')[0]}`,
+                    to: loan.borrower?.email || '',
+                    subject: `Action Required: Missing Documents for Loan ${loan.id?.split('-')[0]}`,
                     html: emailBody,
                     settings: settings.emailSettings
                 })
@@ -329,7 +329,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                         </div>
                         <h1 className="text-3xl font-heading font-bold text-slate-900 dark:text-white">Document Manager</h1>
                         <p className="text-slate-500 mt-1">
-                            {loan.borrower.firstName} {loan.borrower.lastName} • <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">{loan.id.split('-')[0]}</span>
+                            {loan.borrower?.firstName || 'Unknown'} {loan.borrower?.lastName || 'Borrower'} • <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">{loan.id?.split('-')[0] || '...'}</span>
                         </p>
                     </div>
                     <div className="flex gap-3">
