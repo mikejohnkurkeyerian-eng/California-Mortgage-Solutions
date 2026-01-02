@@ -150,10 +150,24 @@ function LoanApplicationContent() {
             return;
         }
 
-        if (isEditMode && currentLoan) {
-            console.log("Edit mode: Loading existing data", currentLoan);
+        if (currentLoan && (isEditMode || currentLoan.status === 'Draft')) {
+            console.log("Loading existing data", currentLoan);
 
-            // Map LoanApplication to Full1003Data
+            // 1. Try to load exact 1003 data first (Best Fidelity)
+            if ((currentLoan as any).full1003) {
+                try {
+                    let savedData = (currentLoan as any).full1003;
+                    if (typeof savedData === 'string') {
+                        savedData = JSON.parse(savedData);
+                    }
+                    setFormData(savedData);
+                    return; // Skip manual mapping
+                } catch (e) {
+                    console.error("Failed to parse partial full1003", e);
+                }
+            }
+
+            // Fallback: Map LoanApplication to Full1003Data
             const mappedData: Full1003Data = {
                 borrower: {
                     firstName: currentLoan.borrower?.firstName || '',
@@ -411,6 +425,7 @@ function LoanApplicationContent() {
                     monthlyIncome: formData.employment.reduce((sum, emp) => sum + emp.monthlyIncome.total, 0),
                     incomeType: formData.employment.length > 0 && formData.employment[0].isSelfEmployed ? 'SelfEmployed' : 'W2'
                 },
+                documents: currentLoan?.documents || [], // Persist existing documents
                 full1003: formData,
                 status: isEditMode ? currentLoan?.status : 'Draft',
                 stage: isEditMode ? currentLoan?.stage : 'Application Review'

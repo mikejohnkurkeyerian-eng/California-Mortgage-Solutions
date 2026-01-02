@@ -52,7 +52,7 @@ export type DocumentType =
     | "Other";
 
 // Income Types
-export type IncomeType = "W2" | "SelfEmployed" | "BusinessOwner" | "SocialSecurity" | "Pension" | "Rental" | "Other";
+export type IncomeType = "W2" | "SelfEmployed" | "BusinessOwner" | "SocialSecurity" | "Pension" | "Rental" | "Retired" | "Unemployed" | "Military" | "Other";
 
 // Employment Status
 export type EmploymentStatus = "Employed" | "SelfEmployed" | "BusinessOwner" | "Retired" | "Unemployed" | "Other";

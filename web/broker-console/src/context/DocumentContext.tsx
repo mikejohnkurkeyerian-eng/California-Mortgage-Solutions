@@ -594,18 +594,35 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [applicationStatus]);
 
-    const addDocumentFile = (id: string, file: File, insights: string[] = [], extractedData?: any, extractedText?: string) => {
+    const addDocumentFile = async (id: string, file: File, insights: string[] = [], extractedData?: any, extractedText?: string) => {
+        let storagePath = 'mock/path';
+
+        // [DEMO] Convert to Base64 for storage to allow "View" without S3
+        if (file.size < 4 * 1024 * 1024) { // 4MB Limit
+            try {
+                const base64 = await new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.readAsDataURL(file);
+                });
+                storagePath = base64;
+            } catch (e) {
+                console.error("Base64 conversion failed", e);
+            }
+        }
+
         setDocuments(prev => {
             const newDocs = prev.map(doc => {
                 if (doc.id === id) {
-                    const newFile: DocumentFile = {
+                    const newFile: DocumentFile & { storagePath?: string } = {
                         name: file.name,
                         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                        file: file, // Store the file object
+                        file: file,
                         extractedData,
-                        extractedText
+                        extractedText,
+                        storagePath // Store locally too
                     };
-                    // Merge new insights with existing ones, avoiding duplicates
+
                     const updatedInsights = Array.from(new Set([...doc.insights, ...insights]));
 
                     return {
@@ -618,13 +635,12 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                 return doc;
             });
 
-            // Run AI Analysis on the new state
+            // Run AI Analysis
             runAIAnalysis(newDocs);
 
-            // [REAL-TIME SYNC] Persist to backend immediately if loan exists
+            // Sync with Backend
             if (currentLoanId) {
                 console.log(`[Sync] Uploading document ${file.name} to Loan ${currentLoanId}`);
-                // Background sync - don't await to keep UI snappy
                 updateLoan(currentLoanId, {
                     documents: newDocs.flatMap(doc =>
                         doc.files.map(f => ({
@@ -634,7 +650,11 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                             fileSize: f.file ? f.file.size : 0,
                             mimeType: f.file ? f.file.type : 'application/pdf',
                             uploadedAt: new Date().toISOString(),
-                            verificationStatus: 'Pending'
+                            verificationStatus: 'Pending',
+                            // Use the stored base64 path if available, else mock
+                            storagePath: (f as any).storagePath || 'mock/path',
+                            extractedData: f.extractedData,
+                            extractedText: f.extractedText
                         }))
                     )
                 }).catch(err => console.error("[Sync] Failed to sync document:", err));

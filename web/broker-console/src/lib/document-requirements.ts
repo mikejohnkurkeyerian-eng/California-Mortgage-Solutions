@@ -1,48 +1,6 @@
 import { DocumentType } from './document-ai';
 import { Full1003Data } from '@/types/form-1003';
-
-// Local definition to avoid circular dependency or missing shared types
-// We extend the basic LoanApplication to include the full 1003 data structure
-export interface LoanApplication {
-    id: string;
-    borrowerId: string;
-    status: string;
-    borrower: {
-        id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        phone?: string;
-        citizenship?: string;
-        maritalStatus?: string;
-    };
-    employment: {
-        incomeType: 'W2' | 'SelfEmployed' | 'Retired' | 'Unemployed' | 'Other' | 'Military' | 'BusinessOwner';
-        employerName?: string;
-        jobTitle?: string;
-        monthlyIncome: number;
-    };
-    assets: {
-        type: string;
-        value: number;
-        institution?: string;
-    }[];
-    property: {
-        address: {
-            street: string;
-            city: string;
-            state: string;
-            zipCode: string;
-        };
-        propertyType: string;
-        purchasePrice: number;
-        loanAmount: number;
-    };
-    // The critical piece: The full 1003 data structure
-    full1003?: Full1003Data;
-    // Additional fields that might be on the loan object directly
-    loanProgram?: string;
-}
+import { LoanApplication } from '@/types/shared';
 
 export interface DocumentRequirement {
     id: string;
@@ -54,10 +12,11 @@ export interface DocumentRequirement {
     insights: string[];
 }
 
+
 export function determineRequiredDocuments(loan: LoanApplication): DocumentRequirement[] {
     console.log('🔥 DETERMINE DOCS CALLED with:', JSON.stringify(loan.full1003));
     const requirements: DocumentRequirement[] = [];
-    const full1003 = loan.full1003;
+    const full1003 = loan.full1003 as Full1003Data | undefined;
 
     console.log('🔍 REQ LOGIC TRACE:', {
         maritalStatus: full1003?.borrower?.maritalStatus,
@@ -251,7 +210,7 @@ export function determineRequiredDocuments(loan: LoanApplication): DocumentRequi
     // Property Type Specifics (if known)
     // Assuming we might have this data in loan.property.propertyType or full1003
     const propertyType = loan.property?.propertyType;
-    if (propertyType === 'Condo' || propertyType === 'Condominium') {
+    if (propertyType === 'Condo') {
         addRequirement('CONDO_QUESTIONNAIRE', 'Condo Questionnaire', 'Completed condo questionnaire');
         addRequirement('HO6_INSURANCE', 'HO-6 Insurance Policy', 'Walls-in coverage policy');
     }
@@ -302,8 +261,8 @@ export function determineRequiredDocuments(loan: LoanApplication): DocumentRequi
     addRequirement('ANTI_STEERING', 'Anti-Steering Disclosure', 'Signed Anti-Steering Disclosure');
 
     // --- 9. SPECIAL PROGRAMS ---
-    if (loan.loanProgram) {
-        const program = loan.loanProgram.toLowerCase();
+    if (loan.loanType) {
+        const program = loan.loanType.toLowerCase();
         if (program.includes('fha')) {
             addRequirement('FHA_AMENDATORY', 'FHA Amendatory Clause', 'Signed FHA Amendatory Clause');
             addRequirement('OTHER', 'Real Estate Certification', 'Signed Real Estate Certification');
