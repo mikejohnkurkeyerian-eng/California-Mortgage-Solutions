@@ -142,6 +142,37 @@ export async function linkBorrowerToBroker(brokerId: string) {
 
         console.log(`[LINK_USER] Backfilled ${unlinkedLoans.count} unlinked loans.`);
 
+        // ENSURE LOAN EXISTS: For Google Sign-In users who bypassed registerUser
+        const existingLoan = await prisma.loanApplication.findFirst({
+            where: { userId: session.user.id }
+        });
+
+        if (!existingLoan) {
+            console.log(`[LINK_USER] Creating missing Draft loan for User ${session.user.id}`);
+            // Fetch user details for the loan data snapshot
+            const userDetails = await prisma.user.findUnique({
+                where: { id: session.user.id },
+                select: { firstName: true, lastName: true, email: true }
+            });
+
+            await prisma.loanApplication.create({
+                data: {
+                    userId: session.user.id,
+                    brokerId: brokerId,
+                    status: 'Draft',
+                    stage: 'Application Review',
+                    data: JSON.stringify({
+                        borrower: {
+                            firstName: userDetails?.firstName || '',
+                            lastName: userDetails?.lastName || '',
+                            email: userDetails?.email || session.user.email || '',
+                        }
+                    })
+                }
+            });
+            console.log(`[LINK_USER] Draft loan created.`);
+        }
+
         return { success: true, backfilled: unlinkedLoans.count };
     } catch (error) {
         console.error("Link user error:", error);

@@ -82,10 +82,12 @@ export default function BorrowerDashboard() {
         initDashboard();
     }, [isLoading, borrowerId, router, syncWithBackend]);
 
-    // Redirect to apply if no loan found after check
+    // Redirect to apply if no loan found after check OR if loan is still in Draft
     useEffect(() => {
-        if (!isLoading && !isCheckingLoan && !currentLoan && borrowerId) {
-            router.push('/borrower/apply');
+        if (!isLoading && !isCheckingLoan && borrowerId) {
+            if (!currentLoan || (currentLoan as any).status === 'Draft') {
+                router.push('/borrower/apply');
+            }
         }
     }, [isLoading, isCheckingLoan, currentLoan, borrowerId, router]);
 

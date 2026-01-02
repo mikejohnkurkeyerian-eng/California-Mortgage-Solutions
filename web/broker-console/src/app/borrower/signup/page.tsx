@@ -63,6 +63,10 @@ function BorrowerSignupContent() {
             return;
         }
 
+        // Resolve Broker ID from URL or LocalStorage
+        const localBrokerId = localStorage.getItem('broker_ref_v2');
+        const finalBrokerId = brokerId || localBrokerId || undefined;
+
         try {
             const result = await registerUser({
                 firstName: formData.firstName,
@@ -71,7 +75,7 @@ function BorrowerSignupContent() {
                 email: formData.email,
                 password: formData.password,
                 role: 'BORROWER',
-                brokerId: brokerId || undefined
+                brokerId: finalBrokerId
             });
 
             if (result.error) {
