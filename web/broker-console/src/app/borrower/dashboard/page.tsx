@@ -99,21 +99,25 @@ export default function BorrowerDashboard() {
     }, [applicationStatus, selectedLoan, router]);
 
     // BLOCKING REDIRECT: Enforce 1003 Completion
+    // BLOCKING REDIRECT: Enforce 1003 Completion
+    // EMERGENCY DISABLE: User reported stuck loop. Disabling redirect to allow debugging.
+    /*
     if (!isLoading && !isCheckingLoan) {
         // Case 1: Loan exists but is still in Draft -> Redirect to Finish
         if (applicationStatus === 'draft' || (applicationStatus as string) === 'Draft') {
-            if (typeof window !== 'undefined') window.location.href = '/borrower/apply';
-            return <RedirectingUI />;
+             if (typeof window !== 'undefined') window.location.href = '/borrower/apply';
+             return <RedirectingUI />;
         }
-
+        
         // Case 2: No Loan exists at all -> Redirect to Start
         if (!currentLoan) {
-            // Optional: Provide a nicer "Start Application" landing or just redirect
-            // For now, redirect to apply so they can start.
-            router.push('/borrower/apply');
-            return <RedirectingUI />;
+             // Optional: Provide a nicer "Start Application" landing or just redirect
+             // For now, redirect to apply so they can start.
+             router.push('/borrower/apply');
+             return <RedirectingUI />;
         }
-    }
+    } 
+    */
 
     // Red Flag Modal Trigger
     useEffect(() => {
@@ -347,6 +351,11 @@ export default function BorrowerDashboard() {
         <main className="min-h-screen bg-background">
 
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+            {/* DEBUG BANNER */}
+            <div className="bg-red-500 text-white p-2 text-xs font-mono">
+                DEBUG: Status=[{String(applicationStatus)}] | LoanID=[{currentLoan?.id || 'null'}] | Loading=[{String(isLoading)}] | Check=[{String(isCheckingLoan)}]
+            </div>
 
             <div className="pt-32 pb-20 px-4">
                 <div className="max-w-7xl mx-auto">
