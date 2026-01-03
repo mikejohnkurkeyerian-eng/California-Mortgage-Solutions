@@ -109,17 +109,38 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
         return { id: 'OTHER', title: 'Other Requirements', types: [] };
     };
 
+    // 4. Create Effective Requirements List (Merge Required + Submitted Standard Types)
+    const effectiveRequirements = [...requirements];
+
+    // Add "Virtual" requirements for uploaded documents that match standard types but aren't strictly required
+    documents.forEach(doc => {
+        if (ALL_STANDARD_TYPES.includes(doc.type)) {
+            const alreadyExists = effectiveRequirements.some(req => req.type === doc.type);
+            if (!alreadyExists) {
+                effectiveRequirements.push({
+                    id: `virtual-${doc.type}`,
+                    type: doc.type as any, // Cast to match enum
+                    name: doc.type.replace(/_/g, ' '), // Simple name fallback
+                    status: 'uploaded',
+                    required: false, // It's present but wasn't initially required
+                    files: [],
+                    insights: ['Uploaded by User (Additional)']
+                });
+            }
+        }
+    });
+
     // Grouping
     const groupedReqs: Record<string, typeof requirements> = {};
     const otherReqs: typeof requirements = [];
-    // Prefer loan.customConditions if available (from DB persistence update), fallback to local state for now if needed,
-    // but ideally we rely on DB prop. Actually, let's sync local state or just use loan prop?
-    // loan.customConditions is what we want. The local state was a temporary scaffold I replaced but it seems I left it in line 28.
+    // Prefer loan.customConditions if available
     const effectiveCustomConditions = loan.customConditions || customConditions;
 
-    requirements.forEach(req => {
+    effectiveRequirements.forEach(req => {
         const cat = getCategoryForType(req.type);
         if (cat.id === 'OTHER') {
+            // Check if this "OTHER" requirement is actually a Custom Condition
+            // or just a generic bucket.
             otherReqs.push(req);
         } else {
             if (!groupedReqs[cat.id]) groupedReqs[cat.id] = [];
@@ -302,7 +323,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
             return;
         }
 
-        const missing = requirements.filter(req => {
+        const missing = effectiveRequirements.filter(req => {
             const uploaded = docStatusMap.get(req.type) || [];
             return uploaded.length === 0;
         });
@@ -620,7 +641,7 @@ export default function BrokerDocumentParamsPage({ params }: PageProps) {
                         {(() => {
                             // Calculate displayed IDs to find hidden ones
                             const displayedDocIds = new Set<string>();
-                            requirements.forEach(req => {
+                            effectiveRequirements.forEach(req => {
                                 const docs = docStatusMap.get(req.type) || [];
                                 docs.forEach(d => displayedDocIds.add(d.id));
                             });
