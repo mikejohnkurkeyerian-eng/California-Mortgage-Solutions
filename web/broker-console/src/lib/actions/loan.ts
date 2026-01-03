@@ -86,10 +86,24 @@ export async function updateLoan(id: string, data: any) {
             return { error: "Unauthorized access to this loan" };
         }
 
+        // DATA MERGE LOGIC: Prevent overwriting existing data with partial updates
+        let currentData = {};
+        try {
+            currentData = existingLoan.data ? JSON.parse(existingLoan.data as string) : {};
+        } catch (e) {
+            console.error("Failed to parse existing loan data for merge:", e);
+            currentData = {};
+        }
+
+        const mergedData = {
+            ...currentData,
+            ...data
+        };
+
         const loan = await prisma.loanApplication.update({
             where: { id },
             data: {
-                data: JSON.stringify(data),
+                data: JSON.stringify(mergedData),
                 updatedAt: new Date(),
             }
         });
