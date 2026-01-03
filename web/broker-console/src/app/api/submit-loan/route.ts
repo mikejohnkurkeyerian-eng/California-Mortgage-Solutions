@@ -28,11 +28,12 @@ export async function POST(request: Request) {
         log(`[API] User ID resolved: ${userId}`);
 
         // 3. Prepare Data
+        // 3. Prepare Data
         const loanData = {
             userId: userId,
             brokerId: body.brokerId,
-            status: 'Draft',
-            stage: 'Application Review',
+            status: body.status || 'Draft', // Allow client to specify status (e.g. submitted)
+            stage: body.stage || 'Application Review',
             data: JSON.stringify(body), // Store full payload
         };
 
@@ -87,10 +88,13 @@ export async function PUT(request: Request) {
         }
 
         // Just update data and timestamp
+        // Update data, timestamp, AND status/stage if provided
         const updated = await prisma.loanApplication.update({
             where: { id: body.id },
             data: {
                 data: JSON.stringify(body),
+                status: body.status || undefined,
+                stage: body.stage || undefined,
                 updatedAt: new Date()
             }
         });
