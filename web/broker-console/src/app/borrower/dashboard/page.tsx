@@ -320,10 +320,14 @@ export default function BorrowerDashboard() {
         statusColor = 'bg-green-500';
     }
 
-    if (isLoading || !borrowerId) {
+    // UNIFIED LOADING STATE: Wait for Auth AND Loan Check
+    if (isLoading || !borrowerId || isCheckingLoan) {
         return (
             <main className="min-h-screen bg-background flex items-center justify-center">
-                <p className="text-slate-900 dark:text-white">Loading...</p>
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-slate-900 dark:text-white font-medium">Loading Dashboard...</p>
+                </div>
             </main>
         );
     }
