@@ -449,8 +449,8 @@ function LoanApplicationContent() {
                 },
                 documents: currentLoan?.documents || [], // Persist existing documents
                 full1003: formData,
-                status: isEditMode ? currentLoan?.status : 'Draft',
-                stage: isEditMode ? currentLoan?.stage : 'Application Review'
+                status: isEditMode ? currentLoan?.status : (redirect ? 'submitted' : 'Draft'),
+                stage: isEditMode ? currentLoan?.stage : (redirect ? 'Processing' : 'Application Review')
             };
 
             if (isEditMode) {
