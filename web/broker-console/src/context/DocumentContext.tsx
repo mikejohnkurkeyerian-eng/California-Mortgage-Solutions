@@ -264,7 +264,53 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
                             });
                         }
 
-                        // 3. Keep other existing docs (User added manually or legacy)
+                        // 3. Process Uploaded Documents from Backend (Synced from Broker/DB)
+                        if (latestLoan.documents && Array.isArray(latestLoan.documents)) {
+                            latestLoan.documents.forEach((backendDoc: any) => {
+                                // Find matching requirement by Type or explicitly by ID if we stored it
+                                let match = mergedDocs.find(d => d.type === backendDoc.type);
+
+                                // If it's an "OTHER" type, try to match by name if possible, or just treat as generic
+                                if (backendDoc.type === 'OTHER' && !match) {
+                                    // Maybe match by name? simplified for now.
+                                }
+
+                                const fileEntry: DocumentFile = {
+                                    name: backendDoc.fileName,
+                                    date: new Date(backendDoc.uploadedAt).toLocaleDateString(),
+                                    file: undefined, // No File object for remote files
+                                    extractedData: backendDoc.extractedData,
+                                    extractedText: backendDoc.extractedText,
+                                    // We need to store some reference to download it if needed, but for now just existence
+                                };
+
+                                if (match) {
+                                    // Avoid duplicates
+                                    if (!match.files.some(f => f.name === backendDoc.fileName)) {
+                                        match.files.push(fileEntry);
+                                        match.status = match.status === 'verified' ? 'verified' : 'uploaded';
+
+                                        // If backend says verified, trust it
+                                        if (backendDoc.verificationStatus === 'Verified') {
+                                            match.status = 'verified';
+                                        }
+                                    }
+                                } else {
+                                    // New unrequested upload (e.g. Broker uploaded something extra)
+                                    mergedDocs.push({
+                                        id: backendDoc.id || Math.random().toString(36).substr(2, 9),
+                                        type: backendDoc.type,
+                                        name: backendDoc.type.replace(/_/g, ' '),
+                                        status: backendDoc.verificationStatus === 'Verified' ? 'verified' : 'uploaded',
+                                        required: false,
+                                        files: [fileEntry],
+                                        insights: ['Uploaded by Broker']
+                                    });
+                                }
+                            });
+                        }
+
+                        // 4. Keep other existing docs (User added manually or legacy local state)
                         prev.forEach(p => {
                             // If it's not in the merged list yet...
                             const isAlreadyIncluded = mergedDocs.find(m => m.id === p.id || m.type === p.type);
