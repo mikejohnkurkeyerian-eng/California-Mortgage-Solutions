@@ -390,7 +390,20 @@ function LoanApplicationContent() {
         window.scrollTo(0, 0);
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
+        // PERISTENCE: Save progress before moving to next step
+        if (borrowerId) {
+            console.log("Auto-saving progress...");
+            try {
+                // We use handleSubmit(false) to reuse the save logic without submitting/redirecting
+                await handleSubmit(false);
+            } catch (err) {
+                console.error("Auto-save failed:", err);
+                // Optionally show a toast, but maybe don't block navigation if it's just a draft save?
+                // For now, we log it. User will see 'Saving changes...' toast from handleSubmit.
+            }
+        }
+
         let nextStep = step + 1;
         // Skip Acknowledgments (Step 8) in Edit Mode
         if (isEditMode && nextStep === 8) {
