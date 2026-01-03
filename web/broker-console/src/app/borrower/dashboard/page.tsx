@@ -99,11 +99,24 @@ export default function BorrowerDashboard() {
     }, [applicationStatus, selectedLoan, router]);
 
     // BLOCKING REDIRECT: Enforce 1003 Completion
+    // Refined: Only redirect if loan is Draft AND effectively empty.
+    // If user has started data entry, let them access dashboard to resume/submit via the UI.
     if (!isLoading && !isCheckingLoan) {
-        // Case 1: Loan exists but is still in Draft -> Redirect to Finish
+        // Case 1: Loan exists but is still in Draft
         if (applicationStatus === 'draft' || (applicationStatus as string) === 'Draft') {
-            if (typeof window !== 'undefined') window.location.href = '/borrower/apply';
-            return <RedirectingUI />;
+            // Check if it's an "Empty" draft
+            // We can check if basic fields are populated
+            const data = (currentLoan as any)?.data || {};
+            const hasProperty = data?.property?.address?.street;
+            const hasIncome = data?.employment?.monthlyIncome > 0;
+            const hasBorrower = data?.borrower?.firstName && data?.borrower?.lastName;
+
+            // If it has NO meaningful data, we redirect. 
+            // If it DOES have data, we assume they are "In Progress" and let them stay (Dashboard has "Submit" button).
+            if (!hasProperty && !hasIncome) {
+                if (typeof window !== 'undefined') window.location.href = '/borrower/apply';
+                return <RedirectingUI />;
+            }
         }
 
         // Case 2: No Loan exists at all -> Redirect to Start
