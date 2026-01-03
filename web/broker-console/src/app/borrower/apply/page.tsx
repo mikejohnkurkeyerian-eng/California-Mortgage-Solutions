@@ -419,7 +419,22 @@ function LoanApplicationContent() {
         setToast({ message: isEditMode ? 'Saving changes...' : 'Submitting application...', type: 'info' });
 
         try {
+            // NEW LOGIC: Determine if we should UPDATE or CREATE
+            // We update if: 1) URL says edit mode OR 2) We have a current loan that is still in Draft
+            const isExistingDraft = currentLoan?.status === 'Draft';
+            const shouldUpdate = isEditMode || (currentLoan && isExistingDraft && currentLoan.id);
+
+            // logic for status: 
+            // If updating a non-draft (e.g. Underwriting), keep status.
+            // If updating a draft OR creating new, use target status (Draft or submitted).
+            const targetStatus = redirect ? 'submitted' : 'Draft';
+            const targetStage = redirect ? 'Processing' : 'Application Review';
+
+            const finalStatus = (shouldUpdate && !isExistingDraft) ? currentLoan?.status : targetStatus;
+            const finalStage = (shouldUpdate && !isExistingDraft) ? currentLoan?.stage : targetStage;
+
             const loanData = {
+                // ... same data ...
                 borrowerId,
                 borrower: {
                     id: borrowerId,
@@ -447,29 +462,28 @@ function LoanApplicationContent() {
                     monthlyIncome: formData.employment.reduce((sum, emp) => sum + emp.monthlyIncome.total, 0),
                     incomeType: formData.employment.length > 0 && formData.employment[0].isSelfEmployed ? 'SelfEmployed' : 'W2'
                 },
-                documents: currentLoan?.documents || [], // Persist existing documents
+                documents: currentLoan?.documents || [],
                 full1003: formData,
-                status: isEditMode ? currentLoan?.status : (redirect ? 'submitted' : 'Draft'),
-                stage: isEditMode ? currentLoan?.stage : (redirect ? 'Processing' : 'Application Review')
+                status: finalStatus,
+                stage: finalStage
             };
 
-            if (isEditMode) {
+            if (shouldUpdate) {
                 if (!currentLoan) {
-                    console.error("Edit mode but no currentLoan found");
+                    // Should be unreachable given shouldUpdate check
+                    console.error("Should update but no currentLoan found");
                     setToast({ message: 'Error: Could not find loan to update. Please try again.', type: 'error' });
                     return;
                 }
-                // The original `isEditMode` check is equivalent to `isUpdate` here.
-                // We need to ensure `existingLoanId` is available, which `currentLoan.id` provides.
                 const existingLoanId = currentLoan.id;
 
-                console.log("Updating via API Route...");
+                console.log("Updating via API Route (Force Update)...");
 
                 // Standard API Fetch for Update
                 const response = await fetch('/api/submit-loan', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...loanData, id: existingLoanId }) // Ensure ID is present
+                    body: JSON.stringify({ ...loanData, id: existingLoanId })
                 });
 
                 if (!response.ok) {
@@ -484,7 +498,7 @@ function LoanApplicationContent() {
                 const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 setToast({ message: `Saved successfully at ${time}`, type: 'success' });
             } else {
-                console.log("Submitting via API Route...");
+                console.log("Submitting via API Route (New Loan)...");
 
                 // Use Standard API Fetch instead of Server Action
                 const response = await fetch('/api/submit-loan', {
