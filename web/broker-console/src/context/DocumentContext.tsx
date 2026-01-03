@@ -169,10 +169,24 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
             try {
                 const loans = await getLoans();
                 if (loans && loans.length > 0) {
-                    // Sort by createdAt descending to get the most recent loan
-                    const sortedLoans = loans.sort((a: any, b: any) =>
-                        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                    );
+                    // Sort by Priority (Active > Draft) then by Recency
+                    // This prevents an old or accidental "Draft" from blocking access if a real loan exists.
+                    const sortedLoans = loans.sort((a: any, b: any) => {
+                        const score = (status: string) => {
+                            if (status === 'Draft' || status === 'InProgress') return 0;
+                            return 10; // Submitted, Approved, etc. are higher priority
+                        };
+                        const scoreA = score(a.status);
+                        const scoreB = score(b.status);
+
+                        // 1. Prioritize non-draft loans
+                        if (scoreA !== scoreB) return scoreB - scoreA; // Descending priority
+
+                        // 2. Tie-break with Recency (Updated > Created)
+                        const dateA = new Date(a.updatedAt || a.createdAt).getTime();
+                        const dateB = new Date(b.updatedAt || b.createdAt).getTime();
+                        return dateB - dateA; // Descending date
+                    });
                     const latestLoan = sortedLoans[0];
                     setCurrentLoanId(latestLoan.id);
                     // setCurrentLoan moved to after parsing
