@@ -98,6 +98,25 @@ export default function BorrowerDashboard() {
         }
     }, [applicationStatus, selectedLoan, router]);
 
+    // BLOCKING REDIRECT: Enforce 1003 Completion
+    // If status is 'draft', user MUST go to application.
+    if (!isLoading && !isCheckingLoan && applicationStatus === 'draft') {
+        // Use window.location for hard redirect to ensure clean state pivot
+        if (typeof window !== 'undefined') {
+            window.location.href = '/borrower/apply';
+        }
+        // Return null/loading to block Dashboard rendering
+        return (
+            <main className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-slate-900 dark:text-white font-medium">Redirecting to Application...</p>
+                    <p className="text-sm text-slate-500 mt-2">Please complete your 1003 form first.</p>
+                </div>
+            </main>
+        );
+    }
+
     // Red Flag Modal Trigger
     useEffect(() => {
         if (aiAnalysisResult && aiAnalysisResult.issues.length > 0) {
