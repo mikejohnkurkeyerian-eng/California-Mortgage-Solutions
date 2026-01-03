@@ -142,7 +142,14 @@ export async function getLoans() {
         });
 
         return loans.map((loan: any) => {
-            const parsedData = loan.data ? JSON.parse(loan.data) : {};
+            let parsedData: any = {};
+            try {
+                parsedData = loan.data ? JSON.parse(loan.data) : {};
+            } catch (e) {
+                console.error(`[GET_LOANS] JSON Parse Error for loan ${loan.id}:`, e);
+                // Fallback to empty object so we still return the loan
+                parsedData = {};
+            }
 
             // Ensure borrower object exists with fallbacks
             const borrower = parsedData.borrower || {};
