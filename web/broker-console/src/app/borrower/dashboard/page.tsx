@@ -99,22 +99,20 @@ export default function BorrowerDashboard() {
     }, [applicationStatus, selectedLoan, router]);
 
     // BLOCKING REDIRECT: Enforce 1003 Completion
-    // If status is 'draft', user MUST go to application.
-    if (!isLoading && !isCheckingLoan && applicationStatus === 'draft') {
-        // Use window.location for hard redirect to ensure clean state pivot
-        if (typeof window !== 'undefined') {
-            window.location.href = '/borrower/apply';
+    if (!isLoading && !isCheckingLoan) {
+        // Case 1: Loan exists but is still in Draft -> Redirect to Finish
+        if (applicationStatus === 'draft' || (applicationStatus as string) === 'Draft') {
+            if (typeof window !== 'undefined') window.location.href = '/borrower/apply';
+            return <RedirectingUI />;
         }
-        // Return null/loading to block Dashboard rendering
-        return (
-            <main className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-slate-900 dark:text-white font-medium">Redirecting to Application...</p>
-                    <p className="text-sm text-slate-500 mt-2">Please complete your 1003 form first.</p>
-                </div>
-            </main>
-        );
+
+        // Case 2: No Loan exists at all -> Redirect to Start
+        if (!currentLoan) {
+            // Optional: Provide a nicer "Start Application" landing or just redirect
+            // For now, redirect to apply so they can start.
+            router.push('/borrower/apply');
+            return <RedirectingUI />;
+        }
     }
 
     // Red Flag Modal Trigger
@@ -318,6 +316,19 @@ export default function BorrowerDashboard() {
         statusText = 'Clear to Close';
         progressWidth = '100%';
         statusColor = 'bg-green-500';
+    }
+
+    // Helper component for redirecting
+    function RedirectingUI() {
+        return (
+            <main className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-slate-900 dark:text-white font-medium">Redirecting...</p>
+                    <p className="text-sm text-slate-500 mt-2">Preparing your application...</p>
+                </div>
+            </main>
+        );
     }
 
     // UNIFIED LOADING STATE: Wait for Auth AND Loan Check
